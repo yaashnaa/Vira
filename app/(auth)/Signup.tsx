@@ -11,7 +11,7 @@ import {
   Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { registerUser } from "../utils/auth"; // Firebase authentication function
+import { registerUser } from"../../utils/auth"; // Firebase authentication function
 
 export default function SignupScreen() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function SignupScreen() {
     try {
       await registerUser(email, password);
       Alert.alert("Signup Successful!");
-      router.replace("/newHome"); // Redirect to Home Screen
+      router.replace("/home"); // Redirect to Home Screen
     } catch (error) {
       Alert.alert("Signup Failed", (error as Error).message);
     }
@@ -31,7 +31,7 @@ export default function SignupScreen() {
   return (
     <View style={[styles.container, { backgroundColor: lightTheme.background }]}>
       {/* Logo Image */}
-      <Image style={styles.image} source={require("../assets/images/vira.png")} />
+      <Image style={styles.image} source={require("../../assets/images/vira.png")} />
       <StatusBar style="auto" />
 
       {/* Email Input */}

@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { auth } from "../config/firebaseConfig";
+import { auth } from "../../config/firebaseConfig";
 import { signOut } from "firebase/auth";
 import { useRouter } from "expo-router";
 import { lightTheme } from "@/config/theme";

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
-import { auth } from "../config/firebaseConfig"; // Firebase Auth Instance
+import { auth } from "../../config/firebaseConfig"; // Firebase Auth Instance
 import { onAuthStateChanged, User } from "firebase/auth"; // Import User type
 import { darkTheme, lightTheme } from "@/config/theme"; // Custom theme hook
 
@@ -22,7 +22,7 @@ export default function WelcomeScreen() {
         console.log("User is logged in:", currentUser.email); // Debugging check
         console.log("User detected:", currentUser);
 
-        router.replace("/newHome"); // ✅ Redirect to Home if logged in
+        router.replace("/home"); // ✅ Redirect to Home if logged in
         
       }
     });

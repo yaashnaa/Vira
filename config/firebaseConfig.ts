@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
 // declare module "@env" {
 //   export const FIREBASE_API_KEY: string;

@@ -20,8 +20,8 @@ export default function OnBoardingScreen() {
 
 
       <Onboarding
-        onDone={() => router.replace("/home")}
-        onSkip={() => router.replace("/home")}
+        onDone={() => router.replace("/welcome")}
+        onSkip={() => router.replace("/welcome")}
         pages={[
           {
             backgroundColor: "#f5f5f5",
