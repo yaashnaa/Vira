@@ -22,7 +22,7 @@ export default function SignupScreen() {
     try {
       await registerUser(email, password);
       Alert.alert("Signup Successful!");
-      router.replace("/home"); // Redirect to Home Screen
+      router.replace("/newHome"); // Redirect to Home Screen
     } catch (error) {
       Alert.alert("Signup Failed", (error as Error).message);
     }

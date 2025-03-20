@@ -3,25 +3,32 @@ import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "rea
 import { useRouter } from "expo-router";
 import { auth } from "../config/firebaseConfig"; // Firebase Auth Instance
 import { onAuthStateChanged, User } from "firebase/auth"; // Import User type
-import { darkTheme, lightTheme } from "@/config/theme";
+import { darkTheme, lightTheme } from "@/config/theme"; // Custom theme hook
 
 export default function WelcomeScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null); 
-
-  // Check if a user is logged in
+  const [user, setUser] = useState<User | null>(null);
+  console.log("Checking auth state...");
+  // ✅ Check if a user is logged in
   useEffect(() => {
+    console.log("Checking auth state...");
+    console.log("Auth State: ", auth.currentUser);
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser); // ✅ Now TypeScript knows it's User | null
+      setUser(currentUser);
+      
       setLoading(false);
       if (currentUser) {
-        router.replace("/home"); // Redirect to home if logged in
+        console.log("User is logged in:", currentUser.email); // Debugging check
+        console.log("User detected:", currentUser);
+
+        router.replace("/newHome"); // ✅ Redirect to Home if logged in
+        
       }
     });
 
     return () => unsubscribe(); // Cleanup listener on unmount
-  }, []);
+  }, [router]); // ✅ Ensure router is in dependency array
 
   if (loading) {
     return (

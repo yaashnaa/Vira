@@ -22,7 +22,7 @@ export default function LoginScreen() {
     try {
       await loginUser(email, password);
       Alert.alert("Login Successful!");
-      router.replace("/home"); // Redirect to Home Screen
+      router.replace("/newHome"); // Redirect to Home Screen
     } catch (error) {
       Alert.alert("Login Failed", (error as Error).message);
     }
