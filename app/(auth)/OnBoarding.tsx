@@ -5,11 +5,11 @@ import { useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
 
 
-const welcome = require("../assets/animations/welcome1.json")
-const mindfulTracking = require("../assets/animations/1.json")
-const selfCompassion = require("../assets/animations/compassion.json");
-const holisticWellBeing = require("../assets/animations/holistic.json"); // New animation for holistic wellness
-const getStarted = require("../assets/animations/getstarted.json");
+const welcome = require("../../assets/animations/welcome1.json")
+const mindfulTracking = require("../../assets/animations/1.json")
+const selfCompassion = require("../../assets/animations/compassion.json");
+const holisticWellBeing = require("../../assets/animations/holistic.json"); // New animation for holistic wellness
+const getStarted = require("../../assets/animations/getstarted.json"); // New animation for getting started
 
 const {width, height}= Dimensions.get('window');
 export default function OnBoardingScreen() {

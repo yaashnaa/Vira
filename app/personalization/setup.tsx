@@ -2,10 +2,10 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function TrackScreen() {
+export default function Setup() {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>This is the Track screen</Text>
+      <Text style={styles.text}>Setup</Text>
     </View>
   );
 }

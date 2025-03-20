@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function MindfulnessScreen() {
+export default function Mood() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Mindfulness & Relaxation</Text>
+      <Text style={styles.title}>Mood</Text>
       <Text style={styles.description}>
         Find guided meditations, breathing exercises, and tips for mental well-being.
       </Text>

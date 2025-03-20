@@ -22,7 +22,7 @@ export default function LoginScreen() {
     try {
       await loginUser(email, password);
       Alert.alert("Login Successful!");
-      router.replace("/home"); // Redirect to Home Screen
+      router.replace("/quizzes/screening"); 
     } catch (error) {
       Alert.alert("Login Failed", (error as Error).message);
     }
@@ -67,7 +67,7 @@ export default function LoginScreen() {
       </TouchableOpacity>
 
       {/* Navigate to Signup */}
-      <TouchableOpacity onPress={() => router.push("/Signup")}>
+      <TouchableOpacity onPress={() => router.push("/signup")}>
         <Text style={styles.signupText}>Don't have an account? Sign up</Text>
       </TouchableOpacity>
     </View>

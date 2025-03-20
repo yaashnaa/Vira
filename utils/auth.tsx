@@ -1,6 +1,9 @@
 import { auth } from "../config/firebaseConfig";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
-
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut
+} from "firebase/auth/react-native";
 
 // ✅ Sign Up Function
 export async function registerUser(email: string, password: string) {

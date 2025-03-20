@@ -45,11 +45,11 @@ export default function WelcomeScreen() {
         Please log in or sign up to continue.
       </Text>
 
-      <TouchableOpacity style={[styles.button, { backgroundColor: lightTheme.primary }]} onPress={() => router.push("/Signup")}>
+      <TouchableOpacity style={[styles.button, { backgroundColor: lightTheme.primary }]} onPress={() => router.push("/signup")}>
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={[styles.button, styles.loginButton]} onPress={() => router.push("/Login")}>
+      <TouchableOpacity style={[styles.button, styles.loginButton]} onPress={() => router.push("/login")}>
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
     </View>
