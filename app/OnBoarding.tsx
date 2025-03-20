@@ -1,35 +1,71 @@
-import {View, StyleSheet, Text} from "react-native";
 import React from "react";
-import Onboarding from 'react-native-onboarding-swiper';
+import { View, StyleSheet, Dimensions } from "react-native";
+import Onboarding from "react-native-onboarding-swiper";
+import { useRouter } from "expo-router";
+import LottieView from "lottie-react-native";
 
-export default function OnBoarding() {
-    return (
-        <View style={styles.container}>
-            <Onboarding
-            pages={[
-                {
-                backgroundColor: '#fff',
-                image: <Text>1</Text>,
-                title: 'Onboarding',
-                subtitle: 'Done with React Native Onboarding Swiper',
-                },
-                {
-                    backgroundColor: '#fff',
-                    image: <Text>1</Text>,
-                    title: 'hi',
-                    subtitle: 'Done with React Native Onboarding Swiper',
-                    },
-                
-            ]}
-        />
-        </View>
-    )
 
+const welcome = require("../assets/animations/welcome1.json")
+const mindfulTracking = require("../assets/animations/1.json")
+const selfCompassion = require("../assets/animations/compassion.json");
+const holisticWellBeing = require("../assets/animations/holistic.json"); // New animation for holistic wellness
+const getStarted = require("../assets/animations/getstarted.json");
+
+const {width, height}= Dimensions.get('window');
+export default function OnBoardingScreen() {
+  const router = useRouter();
+
+  return (
+    <View style={styles.container}>
+
+
+      <Onboarding
+        onDone={() => router.replace("/home")}
+        onSkip={() => router.replace("/home")}
+        pages={[
+          {
+            backgroundColor: "#f5f5f5",
+            image: <LottieView source={welcome} autoPlay loop style={styles.lottie} />,
+            title: "Welcome to Your Wellness Journey",
+            subtitle: "A mindful approach to fitness, nutrition, and mental health.",
+          },
+          {
+            backgroundColor: "#fff",
+            image: <LottieView source={mindfulTracking} autoPlay loop style={styles.lottie} />,
+            title: "Mindful Tracking, Not Numbers",
+            subtitle: "We focus on how you feel, not just what you do. No calorie counting, just mindful self-reflection.",
+          },
+          {
+            backgroundColor: "#ffffff",
+            image: <LottieView source={selfCompassion} autoPlay loop style={styles.lottie} />,
+            title: "Self-Compassionate Guidance",
+            subtitle: "Your journey is unique. No pressure, just support for lasting healthy habits.",
+          },
+          {
+            backgroundColor: "#c8e6c9",
+            image: <LottieView source={holisticWellBeing} autoPlay loop style={styles.lottie} />,
+            title: "Holistic Well-Being",
+            subtitle: "Wellness isn’t just about fitness—it’s about your mind, body, and emotions working together.",
+          },
+          {
+            backgroundColor: "#d1c4e9",
+            image: <LottieView source={getStarted} autoPlay loop style={styles.lottie} />,
+            title: "Let's Begin!",
+            subtitle: "Take small steps towards a healthier you. Start your journey today!",
+          },
+        ]}
+      />
+    </View>
+  );
 }
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#fff"
-    }
 
-})
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  lottie: {
+    width: width*0.9,
+    height: width,
+  },
+});
