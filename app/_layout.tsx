@@ -1,7 +1,7 @@
 // app/_layout.tsx
 import React, { useEffect, useState } from "react";
 import { Stack, useRouter } from "expo-router";
-import { onAuthStateChanged } from "firebase/auth/react-native";
+import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../config/firebaseConfig";
 import { UserPreferencesProvider } from "../context/userPreferences"; // Import your context if needed
 import { SafeAreaFrameContext, SafeAreaView } from "react-native-safe-area-context";
