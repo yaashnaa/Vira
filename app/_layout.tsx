@@ -1,40 +1,51 @@
-// app/_layout.tsx
 import React, { useEffect, useState } from "react";
-import { Stack, useRouter } from "expo-router";
+import { ActivityIndicator, View } from "react-native";
+import { Stack, useRouter, Slot } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../config/firebaseConfig";
-import { UserPreferencesProvider } from "../context/userPreferences"; // Import your context if needed
-import { SafeAreaFrameContext, SafeAreaView } from "react-native-safe-area-context";
+import { UserPreferencesProvider } from "../context/userPreferences";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function RootLayout() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [hasMounted, setHasMounted] = useState(false);
 
+  // Ensure the component has mounted
   useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  // Listen for auth state changes once the layout has mounted
+  useEffect(() => {
+    if (!hasMounted) return;
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setIsAuthenticated(true);
-        // Redirect to authenticated flow.
         router.replace("/(auth)/home");
       } else {
         setIsAuthenticated(false);
-        // Redirect to authentication flow.
         router.replace("/(auth)/login");
       }
     });
     return unsubscribe;
-  }, [router]);
+  }, [hasMounted, router]);
 
-  // Optionally, render a loading state while checking auth.
-  if (isAuthenticated === null) {
-    return null;
+  // While loading, render a basic navigator with a loading indicator
+  if (!hasMounted || isAuthenticated === null) {
+    return (
+      <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+      </SafeAreaView>
+    );
   }
+
   return (
     <UserPreferencesProvider>
-      <SafeAreaView>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="+not-found" />
-      </Stack>
+      <SafeAreaView style={{ flex: 1 }}>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Slot />
+        </Stack>
       </SafeAreaView>
     </UserPreferencesProvider>
   );

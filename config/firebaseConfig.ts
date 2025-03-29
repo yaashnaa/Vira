@@ -1,14 +1,7 @@
 import { initializeApp } from "firebase/app";
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import {getApps, getApp} from 'firebase/app';
-import { getStorage } from "firebase/storage";
-import {
-  initializeAuth,
-  getReactNativePersistence,
-} from 'firebase/auth/react-native';
 
+// Optionally declare your .env variables if you use them
 // declare module "@env" {
 //   export const FIREBASE_API_KEY: string;
 //   export const FIREBASE_AUTH_DOMAIN: string;
@@ -30,14 +23,8 @@ const firebaseConfig = {
   measurementId: "G-5TDCLQ9B6G",
 };
 
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-
-// const db = getFirestore(app);
-// const storage = getStorage(app);
-
-
-// export { app, auth, db, storage };
-export const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage),
-});
+// Export the Auth instance
+export const auth = getAuth(app);
