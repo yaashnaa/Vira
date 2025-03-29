@@ -22,7 +22,7 @@ export default function WelcomeScreen() {
         console.log("User is logged in:", currentUser.email); // Debugging check
         console.log("User detected:", currentUser);
 
-        router.replace("/home"); // ✅ Redirect to Home if logged in
+        router.replace("/dashboard"); // ✅ Redirect to Home if logged in
         
       }
     });

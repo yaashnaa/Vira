@@ -17,17 +17,12 @@ import BasicQuiz from "./basic";
 export default function QuizScreen() {
   const [step, setStep] = useState(0);
   const router = useRouter();
-  const [value, setValue] = useState("");
-  const [error, setError] = useState("");
+
   // Example state variables for a few questions.
-  const [name, setName] = useState("");
-  const [ageGroup, setAgeGroup] = useState("");
-  const [activityLevel, setActivityLevel] = useState("");
   const [dietPreferences, setDietPreferences] = useState<string[]>([]);
   const [customDiet, setCustomDiet] = useState("");
   const [mealLoggingComfort, setMealLoggingComfort] = useState("");
   const [physicalHealth, setPhysicalHealth] = useState("");
-  const [mentalHealth, setMentalHealth] = useState("");
   const [medicalConditions, setMedicalConditions] = useState("");
   const [mentalDisorder, setMentalDisorder] = useState("");
   const [calorieViewing, setCalorieViewing] = useState("");
@@ -93,29 +88,6 @@ export default function QuizScreen() {
       finalCustomDietaryPreferences.push(customDiet.trim());
     }
 
-    let finalMedicalConditions: string[] = [];
-    if (medicalConditions === "Yes" && customMedicalConditions.trim()) {
-      finalMedicalConditions.push(customMedicalConditions.trim());
-    } else if (medicalConditions === "No") {
-      // do nothing or store an empty array
-    } else if (medicalConditions === "Prefer not to say") {
-      finalMedicalConditions = ["Prefer not to say"];
-    }
-
-    // If user selected “Bipolar Disorder” or “Other” for mentalDisorder:
-    let finalMentalHealthConditions: string[] = [];
-    if (
-      mentalDisorder !== "None of the above" &&
-      mentalDisorder !== "Prefer not to say" &&
-      mentalDisorder
-    ) {
-      finalMentalHealthConditions.push(mentalDisorder);
-    }
-    // If user typed a customDisorder:
-    if (mentalDisorder.includes("Other") && customDisorder.trim()) {
-      finalMentalHealthConditions.push(customDisorder.trim());
-    }
-
     // Hide meal tracking logic (optional)
     // e.g. set hideMealTracking to true if user isn't comfortable with meal logging
     let hideMealTrackingBool = false;
@@ -131,9 +103,6 @@ export default function QuizScreen() {
 
     // Finally, call updatePreferences with the merged data
     updatePreferences({
-      name,
-      ageGroup,
-      activityLevel,
       dietaryPreferences: finalDietaryPreferences,
       customDietaryPreferences: customDiet ? [customDiet.trim()] : [],
       mealLogging: mealLoggingComfort,
@@ -141,9 +110,7 @@ export default function QuizScreen() {
       macroViewing: macroViewingBool,
       calorieViewing: calorieViewingBool,
       physicalHealth,
-      medicalConditions: finalMedicalConditions,
       customMedicalConditions,
-      mentalHealthConditions: finalMentalHealthConditions,
       customMentalHealthConditions: customDisorder,
       foodAnxiety: anxiousFood,
       triggerWarnings: hideTriggers,
@@ -177,14 +144,7 @@ export default function QuizScreen() {
         : [...prev, preference]
     );
   };
-  const handleSubmit = () => {
-    if (!name.trim()) {
-      setError("This field is required.");
-      return;
-    }
-    // Proceed with form submission
-    console.log("Submitted value:", name);
-  };
+
 
   const renderStep = () => {
     switch (step) {
@@ -192,87 +152,7 @@ export default function QuizScreen() {
         return (
           <SafeAreaView style={styles.section}>
             <Text style={styles.sectionTitle}>
-              1. Basic Profile and Lifestyle
-            </Text>
-            <View>
-              <Text style={styles.question}>
-                What’s your name or preferred display name?
-              </Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your name"
-                value={name}
-                onChangeText={setName}
-              />
-            </View>
-
-            <Text style={styles.question}>What is your age group?</Text>
-            <View style={styles.optionContainer}>
-              {[
-                "Under 18",
-                "18–25",
-                "26–40",
-                "41–55",
-                "56+",
-                "Prefer not to say",
-              ].map((group) => (
-                <TouchableOpacity
-                  key={group}
-                  style={[
-                    styles.optionButton,
-                    ageGroup === group && styles.selectedOption,
-                  ]}
-                  onPress={() => setAgeGroup(group)}
-                >
-                  <Text>{group}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <View>
-              <Text style={styles.question}>
-                How would you describe your general activity level?
-              </Text>
-              <View style={styles.optionContainer}>
-                {[
-                  "Sedentary (little or no exercise)",
-                  "Lightly active (1–3 days/week)",
-                  "Moderately active (3–5 days/week)",
-                  "Very active (6–7 days/week)",
-                  "Prefer not to say",
-                ].map((level) => (
-                  <TouchableOpacity
-                    key={level}
-                    style={[
-                      styles.optionButton,
-                      activityLevel === level && styles.selectedOption,
-                    ]}
-                    onPress={() => setActivityLevel(level)}
-                  >
-                    <Text>{level}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </View>
-            <View style={styles.navigationButtons}>
-              <Button
-                title="Next"
-                onPress={() => {
-                  handleSubmit();
-                  // Only proceed to next step if there's no error:
-                  if (name.trim()) {
-                    handleNext();
-                  }
-                }}
-              />
-            </View>
-          </SafeAreaView>
-        );
-      case 1:
-        return (
-          <SafeAreaView style={styles.section}>
-            <Text style={styles.sectionTitle}>
-              1.2 Dietary Preferences/Restrictions
+              1. Dietary Preferences/Restrictions
             </Text>
             <Text style={styles.question}>
               Do you have any dietary preferences or restrictions? (Select all
@@ -360,11 +240,11 @@ export default function QuizScreen() {
             </View>
           </SafeAreaView>
         );
-      case 2:
+      case 1:
         return (
           <SafeAreaView style={styles.section}>
             <Text style={styles.sectionTitle}>
-              2.1 Physical & Mental Health Background
+              2. Physical & Mental Health Background
             </Text>
             <View>
               <Text style={styles.question}>
@@ -521,7 +401,7 @@ export default function QuizScreen() {
           </SafeAreaView>
         );
 
-      case 3:
+      case 2:
         return (
           <SafeAreaView style={styles.container}>
             <Text style={styles.sectionTitle}>

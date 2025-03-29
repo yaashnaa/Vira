@@ -1,30 +1,72 @@
-import React from "react";
-import { View, StyleSheet, Dimensions, SafeAreaView } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Image, StyleSheet, Dimensions } from "react-native";
 import Onboarding from "react-native-onboarding-swiper";
 import { useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 const welcome = require("../../assets/animations/welcome1.json");
 const mindfulTracking = require("../../assets/animations/1.json");
 const selfCompassion = require("../../assets/animations/compassion.json");
-const holisticWellBeing = require("../../assets/animations/holistic.json"); // New animation for holistic wellness
-const getStarted = require("../../assets/animations/getstarted.json"); // New animation for getting started
+const holisticWellBeing = require("../../assets/animations/holistic.json");
+const getStarted = require("../../assets/animations/getstarted.json");
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
+
 export default function OnBoardingScreen() {
   const router = useRouter();
-  const handleFinishOnboarding = async () => {
+  const [loading, setLoading] = useState(true);
+  // This flag indicates whether to show the onboarding screen.
+  const [shouldShowOnboarding, setShouldShowOnboarding] = useState(false);
+
+  const checkOnboardingAndAuth = async () => {
     try {
-      // Save flag so onboarding isn't shown again.
-      await AsyncStorage.setItem('@onboardingComplete', 'true');
-      router.replace('/home');
+      const onboardingComplete = await AsyncStorage.getItem("@onboardingComplete");
+      if (onboardingComplete) {
+        // If onboarding is complete, navigate to home.
+        router.replace("/signup");
+      } else {
+        // Otherwise, set the flag to show onboarding.
+        setShouldShowOnboarding(true);
+      }
     } catch (error) {
-      console.error('Error saving onboarding status:', error);
+      console.error("Error checking onboarding status:", error);
+      setShouldShowOnboarding(true);
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
-    <View style={styles.container}>
+  useEffect(() => {
+    checkOnboardingAndAuth();
+  }, [router]);
+
+  const handleFinishOnboarding = async () => {
+    try {
+      // Save flag so onboarding isn't shown again.
+      await AsyncStorage.setItem("@onboardingComplete", "true");
+      router.replace("/home");
+    } catch (error) {
+      console.error("Error saving onboarding status:", error);
+    }
+  };
+
+  // While loading, you might show a splash image
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Image
+          source={require("../../assets/images/vira.gif")}
+          style={{ width: 500, height: 500 }}
+        />
+      </View>
+    );
+  }
+
+  // If onboarding hasn't been completed, show the onboarding swiper.
+  if (shouldShowOnboarding) {
+    return (
+      <View style={styles.container}>
         <Onboarding
           onDone={handleFinishOnboarding}
           onSkip={() => router.replace("/welcome")}
@@ -101,18 +143,21 @@ export default function OnBoardingScreen() {
             },
           ]}
         />
-    </View>
-  );
+      </View>
+    );
+  }
+
+  // If loading is false and onboarding is not to be shown (meaning onboarding is complete), nothing renders here
+  return null;
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-
   },
   lottie: {
     width: width * 0.9,
-    height: width -60,
+    height: width - 60,
   },
 });

@@ -25,7 +25,7 @@ export default function LoginScreen() {
     try {
       await loginUser(email, password);
       Alert.alert("Login Successful!");
-      router.replace("/quizzes/screening");
+      router.replace("/dashboard"); // Redirect to Home Screen
     } catch (error) {
       Alert.alert("Login Failed", (error as Error).message);
     }

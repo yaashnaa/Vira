@@ -12,6 +12,11 @@ export default function Dashboard() {
     router.push('/nurtition');
   };
 
+  const handlePersonalize = () => {
+    router.push('/quizzes/screening');
+  }
+
+
   const handleLogMood = () => {
     // Navigate to the mood logging screen or daily check-in
     router.push('/');
@@ -52,6 +57,7 @@ export default function Dashboard() {
       </View>
       <View style={styles.container}>
       <Button title="Reset Onboarding" onPress={resetOnboarding} />
+      <Button title="Personalise" onPress={handlePersonalize} />
       <LogoutButton />
     </View>
     </ScrollView>
