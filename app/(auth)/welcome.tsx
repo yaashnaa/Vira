@@ -19,7 +19,7 @@ export default function WelcomeScreen() {
       
       setLoading(false);
       if (currentUser) {
-        console.log("User is l  ogged in:", currentUser.email); // Debugging check
+        console.log("User is logged in:", currentUser.email); // Debugging check
         console.log("User detected:", currentUser);
 
         router.replace("/home"); // ✅ Redirect to Home if logged in

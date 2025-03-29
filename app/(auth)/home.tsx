@@ -12,7 +12,7 @@ export default function NewHome() {
     router.replace("/dashboard"); // Redirect to Quick Start screen
   }
   const handlePersonalise= ()=>{
-    router.replace("/personalization/setup"); // Redirect to Quick Start screen
+    router.replace("/quizzes/screening"); // Redirect to Quick Start screen
   }
 
   // const handleLogout = async () => {

@@ -10,30 +10,7 @@ interface SplashScreenProps {
 export default function SplashScreenComponent({ onFinish }: SplashScreenProps) {
   const router = useRouter();
   const [loading, setLoading] = React.useState(true);
-  useEffect(() => {
-    const checkOnboardingStatus = async () => {
-      try {
-        const onboardingComplete = await AsyncStorage.getItem(
-          "@onboardingComplete"
-        );
-        if (onboardingComplete) {
-          // User has completed onboarding, navigate to home screen.
-          router.replace("/home");
-        } else {
-          // No onboarding flag; navigate to onboarding screen.
-          router.replace("/(auth)/OnBoarding");
-        }
-      } catch (error) {
-        console.error("Error checking onboarding status:", error);
-        // Fallback: navigate to onboarding if error occurs.
-        router.replace("/(auth)/OnBoarding");
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    checkOnboardingStatus();
-  }, [router]);
 
   useEffect(() => {
     const hideSplash = async () => {

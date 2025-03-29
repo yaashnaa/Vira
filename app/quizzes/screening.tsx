@@ -12,10 +12,13 @@ import {
 } from "react-native";
 import { useUserPreferences } from "../../context/userPreferences";
 import { useRouter } from "expo-router";
+import BasicQuiz from "./basic";
 
 export default function QuizScreen() {
   const [step, setStep] = useState(0);
   const router = useRouter();
+  const [value, setValue] = useState("");
+  const [error, setError] = useState("");
   // Example state variables for a few questions.
   const [name, setName] = useState("");
   const [ageGroup, setAgeGroup] = useState("");
@@ -51,6 +54,7 @@ export default function QuizScreen() {
 
   const handleResourceYes = () => setShowResourceConsent(true);
   const handleResourceNo = () => setShowResourceConsent(false);
+
   const handleFinalSubmit = () => {
     // Example: Convert string-based answers to booleans or arrays if needed
 
@@ -173,6 +177,14 @@ export default function QuizScreen() {
         : [...prev, preference]
     );
   };
+  const handleSubmit = () => {
+    if (!name.trim()) {
+      setError("This field is required.");
+      return;
+    }
+    // Proceed with form submission
+    console.log("Submitted value:", name);
+  };
 
   const renderStep = () => {
     switch (step) {
@@ -243,7 +255,16 @@ export default function QuizScreen() {
               </View>
             </View>
             <View style={styles.navigationButtons}>
-              <Button title="Next" onPress={handleNext} />
+              <Button
+                title="Next"
+                onPress={() => {
+                  handleSubmit();
+                  // Only proceed to next step if there's no error:
+                  if (name.trim()) {
+                    handleNext();
+                  }
+                }}
+              />
             </View>
           </SafeAreaView>
         );
@@ -659,13 +680,13 @@ export default function QuizScreen() {
           <SafeAreaView style={styles.section}>
             <Text style={styles.sectionTitle}>Review & Submit</Text>
             <Text>Review your responses and submit your quiz.</Text>
-            
+
             {/* 4.1 Consent to Store and Use Data */}
             <View style={styles.disclaimerContainer}>
               <Text style={styles.disclaimerText}>
-                Data Use: “By continuing, you agree that the app can store your responses
-                to personalize your experience. You can delete or export your data at any
-                time in Settings.”
+                Data Use: “By continuing, you agree that the app can store your
+                responses to personalize your experience. You can delete or
+                export your data at any time in Settings.”
               </Text>
               <View style={styles.consentButtons}>
                 <TouchableOpacity
@@ -688,20 +709,21 @@ export default function QuizScreen() {
                 </TouchableOpacity>
               </View>
             </View>
-            
+
             {/* 4.2 Confirmation of Non-Clinical Service */}
             <View style={styles.disclaimerContainer}>
               <Text style={styles.disclaimerText}>
-                Disclaimer: “This app does not replace professional medical or mental
-                health advice. If you are experiencing severe distress or suspect a
-                serious mental health issue, please seek professional help. Would you like
-                to see a list of mental health resources?”
+                Disclaimer: “This app does not replace professional medical or
+                mental health advice. If you are experiencing severe distress or
+                suspect a serious mental health issue, please seek professional
+                help. Would you like to see a list of mental health resources?”
               </Text>
               <View style={styles.consentButtons}>
                 <TouchableOpacity
                   style={[
                     styles.consentButton,
-                    showResourceConsent === true && styles.selectedConsentButton,
+                    showResourceConsent === true &&
+                      styles.selectedConsentButton,
                   ]}
                   onPress={handleResourceYes}
                 >
@@ -710,7 +732,8 @@ export default function QuizScreen() {
                 <TouchableOpacity
                   style={[
                     styles.consentButton,
-                    showResourceConsent === false && styles.selectedConsentButton,
+                    showResourceConsent === false &&
+                      styles.selectedConsentButton,
                   ]}
                   onPress={handleResourceNo}
                 >
@@ -718,7 +741,7 @@ export default function QuizScreen() {
                 </TouchableOpacity>
               </View>
             </View>
-      
+
             <Button
               title="Submit"
               onPress={() => {
@@ -734,7 +757,7 @@ export default function QuizScreen() {
               <Button title="Back" onPress={handleBack} />
             </View>
           </SafeAreaView>
-        );  
+        );
     }
   };
 

@@ -25,13 +25,12 @@ export default function OnBoardingScreen() {
 
   return (
     <View style={styles.container}>
-
         <Onboarding
           onDone={handleFinishOnboarding}
           onSkip={() => router.replace("/welcome")}
           pages={[
             {
-              backgroundColor: "#f5f5f5",
+              backgroundColor: "#b6dde9",
               image: (
                 <LottieView
                   source={welcome}
@@ -45,7 +44,7 @@ export default function OnBoardingScreen() {
                 "A mindful approach to fitness, nutrition, and mental health.",
             },
             {
-              backgroundColor: "#fff",
+              backgroundColor: "#E7D2CF",
               image: (
                 <LottieView
                   source={mindfulTracking}
@@ -59,7 +58,7 @@ export default function OnBoardingScreen() {
                 "We focus on how you feel, not just what you do. No calorie counting, just mindful self-reflection.",
             },
             {
-              backgroundColor: "#ffffff",
+              backgroundColor: "#adb5d3",
               image: (
                 <LottieView
                   source={selfCompassion}
@@ -73,7 +72,7 @@ export default function OnBoardingScreen() {
                 "Your journey is unique. No pressure, just support for lasting healthy habits.",
             },
             {
-              backgroundColor: "#c8e6c9",
+              backgroundColor: "#c1dfd6",
               image: (
                 <LottieView
                   source={holisticWellBeing}
@@ -110,9 +109,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+
   },
   lottie: {
     width: width * 0.9,
-    height: width,
+    height: width -60,
   },
 });

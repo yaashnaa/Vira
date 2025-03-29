@@ -1,8 +1,9 @@
 // app/(tabs)/home.tsx
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Button } from 'react-native';
 import { useRouter } from 'expo-router';
-
+import { resetOnboarding } from '../../utils/resetOnboarding';
+import LogoutButton from '@/components/logoutButton';
 export default function Dashboard() {
   const router = useRouter();
 
@@ -49,6 +50,10 @@ export default function Dashboard() {
           Try our gentle yoga routine for a refreshing start!
         </Text>
       </View>
+      <View style={styles.container}>
+      <Button title="Reset Onboarding" onPress={resetOnboarding} />
+      <LogoutButton />
+    </View>
     </ScrollView>
   );
 }
