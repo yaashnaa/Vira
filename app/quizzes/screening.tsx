@@ -13,6 +13,7 @@ import {
 import { useUserPreferences } from "../../context/userPreferences";
 import { useRouter } from "expo-router";
 import BasicQuiz from "./basic";
+import { lightTheme } from "@/config/theme";
 
 export default function QuizScreen() {
   const [step, setStep] = useState(0);
@@ -145,6 +146,10 @@ export default function QuizScreen() {
     );
   };
 
+  const handleFirstBack = () => {
+    router.push("/(tabs)/dashboard");
+  }
+
 
   const renderStep = () => {
     switch (step) {
@@ -235,7 +240,7 @@ export default function QuizScreen() {
             </View>
 
             <View style={styles.navigationButtons}>
-              <Button title="Back" onPress={handleBack} />
+              <Button title="Back" onPress={handleFirstBack} />
               <Button title="Next" onPress={handleNext} />
             </View>
           </SafeAreaView>
@@ -685,7 +690,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   selectedOption: {
-    backgroundColor: "#a0d2eb",
+    backgroundColor: lightTheme.primary,
   },
   optionText: {
     fontSize: 14,
@@ -716,7 +721,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   selectedConsentButton: {
-    backgroundColor: "#a0d2eb",
+    backgroundColor: lightTheme.accent,
   },
   buttonText: {
     color: "#fff",

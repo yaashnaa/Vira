@@ -72,7 +72,7 @@ export default function OnBoardingScreen() {
           onSkip={() => router.replace("/welcome")}
           pages={[
             {
-              backgroundColor: "#b6dde9",
+              backgroundColor: "#ffffff",
               image: (
                 <LottieView
                   source={welcome}
@@ -86,7 +86,7 @@ export default function OnBoardingScreen() {
                 "A mindful approach to fitness, nutrition, and mental health.",
             },
             {
-              backgroundColor: "#E7D2CF",
+              backgroundColor: "#ffffff",
               image: (
                 <LottieView
                   source={mindfulTracking}
@@ -100,7 +100,7 @@ export default function OnBoardingScreen() {
                 "We focus on how you feel, not just what you do. No calorie counting, just mindful self-reflection.",
             },
             {
-              backgroundColor: "#adb5d3",
+              backgroundColor: "#ffffff",
               image: (
                 <LottieView
                   source={selfCompassion}
@@ -114,13 +114,13 @@ export default function OnBoardingScreen() {
                 "Your journey is unique. No pressure, just support for lasting healthy habits.",
             },
             {
-              backgroundColor: "#c1dfd6",
+              backgroundColor: "#ffffff",
               image: (
                 <LottieView
                   source={holisticWellBeing}
                   autoPlay
                   loop
-                  style={styles.lottie}
+                  style={[{ width: width * 1.4, height: width - 10 }, styles.lottie]}
                 />
               ),
               title: "Holistic Well-Being",
@@ -128,7 +128,7 @@ export default function OnBoardingScreen() {
                 "Wellness isn’t just about fitness—it’s about your mind, body, and emotions working together.",
             },
             {
-              backgroundColor: "#d1c4e9",
+              backgroundColor: "#ffffff",
               image: (
                 <LottieView
                   source={getStarted}
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   lottie: {
-    width: width * 0.9,
-    height: width - 60,
+    width: width * 1.4,
+    height: width - 10,
   },
 });

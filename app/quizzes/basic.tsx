@@ -51,7 +51,7 @@ export default function BasicQuiz() {
   if (medicalConditions === "Yes" && customMedicalConditions.trim()) {
     finalMedicalConditions.push(customMedicalConditions.trim());
   } else if (medicalConditions === "No") {
-    // do nothing or store an empty array
+    finalMedicalConditions = ["None"];
   } else if (medicalConditions === "Prefer not to say") {
     finalMedicalConditions = ["Prefer not to say"];
   }
@@ -84,7 +84,7 @@ export default function BasicQuiz() {
       customMentalHealthConditions: customDisorder,
     });
     // Navigate to next quiz or dashboard
-    router.push("/dashboard");
+    router.push("/home");
   };
 
   return (

@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import SplashScreenComponent from "../components/SplashScreen";
 import { useRouter } from "expo-router";
+import useCustomLocalFonts from "@/hooks/useCustomFonts";
 
 export default function Index() {
   const [showSplash, setShowSplash] = useState(true);
   const router = useRouter();
+  const fontsLoaded = useCustomLocalFonts();
 
   useEffect(() => {
     if (!showSplash) {
@@ -13,7 +15,7 @@ export default function Index() {
     }
   }, [showSplash, router]);
 
-  if (showSplash) {
+  if (showSplash && fontsLoaded) {
     return <SplashScreenComponent onFinish={() => setShowSplash(false)} />;
   }
 

@@ -1,60 +1,48 @@
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { auth } from "../../config/firebaseConfig";
-import { signOut } from "firebase/auth";
-import { useRouter } from "expo-router";
+import React, { useEffect, useRef } from "react";
+import { Animated, StyleSheet } from "react-native";
 import { lightTheme } from "@/config/theme";
 
-export default function NewHome() {
-  const router = useRouter();
+export default function AnimatedWelcomeText() {
+  // Animated values for opacity and scale.
+  const opacity = useRef(new Animated.Value(0)).current;
+  const scale = useRef(new Animated.Value(0.5)).current;
 
-  const handleQuickStart= ()=>{
-    router.replace("/dashboard"); // Redirect to Quick Start screen
-  }
-  const handlePersonalise= ()=>{
-    router.replace("/quizzes/basic"); // Redirect to Quick Start screen
-  }
-
-  // const handleLogout = async () => {
-  //   try {
-  //     await signOut(auth);
-  //     router.replace("/welcome");
-  //   } catch (error) {
-  //     console.error("Error logging out:", error);
-  //   }
-  // };
+  useEffect(() => {
+    // Run both animations in parallel.
+    Animated.parallel([
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 1500,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scale, {
+        toValue: 1,
+        friction: 2,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [opacity, scale]);
 
   return (
-    <View style={[styles.container, { backgroundColor: lightTheme.background }]}>
-      <Text style={[styles.title, { color: lightTheme.text }]}>Welcome to Vira!</Text>
-      <View style={[styles.buttonContainer]}> 
-      <TouchableOpacity style={[styles.button]} onPress={handleQuickStart}>
-        <Text style={styles.buttonText}>Quick Start</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={[styles.button]} onPress={handlePersonalise}>
-        <Text style={styles.buttonText}> Personalize My Experience”</Text>
-      </TouchableOpacity>
-      </View>
-   
-    </View>
+    <Animated.Text
+      style={[
+        styles.title,
+        {
+          opacity,
+          transform: [{ scale }],
+          color: lightTheme.text,
+        },
+      ]}
+    >
+      Welcome to Vira!
+    </Animated.Text>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1, justifyContent: "center", alignItems: "center"
-  },
   title: {
-    fontSize: 24, fontWeight: "bold"
+    fontSize: 28,
+    fontWeight: "bold",
+    textAlign: "center",
   },
-  button: {
-    marginTop: 20, padding: 15, backgroundColor: "red", borderRadius: 10
-  },
-  buttonText: {
-    color: "#fff", fontSize: 16, fontWeight: "bold"
-  },
-  buttonContainer: {
-    display: "flex",
-    flexDirection: "column",
-  }
 });

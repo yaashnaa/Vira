@@ -42,11 +42,11 @@ export default function RootLayout() {
 
   return (
     <UserPreferencesProvider>
-      <SafeAreaView style={{ flex: 1 }}>
+
         <Stack screenOptions={{ headerShown: false }}>
           <Slot />
         </Stack>
-      </SafeAreaView>
+
     </UserPreferencesProvider>
   );
 }
