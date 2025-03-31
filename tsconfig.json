@@ -9,11 +9,13 @@
         "./*"
       ]
     }
-  },
+  },  
+  "extends": "expo/tsconfig.base",
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-, "app/(auth)/OnBoarding.tsx"  ]
+    "expo-env.d.ts",
+    "app/(auth)/OnBoarding.tsx"
+  ]
 }
