@@ -3,7 +3,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut
-} from "firebase/auth/react-native";
+} from "firebase/auth";
 
 // ✅ Sign Up Function
 export async function registerUser(email: string, password: string) {

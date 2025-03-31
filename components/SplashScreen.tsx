@@ -1,12 +1,17 @@
 import React, { useEffect } from "react";
 import { View, Image } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 interface SplashScreenProps {
   onFinish: () => void;
 }
 
 export default function SplashScreenComponent({ onFinish }: SplashScreenProps) {
+  const router = useRouter();
+  const [loading, setLoading] = React.useState(true);
+
+
   useEffect(() => {
     const hideSplash = async () => {
       await new Promise((resolve) => setTimeout(resolve, 3000)); // Wait 3 sec
@@ -15,10 +20,22 @@ export default function SplashScreenComponent({ onFinish }: SplashScreenProps) {
     };
     hideSplash();
   }, []);
-
-  return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#ffffff" }}>
-      <Image source={require("../assets/images/vira.gif")} style={{ width: 500, height: 500 }} />
-    </View>
-  );
+  if (loading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#ffffff",
+        }}
+      >
+        <Image
+          source={require("../assets/images/vira.gif")}
+          style={{ width: 500, height: 500 }}
+        />
+      </View>
+    );
+  }
+  return null;
 }

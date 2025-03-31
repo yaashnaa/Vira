@@ -1,8 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  Image,
+} from "react-native";
 import { useRouter } from "expo-router";
-import { auth } from "../../config/firebaseConfig"; // Firebase Auth Instance
-import { onAuthStateChanged, User } from "firebase/auth"; // Import User type
+import { onAuthStateChanged, User } from "firebase/auth";
+import { auth } from "../../config/firebaseConfig";
+import FadeInText from "@/components/fadeInText";
 import { darkTheme, lightTheme } from "@/config/theme"; // Custom theme hook
 
 export default function WelcomeScreen() {
@@ -16,14 +24,13 @@ export default function WelcomeScreen() {
     console.log("Auth State: ", auth.currentUser);
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      
+
       setLoading(false);
       if (currentUser) {
         console.log("User is logged in:", currentUser.email); // Debugging check
         console.log("User detected:", currentUser);
 
-        router.replace("/home"); // ✅ Redirect to Home if logged in
-        
+        router.replace("/dashboard"); // ✅ Redirect to Home if logged in
       }
     });
 
@@ -32,24 +39,41 @@ export default function WelcomeScreen() {
 
   if (loading) {
     return (
-      <View style={[styles.container, { backgroundColor: lightTheme.background }]}>
+      <View
+        style={[styles.container, { backgroundColor: lightTheme.background }]}
+      >
         <ActivityIndicator size="large" color={lightTheme.primary} />
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: lightTheme.background }]}>
-      <Text style={[styles.title, { color: lightTheme.text }]}>Get Started</Text>
+    <View
+      style={[styles.container, { backgroundColor: lightTheme.background }]}
+    >
+      <Image
+        source={require("../../assets/images/welcome.jpg")}
+        style={styles.image}
+      />
+      <Text style={[styles.title, { color: lightTheme.text }]}>
+        {" "}
+        Get started{" "}
+      </Text>
       <Text style={[styles.subtitle, { color: lightTheme.text }]}>
         Please log in or sign up to continue.
       </Text>
 
-      <TouchableOpacity style={[styles.button, { backgroundColor: lightTheme.primary }]} onPress={() => router.push("/signup")}>
+      <TouchableOpacity
+        style={styles.buttons}
+        onPress={() => router.push("/signup")}
+      >
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={[styles.button, styles.loginButton]} onPress={() => router.push("/login")}>
+      <TouchableOpacity
+        style={styles.buttons}
+        onPress={() => router.push("/login")}
+      >
         <Text style={styles.buttonText}>Login</Text>
       </TouchableOpacity>
     </View>
@@ -64,14 +88,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 42,
     fontWeight: "bold",
     marginBottom: 10,
+    fontFamily: "Charm-Regular",
+  },
+  image: {
+    width: 300,
+    height: 300,
   },
   subtitle: {
     fontSize: 16,
     textAlign: "center",
     marginBottom: 30,
+    fontFamily: "Main-font",
   },
   button: {
     width: "80%",
@@ -79,13 +109,33 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
     marginVertical: 10,
-  },
-  loginButton: {
-    backgroundColor: "#007BFF",
+
   },
   buttonText: {
-    color: "white",
-    fontSize: 16,
+    color: "black",
+    fontSize: 20,
     fontWeight: "bold",
+    fontFamily: "Main-font",
+  },
+  buttons: {
+    width: "60%",
+    borderRadius: 15,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 20,
+    color: "black",
+    borderWidth: 3,
+    borderColor: lightTheme.accent,
+    borderStyle: "solid",
+    shadowColor: lightTheme.secondary,
+    shadowOffset: {
+      width: 3,
+      height: 3,
+    },
+    shadowOpacity: 9.55,
+    shadowRadius: 3.84,
+
+    elevation: 2,
   },
 });

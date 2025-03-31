@@ -1,7 +1,9 @@
-// context/UserPreferencesContext.tsx
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { auth } from "../config/firebaseConfig";
+import { onAuthStateChanged } from "firebase/auth";
+import { saveUserPreferences } from "../utils/firestore";
 
-interface UserPreferences {
+export interface UserPreferences {
   name: string;
   ageGroup: string;
   activityLevel: string;
@@ -14,7 +16,7 @@ interface UserPreferences {
   mentalHealthConditions: string[];
   medicalConditions: string[];
   calorieViewing: boolean;
-  macroViewing: boolean; // Optional property for macro viewing
+  macroViewing: boolean;
   foodAnxiety: string;
   primaryGoals: string[];
   moodCheckIn: boolean;
@@ -24,8 +26,7 @@ interface UserPreferences {
   customGoals: string[];
   customMedicalConditions: string;
   customMentalHealthConditions: string;
-    customDietaryPreferences: string[];
-    
+  customDietaryPreferences: string[];
 }
 
 interface UserPreferencesContextProps {
@@ -60,8 +61,19 @@ export const UserPreferencesProvider = ({ children }: { children: ReactNode }) =
     customMedicalConditions: '',
     customMentalHealthConditions: '',
     customDietaryPreferences: [],
-
   });
+
+  // Save preferences when they change and a user is authenticated
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // Save the preferences for the authenticated user
+        saveUserPreferences(user.uid, userPreferences);
+      }
+    });
+
+    return unsubscribe;
+  }, [userPreferences]);
 
   const updatePreferences = (newPreferences: Partial<UserPreferences>) => {
     setUserPreferences((prev) => ({ ...prev, ...newPreferences }));
