@@ -69,7 +69,7 @@ export default function OnBoardingScreen() {
       <View style={styles.container}>
         <Onboarding
           onDone={handleFinishOnboarding}
-          onSkip={() => router.replace("/welcome")}
+          onSkip={handleFinishOnboarding}
           pages={[
             {
               backgroundColor: "#ffffff",

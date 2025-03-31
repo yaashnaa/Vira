@@ -70,11 +70,6 @@ export default function Dashboard() {
           Welcome back, {userPreferences?.name}!
         </FadeInText>
         <View style={styles.snapshotContainer}>
-          <Text style={styles.snapshotTitle}>Today's Snapshot</Text>
-          <Text style={styles.snapshotText}>Mood: Good</Text>
-          <Text style={styles.snapshotText}>Steps: 3,500</Text>
-        </View>
-        <View style={styles.snapshotContainer}>
           <Text style={styles.snapshotTitle}>Today's Quote</Text>
           <Text>Qoute will be here </Text>
           {/* <Quotes /> */}
