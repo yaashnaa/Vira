@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { loginUser } from "../../utils/auth"; // Firebase authentication function
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -24,6 +24,7 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     try {
       await loginUser(email, password);
+      await AsyncStorage.setItem('@loggedIn', 'true');
       Alert.alert("Login Successful!");
       router.replace("/dashboard"); // Redirect to Home Screen
     } catch (error) {

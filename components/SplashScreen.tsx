@@ -10,7 +10,25 @@ interface SplashScreenProps {
 export default function SplashScreenComponent({ onFinish }: SplashScreenProps) {
   const router = useRouter();
   const [loading, setLoading] = React.useState(true);
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const loggedIn = await AsyncStorage.getItem('@loggedIn');
+        if (loggedIn === 'true') {
+          router.replace("/dashboard");
+        } else {
+          router.replace("/login");
+        }
+      } catch (error) {
+        console.error("Error checking login status:", error);
+        router.replace("/login");
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    checkLoginStatus();
+  }, [router]);
 
   useEffect(() => {
     const hideSplash = async () => {

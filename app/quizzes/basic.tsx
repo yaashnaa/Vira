@@ -84,7 +84,7 @@ export default function BasicQuiz() {
       customMentalHealthConditions: customDisorder,
     });
     // Navigate to next quiz or dashboard
-    router.push("/home");
+    router.push("/dashboard");
   };
 
   return (

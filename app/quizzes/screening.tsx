@@ -126,7 +126,7 @@ export default function QuizScreen() {
     // Navigate to your next screen, e.g. the home screen:
     // router.replace('/(tabs)/home');
     console.log("User Preferences Submitted!");
-    router.replace("/(tabs)/dashboard");
+    router.replace("/dashboard");
   };
 
   const handleNext = () => {
@@ -147,7 +147,7 @@ export default function QuizScreen() {
   };
 
   const handleFirstBack = () => {
-    router.push("/(tabs)/dashboard");
+    router.push("/dashboard");
   }
 
 

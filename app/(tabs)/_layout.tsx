@@ -8,10 +8,11 @@ export default function TabLayout() {
         animation: 'shift',
         headerShown: false
       }}>
-      <Tabs.Screen name="home" options={{ title: "Home" }} />
-      <Tabs.Screen name="track" options={{ title: "Track" }} />
-      <Tabs.Screen name="mindfulness" options={{ title: "Mindfulness" }} />
-      <Tabs.Screen name="progress" options={{ title: "Progress" }} />
+      <Tabs.Screen name="dashboard" options={{ title: "Dashboard" }} />
+      <Tabs.Screen name="nurtition" options={{ title: "Nurtition" }} />
+      <Tabs.Screen name="mood" options={{ title: "Mood" }} />
+      <Tabs.Screen name="fitness" options={{ title: "Fitness" }} />
+      <Tabs.Screen name="settings" options={{ title: "Settings" }} />
     </Tabs>
   );
 }
