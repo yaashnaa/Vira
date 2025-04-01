@@ -1,13 +1,22 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState } from "react";
+import { View, Text, StyleSheet } from "react-native";
+import CircularSlider from 'react-native-circular-slider';
 
-export default function Mood() {
+export default function MoodSlider() {
+  const [mood, setMood] = useState(50); // 0-100 scale, for instance
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Mood</Text>
-      <Text style={styles.description}>
-        Find guided meditations, breathing exercises, and tips for mental well-being.
-      </Text>
+      <Text style={styles.title}>How are you feeling today?</Text>
+      <CircularSlider
+        value={mood}
+        onChange={(newValue: number) => setMood(newValue)}
+        strokeWidth={10}
+        strokeColor="#007AFF"
+        backgroundColor="#eee"
+        size={250}
+      />
+      <Text style={styles.moodText}>Mood: {mood}</Text>
     </View>
   );
 }
@@ -15,16 +24,16 @@ export default function Mood() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
   },
   title: {
-    fontSize: 24,
-    marginBottom: 8,
+    fontSize: 20,
+    marginBottom: 20,
   },
-  description: {
-    fontSize: 16,
-    textAlign: 'center',
+  moodText: {
+    fontSize: 18,
+    marginTop: 20,
   },
 });

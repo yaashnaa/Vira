@@ -45,7 +45,7 @@ export default function OnBoardingScreen() {
     try {
       // Save flag so onboarding isn't shown again.
       await AsyncStorage.setItem("@onboardingComplete", "true");
-      router.replace("/home");
+      router.replace("/welcome");
     } catch (error) {
       console.error("Error saving onboarding status:", error);
     }
