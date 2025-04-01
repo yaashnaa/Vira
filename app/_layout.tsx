@@ -6,6 +6,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../config/firebaseConfig";
 import { UserPreferencesProvider } from "../context/userPreferences";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { MoodProvider } from "@/context/moodContext";
 
 export default function RootLayout() {
   const router = useRouter();
@@ -45,6 +46,9 @@ export default function RootLayout() {
 
   return (
     <UserPreferencesProvider>
+      <MoodProvider> 
+
+    
       <Stack screenOptions={{
         // Show the header
         headerTitle:"",
@@ -57,6 +61,7 @@ export default function RootLayout() {
       }}>
         <Slot />
       </Stack>
+      </MoodProvider>
     </UserPreferencesProvider>
   );
 }

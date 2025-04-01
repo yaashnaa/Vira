@@ -10,6 +10,7 @@ import {
   Animated,
   SafeAreaView,
 } from "react-native";
+import { useMoodContext } from "@/context/moodContext";
 import LogMoodButton from "@/components/logMoodBtn";
 import RecommendedWidgetsBanner from "@/components/recommendedWidegts";
 import { Link } from "expo-router";
@@ -29,6 +30,7 @@ export default function Dashboard() {
   const opacity = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0.5)).current;
   const { userPreferences } = useUserPreferences();
+  const { hasLoggedToday, logMood } = useMoodContext();
   useEffect(() => {
     Animated.parallel([
       Animated.timing(opacity, {
@@ -56,14 +58,14 @@ export default function Dashboard() {
     router.push("/quizzes/screening");
   };
 
-  const handleLogMood = () => {
-    // Navigate to the mood logging screen or daily check-in
-    router.push("/");
-  };
 
   const handleStartWorkout = () => {
     // Navigate to the fitness/workout screen
     router.push("/fitness");
+  };
+  const handleLogMood = async () => {
+    // e.g. user picks a numeric mood or you open a mood slider
+    await logMood(75); // example
   };
 const mood = () => {
   router.push("/mood");
