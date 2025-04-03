@@ -8,9 +8,11 @@ import {
   ScrollView,
   SafeAreaView,
 } from "react-native";
+import { storePreferencesLocally } from "../utils/asyncStorage"; // Adjust the path as necessary
 import BasicButton from "@/components/basicButton";
 import { useUserPreferences } from "../context/userPreferences"; // Adjust the path as necessary
-import { useRouter } from "expo-router";
+import { useRouter } from "expo-router"; 
+import { auth } from "@/config/firebaseConfig";
 
 export default function Settings() {
   // Get current preferences and the updater function from the context.
@@ -104,18 +106,15 @@ export default function Settings() {
     setCustomGoal(userPreferences.customGoals.join(", "));
   }, [userPreferences]);
 
-  const handleSave = () => {
-    updatePreferences({
+  const handleSave = async () => {
+    const updated = {
       name,
       ageGroup,
       activityLevel,
-      // If the user enters medical conditions as a comma-separated string,
-      // we convert it into an array.
       medicalConditions: medicalConditions
         .split(",")
         .map((item) => item.trim())
         .filter((item) => item !== ""),
-      // Similarly for mentalHealthConditions and customDiet/dietaryPreferences.
       mentalHealthConditions: mentalDisorder
         .split(",")
         .map((item) => item.trim())
@@ -129,9 +128,7 @@ export default function Settings() {
         .filter((item) => item !== ""),
       mealLogging: mealLoggingComfort,
       physicalHealth,
-      // For booleans, we convert the string to a boolean.
       calorieViewing: calorieViewing.toLowerCase() === "true",
-      // We'll keep macroViewing unchanged for now.
       macroViewing: userPreferences.macroViewing,
       foodAnxiety: anxiousFood,
       primaryGoals: primaryGoals,
@@ -143,16 +140,26 @@ export default function Settings() {
         .split(",")
         .map((item) => item.trim())
         .filter((item) => item !== ""),
-      // Optionally, if you have fields like mentalHealthOptIn, include them:
       mentalHealthOptIn: userPreferences.mentalHealthOptIn,
       remindersFrequency,
       hideMealTracking,
-    });
-    // Optionally, you can add a confirmation message or navigate away.
-    console.log("User Preferences Submitted!");
-    router.replace("/(tabs)/dashboard");
+    };
+  
+    // 1. Update context (for immediate in-app changes)
+    updatePreferences(updated);
+  
+    // 2. Also save to AsyncStorage using current user ID
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      await storePreferencesLocally(currentUser.uid, {
+        ...userPreferences,
+        ...updated,
+      });
+    }
+  
+    console.log("User Preferences Submitted & Stored!");
+    router.replace("/dashboard");
   };
-
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.container}>

@@ -4,6 +4,7 @@ import { darkTheme, lightTheme } from "@/config/theme";
 import Header from "@/components/header";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { auth } from "../../config/firebaseConfig";
 import {
   StyleSheet,
   Text,
@@ -24,7 +25,11 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     try {
       await loginUser(email, password);
-      await AsyncStorage.setItem('@loggedIn', 'true');
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        await AsyncStorage.setItem('@currentUserId', currentUser.uid);
+      }
+
       Alert.alert("Login Successful!");
       router.replace("/dashboard"); // Redirect to Home Screen
     } catch (error) {

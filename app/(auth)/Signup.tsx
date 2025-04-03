@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { darkTheme, lightTheme } from "@/config/theme";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { auth } from "../../config/firebaseConfig"; 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   StyleSheet,
   Text,
@@ -23,6 +25,11 @@ export default function SignupScreen() {
   const handleSignup = async () => {
     try {
       await registerUser(email, password);
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        await AsyncStorage.setItem('@currentUserId', currentUser.uid);
+      }
+  
       Alert.alert("Signup Successful!");
       router.replace("/quizzes/basic"); // Redirect to Home Screen
     } catch (error) {

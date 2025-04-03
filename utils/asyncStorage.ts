@@ -1,77 +1,75 @@
+// utils/localStorage.ts
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { UserPreferences } from '../context/userPreferences'; // Adjust the import path as necessary
 import dayjs from 'dayjs';
-const STORAGE_KEY = '@user_preferences';
+import { UserPreferences } from '../context/userPreferences';
 
-export const storePreferencesLocally = async (preferences: UserPreferences) => {
+const PREFS_KEY_PREFIX = '@prefs_';
+const MOOD_KEY_PREFIX = '@moods_';
+const ONBOARDING_KEY = '@onboardingComplete';
+const QUIZ_KEY = '@quizComplete';
+
+// Save user preferences to local storage using Firebase Auth UID
+export const storePreferencesLocally = async (uid: string, preferences: UserPreferences) => {
   try {
     const jsonValue = JSON.stringify(preferences);
-    await AsyncStorage.setItem(STORAGE_KEY, jsonValue);
-    console.log('Preferences saved locally.');
+    await AsyncStorage.setItem(PREFS_KEY_PREFIX + uid, jsonValue);
+    console.log('Preferences saved locally for UID:', uid);
   } catch (error) {
-    console.error('Error saving preferences: ', error);
+    console.error('Error saving preferences locally:', error);
   }
 };
 
-export const loadPreferencesLocally = async (): Promise<UserPreferences | null> => {
+export const loadPreferencesLocally = async (uid: string): Promise<UserPreferences | null> => {
   try {
-    const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
+    const jsonValue = await AsyncStorage.getItem(PREFS_KEY_PREFIX + uid);
     return jsonValue != null ? JSON.parse(jsonValue) : null;
   } catch (error) {
-    console.error('Error loading preferences: ', error);
+    console.error('Error loading preferences locally:', error);
     return null;
   }
 };
 
-// Key in AsyncStorage
-const USER_STORAGE_KEY = "@multi_user_mood_logs";
-
-interface MultiUserData {
-  currentUser: string | null;
-  userMoods: {
-    [username: string]: { [date: string]: number };
-  };
-}
-
-async function loadMultiUserData(): Promise<MultiUserData> {
+// Save today's mood for current user
+export const logMoodLocally = async (uid: string, mood: number) => {
   try {
-    const json = await AsyncStorage.getItem(STORAGE_KEY);
-    if (json) {
-      return JSON.parse(json);
-    }
-  } catch (e) {
-    console.error("Error loading data:", e);
+    const key = MOOD_KEY_PREFIX + uid;
+    const today = dayjs().format('YYYY-MM-DD');
+    const existing = await AsyncStorage.getItem(key);
+    const moods = existing ? JSON.parse(existing) : {};
+    moods[today] = mood;
+    await AsyncStorage.setItem(key, JSON.stringify(moods));
+    console.log(`Mood ${mood} saved locally for ${uid} on ${today}`);
+  } catch (error) {
+    console.error('Error saving mood locally:', error);
   }
-  return { currentUser: null, userMoods: {} };
-}
+};
 
-async function saveMultiUserData(data: MultiUserData) {
+// Load all mood logs for the current user
+export const getMoodHistory = async (uid: string): Promise<{ [date: string]: number }> => {
   try {
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch (e) {
-    console.error("Error saving data:", e);
+    const key = MOOD_KEY_PREFIX + uid;
+    const data = await AsyncStorage.getItem(key);
+    return data ? JSON.parse(data) : {};
+  } catch (error) {
+    console.error('Error loading mood history locally:', error);
+    return {};
   }
-}
+};
 
-// Example usage: setting current user
-async function setCurrentUser(username: string) {
-  const data = await loadMultiUserData();
-  data.currentUser = username;
-  if (!data.userMoods[username]) {
-    data.userMoods[username] = {};
-  }
-  await saveMultiUserData(data);
-}
+export const markOnboardingComplete = async () => {
+  await AsyncStorage.setItem(ONBOARDING_KEY, 'true');
+};
 
-// Example usage: logging mood
-async function logMoodForCurrentUser(moodValue: number) {
-  const data = await loadMultiUserData();
-  if (!data.currentUser) {
-    console.warn("No current user set!");
-    return;
-  }
-  const today = dayjs().format("YYYY-MM-DD");
-  data.userMoods[data.currentUser][today] = moodValue;
-  await saveMultiUserData(data);
-}
+export const isOnboardingComplete = async (): Promise<boolean> => {
+  const value = await AsyncStorage.getItem(ONBOARDING_KEY);
+  return value === 'true';
+};
 
+export const markQuizComplete = async () => {
+  await AsyncStorage.setItem(QUIZ_KEY, 'true');
+};
+
+export const isQuizComplete = async (): Promise<boolean> => {
+  const value = await AsyncStorage.getItem(QUIZ_KEY);
+  return value === 'true';
+};

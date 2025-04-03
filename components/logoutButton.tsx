@@ -14,7 +14,7 @@ export default function LogoutButton() {
 
       // Remove any local keys (like onboarding flag) if needed.
       await AsyncStorage.removeItem('@onboardingComplete');
-
+      await AsyncStorage.removeItem('@user');
       // Navigate the user to the login screen.
       router.replace('/(auth)/login');
     } catch (error) {

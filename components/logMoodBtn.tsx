@@ -1,30 +1,24 @@
 import React from "react";
-import {
-  Pressable,
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  Dimensions,
-} from "react-native";
+import { Pressable, View, Text, Image, StyleSheet, Dimensions } from "react-native";
 import { Divider } from "react-native-paper";
+
 interface LogMoodButtonProps {
   onPress: () => void;
+  isLogged?: boolean;
 }
+
 const { width } = Dimensions.get("window");
-export default function LogMoodButton({ onPress }: LogMoodButtonProps) {
+
+export default function LogMoodButton({ onPress, isLogged = false }: LogMoodButtonProps) {
   return (
     <View>
-      <Pressable style={styles.button} onPress={onPress}>
+      <Pressable
+        style={[styles.button, isLogged && styles.buttonDisabled]}
+        onPress={onPress}
+        disabled={isLogged}
+      >
         <Divider bold={true} />
-        <Text
-          style={{
-            fontFamily: "Main-font",
-            fontSize: 20,
-            marginBottom: 10,
-            marginTop: 10,
-          }}
-        >
+        <Text style={styles.heading}>
           How are you feeling today?
         </Text>
         <Divider />
@@ -32,7 +26,9 @@ export default function LogMoodButton({ onPress }: LogMoodButtonProps) {
           source={require("../assets/images/mood/moodScale.png")} // Replace with your own image path
           style={styles.image}
         />
-        <Text style={styles.text}>Log your mood</Text>
+        <Text style={styles.text}>
+          {isLogged ? "Mood Logged" : "Log your mood"}
+        </Text>
       </Pressable>
     </View>
   );
@@ -42,17 +38,23 @@ const styles = StyleSheet.create({
   button: {
     width: width * 0.9,
     justifyContent: "center",
-    margin: "auto",
     alignItems: "center",
     height: 200,
     backgroundColor: "#ffffff",
     borderRadius: 10,
-    // Optional shadow/elevation
     shadowColor: "#000",
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 3,
+  },
+  buttonDisabled: {
+    backgroundColor: "rgba(0, 0, 0, 0.1)", // a lighter background when disabled
+  },
+  heading: {
+    fontFamily: "Main-font",
+    fontSize: 20,
+    marginVertical: 10,
   },
   image: {
     width: 350,
@@ -65,7 +67,6 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#333",
     width: "100%",
-    margin: 0,
     padding: 5,
     textAlign: "center",
     fontFamily: "Main-font",

@@ -148,8 +148,7 @@ export default function QuizScreen() {
 
   const handleFirstBack = () => {
     router.push("/dashboard");
-  }
-
+  };
 
   const renderStep = () => {
     switch (step) {
@@ -425,14 +424,10 @@ export default function QuizScreen() {
                   "Build consistent eating habits",
                   "Learn new recipes/cooking skills",
                   "Improve mindfulness or self-care habits",
-                  "Other",
                 ].map((option) => (
                   <TouchableOpacity
                     key={option}
-                    style={[
-                      styles.optionButton,
-                      primaryGoals.includes(option) && styles.selectedOption,
-                    ]}
+                    style={[styles.optionButton]}
                     onPress={() => {
                       setPrimaryGoals((prev) =>
                         prev.includes(option)
@@ -444,14 +439,6 @@ export default function QuizScreen() {
                     <Text>{option}</Text>
                   </TouchableOpacity>
                 ))}
-                {primaryGoals.includes("Other") && (
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Please specify"
-                    value={customGoal}
-                    onChangeText={setCustomGoal}
-                  />
-                )}
               </View>
             </View>
             <View>

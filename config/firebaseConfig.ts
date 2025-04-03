@@ -1,13 +1,11 @@
 import { initializeApp } from "firebase/app";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import {getApps, getApp} from 'firebase/app';
-import { getStorage } from "firebase/storage";
 import {
   initializeAuth,
   getReactNativePersistence,
-} from 'firebase/auth/react-native';
+  getAuth,
+} from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getFirestore } from "firebase/firestore";
 
 // declare module "@env" {
 //   export const FIREBASE_API_KEY: string;
@@ -30,8 +28,13 @@ const firebaseConfig = {
   measurementId: "G-5TDCLQ9B6G",
  };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-// Export the Auth instance
-export const auth = getAuth(app);
+ const app = initializeApp(firebaseConfig);
+
+ // ✅ Use initializeAuth with AsyncStorage to persist login
+ const auth = initializeAuth(app, {
+   persistence: getReactNativePersistence(AsyncStorage),
+ });
+ 
+ const db = getFirestore(app);
+ 
+ export { app, auth, db };

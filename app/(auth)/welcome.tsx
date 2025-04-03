@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     fontSize: 42,
     fontWeight: "bold",
     marginBottom: 10,
-    fontFamily: "Charm-Regular",
+    fontFamily: "Title-font-regular",
   },
   image: {
     width: 300,

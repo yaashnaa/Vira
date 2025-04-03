@@ -1,58 +1,34 @@
-import React from "react";
-import { View, Text, FlatList, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, FlatList } from "react-native";
 import { useMoodContext } from "../context/moodContext";
-import dayjs from "dayjs";
 
 export default function MoodCalendar() {
-  const { dailyMoods } = useMoodContext();
+  const { fetchAllMoods, userId } = useMoodContext(); // ✅ pull in userId
+  const [moodEntries, setMoodEntries] = useState<{ date: string; mood: number }[]>([]);
 
-  // Turn the object into an array of { date, mood }
-  const moodEntries = Object.keys(dailyMoods).map((date) => ({
-    date,
-    mood: dailyMoods[date],
-  }));
-
-  // Sort by date (descending, optional)
-  moodEntries.sort((a, b) => (a.date < b.date ? 1 : -1));
+  useEffect(() => {
+    if (!userId) return;
+    const load = async () => {
+      const allMoods = await fetchAllMoods();
+      
+      allMoods.sort((a, b) => (a.date < b.date ? 1 : -1));
+      setMoodEntries(allMoods);
+    };
+    load();
+  }, [userId]); // ✅ re-run when userId becomes available
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Mood Calendar</Text>
-      <FlatList
-        data={moodEntries}
-        keyExtractor={(item) => item.date}
-        renderItem={({ item }) => (
-          <View style={styles.item}>
-            <Text style={styles.date}>{item.date}</Text>
-            <Text style={styles.mood}>Mood: {item.mood}</Text>
-          </View>
-        )}
-      />
-    </View>
+    <View style={{ flex: 1, padding: 20 }}>
+    <Text style={{ fontSize: 18, marginBottom: 10 }}>Mood Calendar</Text>
+    <FlatList
+      data={moodEntries}
+      keyExtractor={(item) => item.date}
+      renderItem={({ item }) => (
+        <View style={{ padding: 10, marginBottom: 5, backgroundColor: "#eee", borderRadius: 8 }}>
+          <Text>{item.date}: Mood {item.mood}</Text>
+        </View>
+      )}
+    />
+  </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, marginTop: 50 },
-  title: {
-    fontSize: 20,
-    textAlign: "center",
-    marginBottom: 10,
-  },
-  item: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginVertical: 5,
-    marginHorizontal: 10,
-    padding: 10,
-    backgroundColor: "#eee",
-    borderRadius: 8,
-  },
-  date: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  mood: {
-    fontSize: 16,
-  },
-});

@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import { RadialSlider } from "react-native-radial-slider";
 import { Button } from "react-native-paper";
-
+import { useMoodContext } from "../context/moodContext";
+import { useRouter } from "expo-router";
 // Array of mood images for discrete steps (0, 25, 50, 75, 100)
 const moodImages = [
   require("../assets/images/mood/vhappy.png"), // For mood = 0–24 (e.g., very happy)
@@ -25,18 +26,32 @@ const moodSubText = [
   "A little off, maybe tired or sad.",
   "Overwhelmed or down, need a break.",
 ];
-export default function MoodSlider() {
+interface MoodSliderProps {
+  value: number;
+  onChange: (newValue: number) => void;
+}
+
+export default function MoodSlider({ value, onChange }: MoodSliderProps) {
   // Use a value between 0 and 100 (in increments of 25)
   const [mood, setMood] = useState(50);
+  const { logMood } = useMoodContext();
+  const router = useRouter();
 
-  // Ensure that the slider value is always discrete.
   const handleSliderChange = (newValue: number) => {
-    setMood(newValue);
+    // Round value to the nearest 25
+    const discreteValue = Math.round(newValue / 25) * 25;
+    setMood(discreteValue);
   };
 
-  // Calculate the index based on the mood value.
+  // Calculate the index for images and texts
   const index = Math.min(Math.floor(mood / 25), moodImages.length - 1);
 
+  const handleLogMood = async () => {
+    console.log("Logging mood from mood.tsx:", mood);
+    await logMood(mood);
+    // Navigate to the mood page (or any page you desire)
+    router.push("/dashboard");
+  };
   return (
     <View style={styles.container}>
       <Text style={styles.title}>How are you feeling today?</Text>
@@ -64,7 +79,13 @@ export default function MoodSlider() {
       </View>
       <Text style={styles.moodText}>{moodTexts[index]}</Text>
       <Text style={styles.submoodText}>{moodSubText[index]}</Text>
-      <Button mode="elevated" buttonColor="#ebdaf6" textColor="black" style={{ marginTop: 20 }} onPress={() => console.log("Mood logged:", mood)}>
+      <Button
+        mode="elevated"
+        onPress={handleLogMood}
+        buttonColor="#ebdaf6"
+        textColor="black"
+        style={{ marginTop: 20 }}
+      >
         Log Mood
       </Button>
     </View>
@@ -73,7 +94,6 @@ export default function MoodSlider() {
 
 const styles = StyleSheet.create({
   container: {
-
     flex: 1,
     alignItems: "center",
     padding: 20,

@@ -1,5 +1,5 @@
 // app/(tabs)/home.tsx
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -9,7 +9,9 @@ import {
   Button,
   Animated,
   SafeAreaView,
+  ActivityIndicator,
 } from "react-native";
+import DeleteButton from "@/components/deleteAccount";
 import { useMoodContext } from "@/context/moodContext";
 import LogMoodButton from "@/components/logMoodBtn";
 import RecommendedWidgetsBanner from "@/components/recommendedWidegts";
@@ -24,13 +26,54 @@ import BasicButton from "@/components/basicButton";
 import Quotes from "./quotes";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import TakeQuizButton from "@/components/takeQuiz";
+import MoodCalendar from "../components/moodCalender";
 import { UserPreferences, useUserPreferences } from "@/context/userPreferences";
+import { isOnboardingComplete, isQuizComplete } from "@/utils/asyncStorage";
+import { auth } from "@/config/firebaseConfig";
 export default function Dashboard() {
   const router = useRouter();
+  const { userPreferences, loading } = useUserPreferences();
   const opacity = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0.5)).current;
-  const { userPreferences } = useUserPreferences();
+
   const { hasLoggedToday, logMood } = useMoodContext();
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (user) {
+      console.log("Logged in user:");
+      console.log("UID:", user.uid);
+      console.log("Email:", user.email);
+      console.log("Display Name:", user.displayName);
+    } else {
+      console.log("No user is logged in");
+    }
+  }, []);
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (!user) {
+        console.log("No user logged in – redirecting...");
+        router.replace("/(auth)/login"); // 👈 update this route if needed
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const checkProgress = async () => {
+      const onboarded = await isOnboardingComplete();
+      const quizDone = await isQuizComplete();
+
+      if (!onboarded) {
+        router.replace("/(auth)/OnBoarding");
+      } else if (!quizDone) {
+        router.replace("/quizzes/basic");
+      }
+    };
+
+    checkProgress();
+  }, []);
+
   useEffect(() => {
     Animated.parallel([
       Animated.timing(opacity, {
@@ -58,70 +101,68 @@ export default function Dashboard() {
     router.push("/quizzes/screening");
   };
 
-
   const handleStartWorkout = () => {
     // Navigate to the fitness/workout screen
     router.push("/fitness");
   };
   const handleLogMood = async () => {
-    // e.g. user picks a numeric mood or you open a mood slider
-    await logMood(75); // example
+    router.push("/mood");
   };
-const mood = () => {
-  router.push("/mood");
-}
+  const mood = () => {
+    router.push("/mood");
+  };
+  if (loading || !auth.currentUser || !userPreferences?.name) {
+    return (
+      <View>
+        <ActivityIndicator size="large" color={lightTheme.primary} />
+        <LogoutButton />
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
-        <View>
-          <FadeInText style={styles.title}>
-            Hello, {userPreferences?.name} 👋
-          </FadeInText>
-          <View style={styles.snapshotContainer}>
-            <Text style={styles.snapshotTitle}>Today's Quote</Text>
-            <Text>Qoute will be here </Text>
-            {/* <Quotes /> */}
-          </View>
-          <LogMoodButton onPress={mood} />
-    
-          <TakeQuizButton onPress={handleQuizPress}/>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <AddWidgetButton />
-          </View>
-          <RecommendedWidgetsBanner />
-          {/* <View style={styles.actionsContainer}>
-          <TouchableOpacity style={styles.actionButton} onPress={handleLogMeal}>
-            <Text style={styles.buttonText}>Log Meal</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton} onPress={handleLogMood}>
-            <Text style={styles.buttonText}>Log Mood</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={handleStartWorkout}
-          >
-            <Text style={styles.buttonText}>Log Workout</Text>
-          </TouchableOpacity>
-        </View> */}
+      <View>
+        <FadeInText style={styles.title}>
+          Hello, {userPreferences?.name} 👋
+        </FadeInText>
+        <View style={styles.snapshotContainer}>
+          <Text style={styles.snapshotTitle}>Today's Quote</Text>
+          <Text>Qoute will be here </Text>
+          {/* <Quotes /> */}
+        </View>
+        <View
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <DeleteButton />
+          <LogoutButton />
+          <LogMoodButton onPress={handleLogMood} isLogged={hasLoggedToday} />
+        </View>
 
-          <View style={styles.recommendationContainer}>
-            <Text style={styles.recommendationTitle}>
-              Today's Recommendation
-            </Text>
-            <Text style={styles.recommendationText}>
-              Try our gentle yoga routine for a refreshing start!
-            </Text>
-          </View>
+        <MoodCalendar />
+        <TakeQuizButton onPress={handleQuizPress} />
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <AddWidgetButton />
+        </View>
+        <RecommendedWidgetsBanner />
+
+        {/* <View style={styles.recommendationContainer}>
+          <Text style={styles.recommendationTitle}>Today's Recommendation</Text>
+          <Text style={styles.recommendationText}>
+            Try our gentle yoga routine for a refreshing start!
+          </Text>
+        </View> */}
+        <ScrollView>
           <View style={styles.container}>
             <Button title="Reset Onboarding" onPress={resetOnboarding} />
             <Button title="Personalise" onPress={handlePersonalize} />
-            <LogoutButton />
-            <Link href="/mood">
-              <Text>Go to mood</Text>
-            </Link>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }

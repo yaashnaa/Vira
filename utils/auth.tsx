@@ -2,7 +2,7 @@ import { auth } from "../config/firebaseConfig";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signOut
+  signOut,deleteUser
 } from "firebase/auth";
 
 // ✅ Sign Up Function
@@ -33,5 +33,23 @@ export async function logoutUser() {
     await signOut(auth);
   } catch (error) {
     console.error("Error signing out:", (error as Error).message);
+  }
+}
+export async function deleteAccount() {
+  try {
+    const user = auth.currentUser;
+    if (!user) throw new Error("No user is currently signed in.");
+
+    await deleteUser(user);
+    console.log("User account deleted successfully.");
+  } catch (error: any) {
+    console.error("Error deleting account:", error.message);
+
+    // Some errors like recent login required
+    if (error.code === "auth/requires-recent-login") {
+      throw new Error("Please re-authenticate and try again.");
+    }
+
+    throw error;
   }
 }
