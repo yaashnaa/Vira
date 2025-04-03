@@ -188,7 +188,7 @@ export default function BasicQuiz() {
               ))}
             </View>
             <Text style={styles.question}>
-              How would you rate your current physical health?
+              What is your current activity level?
             </Text>
             <View style={styles.optionContainer}>
               {[

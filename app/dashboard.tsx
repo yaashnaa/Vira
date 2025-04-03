@@ -10,6 +10,7 @@ import {
   Animated,
   SafeAreaView,
   ActivityIndicator,
+  FlatList,
 } from "react-native";
 import DeleteButton from "@/components/deleteAccount";
 import { useMoodContext } from "@/context/moodContext";
@@ -100,7 +101,6 @@ export default function Dashboard() {
   const handlePersonalize = () => {
     router.push("/quizzes/screening");
   };
-
   const handleStartWorkout = () => {
     // Navigate to the fitness/workout screen
     router.push("/fitness");
@@ -108,6 +108,10 @@ export default function Dashboard() {
   const handleLogMood = async () => {
     router.push("/mood");
   };
+  const handleSettings = async () => {
+    router.push("/settings");
+  };
+  const data = [{ key: "dashboard" }];
   const mood = () => {
     router.push("/mood");
   };
@@ -122,47 +126,48 @@ export default function Dashboard() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View>
-        <FadeInText style={styles.title}>
-          Hello, {userPreferences?.name} 👋
-        </FadeInText>
-        <View style={styles.snapshotContainer}>
-          <Text style={styles.snapshotTitle}>Today's Quote</Text>
-          <Text>Qoute will be here </Text>
-          {/* <Quotes /> */}
-        </View>
-        <View
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <DeleteButton />
-          <LogoutButton />
-          <LogMoodButton onPress={handleLogMood} isLogged={hasLoggedToday} />
-        </View>
+      <FlatList
+        data={data}
+        renderItem={() => (
+          <View>
+            <FadeInText style={styles.title}>
+              Hello, {userPreferences?.name} 👋
+            </FadeInText>
 
-        <MoodCalendar />
-        <TakeQuizButton onPress={handleQuizPress} />
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <AddWidgetButton />
-        </View>
-        <RecommendedWidgetsBanner />
+            <View style={styles.snapshotContainer}>
+              <Text style={styles.snapshotTitle}>Today's Quote</Text>
+              <Text>Quote will be here</Text>
+            </View>
 
-        {/* <View style={styles.recommendationContainer}>
-          <Text style={styles.recommendationTitle}>Today's Recommendation</Text>
-          <Text style={styles.recommendationText}>
-            Try our gentle yoga routine for a refreshing start!
-          </Text>
-        </View> */}
-        <ScrollView>
-          <View style={styles.container}>
-            <Button title="Reset Onboarding" onPress={resetOnboarding} />
-            <Button title="Personalise" onPress={handlePersonalize} />
+            <View style={{ alignItems: "center" }}>
+              <DeleteButton />
+              <LogoutButton />
+              <LogMoodButton
+                onPress={handleLogMood}
+                isLogged={hasLoggedToday}
+              />
+            </View>
+            <Button onPress={handleLogMeal} title="Log Meal" />
+            <Button onPress={handleSettings} title="Settings" />
+            <MoodCalendar />
+            <TakeQuizButton onPress={handleQuizPress} />
+
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <AddWidgetButton />
+            </View>
+
+            <RecommendedWidgetsBanner />
+
+            <View style={{ marginTop: 20 }}>
+              <Button title="Reset Onboarding" onPress={resetOnboarding} />
+              <Button title="Personalise" onPress={handlePersonalize} />
+            </View>
           </View>
-        </ScrollView>
-      </View>
+        )}
+        keyExtractor={(item) => item.key}
+        contentContainerStyle={{ paddingBottom: 30 }}
+        ListFooterComponent={<View style={{ height: 50 }} />}
+      />
     </SafeAreaView>
   );
 }

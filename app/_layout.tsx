@@ -49,18 +49,18 @@ export default function RootLayout() {
       <MoodProvider> 
 
     
-      <Stack screenOptions={{
-        // Show the header
+      {/* <Stack screenOptions={{
+
         headerTitle:"",
         headerShown: true,
-        // Example: center the title
+
         headerTitleAlign: "center",
-        // Customize the left and right components
+
         headerLeft: () => <HomeButton />,
         headerRight: () => <SettingsButton />,
-      }}>
+      }}> */}
         <Slot />
-      </Stack>
+      {/* </Stack> */}
       </MoodProvider>
     </UserPreferencesProvider>
   );

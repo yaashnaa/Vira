@@ -14,6 +14,7 @@ const recommendedWidgets = [
     id: "1",
     title: "Nutrition",
     image: require("../assets/images/widgetImages/vegetable.jpg"),
+    link: '../app/nurtition.tsx'
   },
   {
     id: "2",
@@ -54,6 +55,7 @@ export default function RecommendedWidgetsBanner() {
             <View style={styles.cardFooter}>
               {/* The Text is on the left, Icon on the right */}
               <Text style={styles.widgetTitle}>{widget.title}</Text>
+              
               <IconButton
                 icon="plus"
                 mode="outlined"
