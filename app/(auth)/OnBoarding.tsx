@@ -45,7 +45,7 @@ export default function OnBoardingScreen() {
     try {
       // Save flag so onboarding isn't shown again.
       await AsyncStorage.setItem("@onboardingComplete", "true");
-      router.replace("/quizzes/basic");
+      router.replace("/signup");
     } catch (error) {
       console.error("Error saving onboarding status:", error);
     }

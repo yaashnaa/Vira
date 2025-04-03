@@ -16,7 +16,7 @@ import {
   Provider,
   Checkbox,
 } from "react-native-paper";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebaseConfig"; // adjust path as needed
 import { getAuth } from "firebase/auth";
 import MentalHealthCheckboxModal from "@/components/mentalHealthModal";
@@ -167,8 +167,7 @@ export default function Settings() {
       const currentUser = auth.currentUser;
       if (currentUser) {
         const userDocRef = doc(db, "users", currentUser.uid);
-  
-        await updateDoc(userDocRef, updated);
+        await setDoc(userDocRef, updated, { merge: true });
         console.log("✅ Firestore updated for UID:", currentUser.uid);
   
         await storePreferencesLocally(currentUser.uid, {

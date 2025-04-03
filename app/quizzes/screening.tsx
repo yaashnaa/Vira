@@ -9,6 +9,10 @@ import {
   ScrollView,
   SafeAreaView,
 } from "react-native";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "@/config/firebaseConfig";
+import { auth } from "@/config/firebaseConfig";
+
 import { Button, ProgressBar } from "react-native-paper";
 import { useUserPreferences } from "../../context/userPreferences";
 import { useRouter } from "expo-router";
@@ -51,9 +55,7 @@ export default function QuizScreen() {
 
   const handleResourceYes = () => setShowResourceConsent(true);
   const handleResourceNo = () => setShowResourceConsent(false);
-  const handleFinalSubmit = () => {
-    // Example: Convert string-based answers to booleans or arrays if needed
-
+  const handleFinalSubmit = async () => {
     // calorieViewing is a boolean in UserPreferences
     let calorieViewingBool = false;
     let macroViewingBool = false;
@@ -126,6 +128,12 @@ export default function QuizScreen() {
     // Navigate to your next screen, e.g. the home screen:
     // router.replace('/(tabs)/home');
     console.log("User Preferences Submitted!");
+    // const currentUser = auth.currentUser;
+    // if (currentUser) {
+    //   await setDoc(doc(db, "users", currentUser.uid, "preferences", "main"), {
+    //     ...transformedData,
+    //   });
+    // }
     router.replace("/dashboard");
   };
 
@@ -159,308 +167,253 @@ export default function QuizScreen() {
       case 0:
         return (
           <>
-            <View style={{ marginBottom: 20 }}>
-              <ProgressBar
-                progress={(step + 1) / totalSteps}
-                color="#A084DC"
-                style={{ height: 10, borderRadius: 5 }}
-              />
-              <Text style={{ textAlign: "center", fontSize: 16, marginTop: 5 }}>
-                Step {step + 1} of {totalSteps}
-              </Text>
-            </View>
             <SafeAreaView style={styles.section}>
-              <Text style={styles.sectionTitle}>
-                1. Dietary Preferences/Restrictions
-              </Text>
-              <Text style={styles.question}>
-                Do you have any dietary preferences or restrictions? (Select all
-                that apply)
-              </Text>
-              <View style={styles.optionContainer}>
-                {[
-                  "None",
-                  "Vegetarian",
-                  "Vegan",
-                  "Gluten-free",
-                  "Dairy-free",
-                  "Other",
-                ].map((option) => (
-                  <TouchableOpacity
-                    key={option}
-                    style={[
-                      styles.optionButton,
-                      dietPreferences.includes(option) && styles.selectedOption,
-                    ]}
-                    onPress={() => toggleDietPreference(option)}
-                  >
-                    <Text>{option}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              {dietPreferences.includes("Other") && (
-                <TextInput
-                  style={styles.input}
-                  placeholder="Please specify"
-                  value={customDiet}
-                  onChangeText={setCustomDiet}
+              <View style={{ marginBottom: 20 }}>
+                <ProgressBar
+                  progress={(step + 1) / totalSteps}
+                  color="#A084DC"
+                  style={{ height: 10, borderRadius: 5 }}
                 />
-              )}
-
-              <Text style={styles.question}>
-                Are you comfortable logging the types of meals you eat?
-              </Text>
-              <View style={styles.optionContainer}>
-                {[
-                  "Yes, I’m okay with logging (including approximate calories or macros).",
-                  "I’d prefer to log only general descriptions of meals.",
-                  "I’m not comfortable logging meals.",
-                  "Not sure yet.",
-                ].map((option) => (
-                  <TouchableOpacity
-                    key={option}
-                    style={[
-                      styles.optionButton,
-                      mealLoggingComfort === option && styles.selectedOption,
-                    ]}
-                    onPress={() => setMealLoggingComfort(option)}
-                  >
-                    <Text style={styles.optionText}>{option}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <Text style={styles.question}>
-                Would you want to see the calories or macros for your meals?
-              </Text>
-              <View style={styles.optionContainer}>
-                {[
-                  "Yes, I’d like to see them.",
-                  "I’d prefer to see only the calories.",
-                  "I’d prefer to see only the macros.",
-                  "I don’t want to see them.",
-                ].map((option) => (
-                  <TouchableOpacity
-                    key={option}
-                    style={[
-                      styles.optionButton,
-                      calorieViewing === option && styles.selectedOption,
-                    ]}
-                    onPress={() => setCalorieViewing(option)}
-                  >
-                    <Text style={styles.optionText}>{option}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
-              <View style={styles.navigationButtons}>
-                <Button
-                  mode="contained"
-                  textColor="#390a84"
-                  theme={{ colors: { primary: "#C3B1E1" } }}
-                  onPress={handleFirstBack}
-                  style={{ marginTop: 20 }}
+                <Text
+                  style={{ textAlign: "center", fontSize: 16, marginTop: 5 }}
                 >
-                  Back
-                </Button>
-                <Button
-                  mode="contained"
-                  onPress={handleNext}
-                  textColor="#390a84"
-                  theme={{ colors: { primary: "#C3B1E1" } }}
-                  style={{ marginTop: 20 }}
-                >
-                  Next
-                </Button>
+                  Step {step + 1} of {totalSteps}
+                </Text>
               </View>
-            </SafeAreaView>
-          </>
-        );
-      case 1:
-        return (
-          <>
-            <View style={{ marginBottom: 20 }}>
-              <ProgressBar
-                progress={(step + 1) / totalSteps}
-                color="#A084DC"
-                style={{ height: 10, borderRadius: 5 }}
-              />
-              <Text style={{ textAlign: "center", fontSize: 16, marginTop: 5 }}>
-                Step {step + 1} of {totalSteps}
-              </Text>
-            </View>
-            <SafeAreaView style={styles.section}>
-              <Text style={styles.sectionTitle}>
-                2.1 Physical & Mental Health Background
-              </Text>
-              <View>
+              <SafeAreaView style={styles.section}>
+                <Text style={styles.sectionTitle}>
+                  1. Dietary Preferences/Restrictions
+                </Text>
                 <Text style={styles.question}>
-                  How would you rate your current physical health?
+                  Do you have any dietary preferences or restrictions? (Select
+                  all that apply)
                 </Text>
                 <View style={styles.optionContainer}>
                   {[
-                    "Very poor",
-                    "Poor",
-                    "Average",
-                    "Good",
-                    "Excellent",
-                    "Prefer not to say",
-                  ].map((option) => (
-                    <TouchableOpacity
-                      key={option}
-                      style={[
-                        styles.optionButton,
-                        physicalHealth === option && styles.selectedOption,
-                      ]}
-                      onPress={() => setPhysicalHealth(option)}
-                    >
-                      <Text>{option}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-              <View>
-                <Text style={styles.question}>
-                  Do you have any medical conditions or injuries that might
-                  affect exercise choices?
-                </Text>
-                <View style={styles.optionContainer}>
-                  {["Yes", "No", "Prefer not to say"].map((option) => (
-                    <TouchableOpacity
-                      key={option}
-                      style={[
-                        styles.optionButton,
-                        medicalConditions === option && styles.selectedOption,
-                      ]}
-                      onPress={() => setMedicalConditions(option)}
-                    >
-                      <Text>{option}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-                {medicalConditions.includes("Yes") && (
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Please specify"
-                    value={customMedicalConditions}
-                    onChangeText={setCustomMedicalConditions}
-                  />
-                )}
-              </View>
-              <Text style={styles.sectionTitle}>
-                2.2 Mental Health & Emotional State (Opt-In)
-              </Text>
-              <View>
-                <Text style={styles.question}>
-                  Have you ever been diagnosed with (or do you suspect) any of
-                  the following?
-                </Text>
-                <View style={styles.optionContainer}>
-                  {[
-                    "Depression",
-                    "Anxiety",
-                    "Bipolar Disorder",
-                    "Post-Traumatic Stress Disorder (PTSD)",
-                    "Eating Disorder",
-                    "Obsessive-Compulsive Disorder (OCD)",
-                    "None of the above",
-                    "Prefer not to say",
+                    "None",
+                    "Vegetarian",
+                    "Vegan",
+                    "Gluten-free",
+                    "Dairy-free",
                     "Other",
                   ].map((option) => (
                     <TouchableOpacity
                       key={option}
                       style={[
                         styles.optionButton,
-                        mentalDisorder === option && styles.selectedOption,
+                        dietPreferences.includes(option) &&
+                          styles.selectedOption,
                       ]}
-                      onPress={() => setMentalDisorder(option)}
+                      onPress={() => toggleDietPreference(option)}
                     >
                       <Text>{option}</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
-                {mentalDisorder.includes("Other") && (
+
+                {dietPreferences.includes("Other") && (
                   <TextInput
                     style={styles.input}
                     placeholder="Please specify"
-                    value={customDisorder}
-                    onChangeText={setCustomDisorder}
+                    value={customDiet}
+                    onChangeText={setCustomDiet}
                   />
                 )}
-              </View>
-              <View>
+
                 <Text style={styles.question}>
-                  Do you ever feel anxious around mealtimes or tracking your
-                  food/exercise?
+                  Are you comfortable logging the types of meals you eat?
                 </Text>
                 <View style={styles.optionContainer}>
                   {[
-                    "Yes, I often feel anxious",
-                    "Sometimes, but it's manageable",
-                    "Rarely, but it's there",
-                    "No, I don't feel anxious",
-                    "Prefer not to say",
+                    "Yes, I’m okay with logging (including approximate calories or macros).",
+                    "I’d prefer to log only general descriptions of meals.",
+                    "I’m not comfortable logging meals.",
+                    "Not sure yet.",
                   ].map((option) => (
                     <TouchableOpacity
                       key={option}
                       style={[
                         styles.optionButton,
-                        anxiousFood === option && styles.selectedOption,
+                        mealLoggingComfort === option && styles.selectedOption,
                       ]}
-                      onPress={() => setAnxiousFood(option)}
+                      onPress={() => setMealLoggingComfort(option)}
                     >
-                      <Text>{option}</Text>
+                      <Text style={styles.optionText}>{option}</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
-              </View>
-
-              <View>
                 <Text style={styles.question}>
-                  Would you like us to adjust the app to minimize triggers (for
-                  example, hiding calorie counts, providing gentle prompts
-                  instead of strict daily targets)?
+                  Would you want to see the calories or macros for your meals?
                 </Text>
                 <View style={styles.optionContainer}>
                   {[
-                    "Yes, please hide numeric data when possible.",
-                    " I’m okay with seeing all data.",
-                    "I’m not sure, let me decide later in Settings.",
+                    "Yes, I’d like to see them.",
+                    "I’d prefer to see only the calories.",
+                    "I’d prefer to see only the macros.",
+                    "I don’t want to see them.",
                   ].map((option) => (
                     <TouchableOpacity
                       key={option}
                       style={[
                         styles.optionButton,
-                        hideTriggers === option && styles.selectedOption,
+                        calorieViewing === option && styles.selectedOption,
                       ]}
-                      onPress={() => setHideTriggers(option)}
+                      onPress={() => setCalorieViewing(option)}
                     >
-                      <Text>{option}</Text>
+                      <Text style={styles.optionText}>{option}</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
-              </View>
 
-              <View style={styles.navigationButtons}>
-                <Button
-                  onPress={handleBack}
-                  mode="contained"
-                  style={{ marginTop: 20 }}
-                  textColor="#390a84"
-                  theme={{ colors: { primary: "#C3B1E1" } }}
+                <View style={styles.navigationButtons}>
+                  <Button
+                    mode="contained"
+                    textColor="#390a84"
+                    theme={{ colors: { primary: "#C3B1E1" } }}
+                    onPress={handleFirstBack}
+                    style={{ marginTop: 20 }}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    mode="contained"
+                    onPress={handleNext}
+                    textColor="#390a84"
+                    theme={{ colors: { primary: "#C3B1E1" } }}
+                    style={{ marginTop: 20 }}
+                  >
+                    Next
+                  </Button>
+                </View>
+              </SafeAreaView>
+            </SafeAreaView>
+          </>
+        );
+      case 1:
+        return (
+          <>
+            <SafeAreaView style={styles.section}>
+              <View style={{ marginBottom: 20 }}>
+                <ProgressBar
+                  progress={(step + 1) / totalSteps}
+                  color="#A084DC"
+                  style={{ height: 10, borderRadius: 5 }}
+                />
+                <Text
+                  style={{ textAlign: "center", fontSize: 16, marginTop: 5 }}
                 >
-                  Back
-                </Button>
-                <Button
-                  mode="contained"
-                  onPress={handleNext}
-                  style={{ marginTop: 20 }}
-                  textColor="#390a84"
-                  theme={{ colors: { primary: "#C3B1E1" } }}
-                >
-                  Next
-                </Button>
+                  Step {step + 1} of {totalSteps}
+                </Text>
               </View>
+              <SafeAreaView style={styles.section}>
+                <Text style={styles.sectionTitle}>
+                  2.1 Physical & Mental Health Background
+                </Text>
+                <View>
+                  <Text style={styles.question}>
+                    How would you rate your current physical health?
+                  </Text>
+                  <View style={styles.optionContainer}>
+                    {[
+                      "Very poor",
+                      "Poor",
+                      "Average",
+                      "Good",
+                      "Excellent",
+                      "Prefer not to say",
+                    ].map((option) => (
+                      <TouchableOpacity
+                        key={option}
+                        style={[
+                          styles.optionButton,
+                          physicalHealth === option && styles.selectedOption,
+                        ]}
+                        onPress={() => setPhysicalHealth(option)}
+                      >
+                        <Text>{option}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+                
+                <Text style={styles.sectionTitle}>
+                  2.2 Mental Health & Emotional State (Opt-In)
+                </Text>
+              
+                <View>
+                  <Text style={styles.question}>
+                    Do you ever feel anxious around mealtimes or tracking your
+                    food/exercise?
+                  </Text>
+                  <View style={styles.optionContainer}>
+                    {[
+                      "Yes, I often feel anxious",
+                      "Sometimes, but it's manageable",
+                      "Rarely, but it's there",
+                      "No, I don't feel anxious",
+                      "Prefer not to say",
+                    ].map((option) => (
+                      <TouchableOpacity
+                        key={option}
+                        style={[
+                          styles.optionButton,
+                          anxiousFood === option && styles.selectedOption,
+                        ]}
+                        onPress={() => setAnxiousFood(option)}
+                      >
+                        <Text>{option}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+
+                <View>
+                  <Text style={styles.question}>
+                    Would you like us to adjust the app to minimize triggers
+                    (for example, hiding calorie counts, providing gentle
+                    prompts instead of strict daily targets)?
+                  </Text>
+                  <View style={styles.optionContainer}>
+                    {[
+                      "Yes, please hide numeric data when possible.",
+                      " I’m okay with seeing all data.",
+                      "I’m not sure, let me decide later in Settings.",
+                    ].map((option) => (
+                      <TouchableOpacity
+                        key={option}
+                        style={[
+                          styles.optionButton,
+                          hideTriggers === option && styles.selectedOption,
+                        ]}
+                        onPress={() => setHideTriggers(option)}
+                      >
+                        <Text>{option}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+
+                <View style={styles.navigationButtons}>
+                  <Button
+                    onPress={handleBack}
+                    mode="contained"
+                    style={{ marginTop: 20 }}
+                    textColor="#390a84"
+                    theme={{ colors: { primary: "#C3B1E1" } }}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    mode="contained"
+                    onPress={handleNext}
+                    style={{ marginTop: 20 }}
+                    textColor="#390a84"
+                    theme={{ colors: { primary: "#C3B1E1" } }}
+                  >
+                    Next
+                  </Button>
+                </View>
+              </SafeAreaView>
             </SafeAreaView>
           </>
         );

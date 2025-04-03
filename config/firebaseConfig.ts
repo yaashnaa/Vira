@@ -7,34 +7,36 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getFirestore } from "firebase/firestore";
 
-// declare module "@env" {
-//   export const FIREBASE_API_KEY: string;
-//   export const FIREBASE_AUTH_DOMAIN: string;
-//   export const FIREBASE_PROJECT_ID: string;
-//   export const FIREBASE_STORAGE_BUCKET: string;
-//   export const FIREBASE_MESSAGING_SENDER_ID: string;
-//   export const FIREBASE_APP_ID: string;
-//   export const FIREBASE_MEASUREMENT_ID: string;
-// }
+import Constants from "expo-constants";
+const {
+  FIREBASE_API_KEY,
+  FIREBASE_AUTH_DOMAIN,
+  FIREBASE_PROJECT_ID,
+  FIREBASE_STORAGE_BUCKET,
+  FIREBASE_MESSAGING_SENDER_ID,
+  FIREBASE_APP_ID,
+  FIREBASE_MEASUREMENT_ID,
+} = Constants.expoConfig?.extra || {};
 
-// ✅ Firebase Configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDrTuHp59HPW4GPg6EyPPZ6PFmNMKMk5GU",
-  authDomain: "vira-d024f.firebaseapp.com",
-  projectId: "vira-d024f",
-  storageBucket: "vira-d024f.appspot.com",
-  messagingSenderId: "379116480076",
-  appId: "1:379116480076:web:b974726aac4a257877b6e9",
-  measurementId: "G-5TDCLQ9B6G",
- };
+  apiKey: FIREBASE_API_KEY,
+  authDomain: FIREBASE_AUTH_DOMAIN,
+  projectId: FIREBASE_PROJECT_ID,
+  storageBucket: FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: FIREBASE_MESSAGING_SENDER_ID,
+  appId: FIREBASE_APP_ID,
+  measurementId: FIREBASE_MEASUREMENT_ID,
+};
 
- const app = initializeApp(firebaseConfig);
 
- // ✅ Use initializeAuth with AsyncStorage to persist login
- const auth = initializeAuth(app, {
-   persistence: getReactNativePersistence(AsyncStorage),
- });
- 
- const db = getFirestore(app);
- 
- export { app, auth, db };
+
+const app = initializeApp(firebaseConfig);
+
+// ✅ Use initializeAuth with AsyncStorage to persist login
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage),
+});
+
+const db = getFirestore(app);
+
+export { app, auth, db };

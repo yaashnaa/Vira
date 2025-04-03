@@ -53,7 +53,7 @@ export default function Dashboard() {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (!user) {
         console.log("No user logged in – redirecting...");
-        router.replace("/(auth)/login"); // 👈 update this route if needed
+        router.replace("/(auth)/login"); 
       }
     });
 
@@ -120,6 +120,7 @@ export default function Dashboard() {
       <View>
         <ActivityIndicator size="large" color={lightTheme.primary} />
         <LogoutButton />
+        <Text> no user</Text>
       </View>
     );
   }

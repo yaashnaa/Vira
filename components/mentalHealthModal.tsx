@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,8 +7,9 @@ import {
   ScrollView,
   StyleSheet,
   TextInput,
+  Animated,
 } from "react-native";
-import { Checkbox, Button, Menu } from "react-native-paper";
+import { Checkbox, Button } from "react-native-paper";
 
 const mentalHealthOptions = [
   "Depression",
@@ -30,14 +31,16 @@ export default function MentalHealthCheckboxModal({
 }: {
   mentalDisorder: string[];
   setMentalDisorder: React.Dispatch<React.SetStateAction<string[]>>;
-
   customDisorder: string;
   setCustomDisorder: (value: string) => void;
 }) {
   const [showModal, setShowModal] = useState(false);
-  const [showMentalMenu, setShowMentalMenu] = useState(false);
+  const [error, setError] = useState("");
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const toggleOption = (option: string) => {
+    setError(""); // clear previous error
+
     setMentalDisorder((prev) =>
       prev.includes(option)
         ? prev.filter((item) => item !== option)
@@ -45,78 +48,96 @@ export default function MentalHealthCheckboxModal({
     );
   };
 
+  // Animate custom input if "Other" is selected
+  useEffect(() => {
+    if (mentalDisorder.includes("Other")) {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+      setCustomDisorder(""); // reset custom input if "Other" is unchecked
+    }
+  }, [mentalDisorder]);
+
+  const handleDone = () => {
+    if (mentalDisorder.includes("Other") && !customDisorder.trim()) {
+      setError("Please provide a description for 'Other'");
+      return;
+    }
+
+    setShowModal(false);
+  };
+
   return (
     <View style={{ marginTop: 20 }}>
-      <Text style={styles.label}>Mental Health Conditions</Text>
+      <Text style={styles.label}>
+        Diagnosed or self-identified mental health conditions{" "}
+        <Text style={{ fontWeight: "normal" }}>(Select all that apply)</Text>
+      </Text>
 
-      <Menu
-        visible={showMentalMenu}
-        onDismiss={() => setShowMentalMenu(false)}
-        anchor={
-          <TouchableOpacity
-            onPress={() => setShowMentalMenu(true)}
-            style={styles.dropdown}
-          >
-            <Text style={{ color: mentalDisorder.length ? "#000" : "#888" }}>
-              {mentalDisorder.length > 0
-                ? mentalDisorder.join(", ")
-                : "Select conditions (optional)"}
-            </Text>
-          </TouchableOpacity>
-        }
+      <TouchableOpacity
+        style={styles.dropdown}
+        onPress={() => setShowModal(true)}
       >
-        {[
-          "Depression",
-          "Anxiety",
-          "Bipolar Disorder",
-          "Post-Traumatic Stress Disorder (PTSD)",
-          "Eating Disorder",
-          "Obsessive-Compulsive Disorder (OCD)",
-          "None of the above",
-          "Prefer not to say",
-          "Other",
-        ].map((option) => (
-          <Menu.Item
-            key={option}
-            title={
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Checkbox
-                  status={
-                    mentalDisorder.includes(option) ? "checked" : "unchecked"
-                  }
-                  onPress={() => {
-                    setMentalDisorder((prev) =>
-                      prev.includes(option)
-                        ? prev.filter((item) => item !== option)
-                        : [...prev, option]
-                    );
-                  }}
-                />
-                <Text>{option}</Text>
-              </View>
-            }
-            onPress={() => {
-              setMentalDisorder((prev) =>
-                prev.includes(option)
-                  ? prev.filter((item) => item !== option)
-                  : [...prev, option]
-              );
-            }}
-          />
-        ))}
-      </Menu>
+        <Text style={{ color: mentalDisorder.length ? "#000" : "#888" }}>
+          {mentalDisorder.length > 0
+            ? mentalDisorder.join(", ")
+            : "Select conditions (optional)"}
+        </Text>
+      </TouchableOpacity>
 
-      {mentalDisorder.includes("Other") && (
-        <>
-          <Text style={styles.label}>Custom Mental Health Condition</Text>
-          <TextInput
-            style={styles.input}
-            value={customDisorder}
-            onChangeText={setCustomDisorder}
-            placeholder="Please specify"
-          />
-        </>
-      )}
+      {/* Modal for checkbox selection */}
+      <Modal visible={showModal} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Select mental health conditions</Text>
+            <ScrollView>
+              {mentalHealthOptions.map((option) => (
+                <TouchableOpacity
+                  key={option}
+                  onPress={() => toggleOption(option)}
+                  style={styles.option}
+                >
+                  <Checkbox
+                    status={
+                      mentalDisorder.includes(option) ? "checked" : "unchecked"
+                    }
+                  />
+                  <Text>{option}</Text>
+                </TouchableOpacity>
+              ))}
+
+              {/* Animated input for "Other" */}
+              {mentalDisorder.includes("Other") && (
+                <Animated.View style={{ opacity: fadeAnim }}>
+                  <Text style={[styles.label, { fontWeight: "normal", fontSize: 14 }]}>
+                    Describe it in your own words:
+                  </Text>
+                  <TextInput
+                    style={styles.input}
+                    value={customDisorder}
+                    onChangeText={setCustomDisorder}
+                    placeholder="Optional"
+                  />
+                </Animated.View>
+              )}
+
+              {error !== "" && <Text style={styles.error}>{error}</Text>}
+            </ScrollView>
+
+            <Button mode="contained" onPress={handleDone}>
+              Done
+            </Button>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -141,6 +162,12 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderWidth: 1,
     backgroundColor: "#fff",
+  },
+  error: {
+    color: "red",
+    marginTop: 6,
+    marginBottom: 10,
+    fontSize: 13,
   },
   modalOverlay: {
     flex: 1,

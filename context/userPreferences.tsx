@@ -12,7 +12,7 @@ import {
   onAuthStateChanged, // ✅ Add this line
   getAuth,
 } from "firebase/auth";
-
+import { migrateNameToPreferences } from "@/utils/migrateNameToPreferences";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { saveUserPreferences } from "../utils/firestore";
@@ -65,9 +65,12 @@ export const UserPreferencesProvider = ({
     userId: string
   ): Promise<UserPreferences | null> => {
     try {
-      const docRef = doc(db, "userPreferences", userId);
+      const docRef = doc(db, "users", userId, "preferences", "main"); // ✅ correct path
+
+
       const snapshot = await getDoc(docRef);
       if (snapshot.exists()) {
+        console.log("Fetched user preferences from Firestore:", snapshot.data());
         return snapshot.data() as UserPreferences;
       }
       return null;
@@ -76,6 +79,7 @@ export const UserPreferencesProvider = ({
       return null;
     }
   };
+  
   const [userId, setUserId] = useState<string | null>(null);
 
   const [hasLoaded, setHasLoaded] = useState(false); 
@@ -111,7 +115,7 @@ export const UserPreferencesProvider = ({
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUserId(user.uid);
-  
+        await migrateNameToPreferences(user.uid);
         const prefs = await loadUserPreferences(user.uid);
         if (prefs) {
           setUserPreferences(prefs);

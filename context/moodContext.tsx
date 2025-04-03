@@ -52,7 +52,9 @@ export function MoodProvider({ children }: { children: React.ReactNode }) {
     if (!userId) return;
     const dateStr = today;
     try {
-      const docRef = doc(db, "moodLogs", userId, "moods", dateStr);
+      const docRef = doc(db, "users", userId, "moods", dateStr);
+
+
       const snapshot = await getDoc(docRef);
       if (snapshot.exists()) {
         const data = snapshot.data();
@@ -84,7 +86,8 @@ export function MoodProvider({ children }: { children: React.ReactNode }) {
     const dateStr = today;
     console.log(`Attempting to log mood ${value} for date ${dateStr}`);
     try {
-      const docRef = doc(db, "moodLogs", userId, "moods", dateStr);
+      const docRef = doc(db, "users", userId, "moods", dateStr);
+
       await setDoc(docRef, { mood: value, date: dateStr });
   
       // 🔁 Save to local storage
@@ -102,7 +105,9 @@ export function MoodProvider({ children }: { children: React.ReactNode }) {
   const fetchAllMoods = async () => {
     if (!userId) return [];
     try {
-      const collectionRef = collection(db, "moodLogs", userId, "moods");
+      const collectionRef = collection(db, "users", userId, "moods");
+
+
       const snapshot = await getDocs(collectionRef);
       const moodEntries: { date: string; mood: number }[] = [];
   

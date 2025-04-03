@@ -50,7 +50,7 @@ export default function NutritionScreen() {
 
   return (
     <>
-      <Appbar.Header>
+      <Appbar.Header elevated={true} >
         <Appbar.BackAction onPress={handleBackPress} />
         <Appbar.Content title="Nutrition" />
       

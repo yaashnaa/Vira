@@ -23,7 +23,7 @@ export default function LogMoodButton({ onPress, isLogged = false }: LogMoodButt
         </Text>
         <Divider />
         <Image
-          source={require("../assets/images/mood/moodScale.png")} // Replace with your own image path
+          source={require("../assets/images/mood/moodScale.png")} 
           style={styles.image}
         />
         <Text style={styles.text}>
