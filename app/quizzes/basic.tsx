@@ -4,11 +4,12 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Button,
   StyleSheet,
   SafeAreaView,
   ScrollView,
 } from "react-native";
+import { ProgressBar } from "react-native-paper";
+import { Button } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 import { useUserPreferences } from "../../context/userPreferences";
 import { useRouter } from "expo-router";
@@ -19,6 +20,7 @@ export default function BasicQuiz() {
   const { updatePreferences, userPreferences } = useUserPreferences();
   const router = useRouter();
   const [error, setError] = useState("");
+  const [goalError, setGoalError] = useState("");
 
   // Other state variables...
   const [medicalConditionsInput, setMedicalConditionsInput] = useState(""); // User enters comma-separated conditions
@@ -77,14 +79,24 @@ export default function BasicQuiz() {
       setError("This field is required.");
       return;
     }
+
     setStep((prev) => prev + 1);
   };
 
   const handleBack = () => {
     setStep((prev) => (prev > 0 ? prev - 1 : prev));
   };
+  const totalSteps = 2;
+  const progress = (step + 1) / totalSteps;
 
   const handleSubmitForm = async () => {
+    if (primaryGoals.length === 0) {
+      setGoalError("Please select at least one goal.");
+      return;
+    } else {
+      setGoalError("");
+    }
+
     // Parse the comma-separated input into an array
     const medicalConditionsArray = medicalConditionsInput
       .split(",")
@@ -127,6 +139,16 @@ export default function BasicQuiz() {
       case 0:
         return (
           <>
+            <View style={{ marginBottom: 20 }}>
+              <ProgressBar
+                progress={(step + 1) / totalSteps}
+                color="#A084DC"
+                style={{ height: 10, borderRadius: 5 }}
+              />
+              <Text style={{ textAlign: "center", fontSize: 16, marginTop: 5 }}>
+                Step {step + 1} of {totalSteps}
+              </Text>
+            </View>
             <Text style={styles.sectionTitle}>Health Quiz</Text>
             <Text style={styles.question}>
               What’s your name or preferred display name?
@@ -165,7 +187,6 @@ export default function BasicQuiz() {
                 </TouchableOpacity>
               ))}
             </View>
-
             <Text style={styles.question}>
               How would you rate your current physical health?
             </Text>
@@ -189,7 +210,6 @@ export default function BasicQuiz() {
                 </TouchableOpacity>
               ))}
             </View>
-
             <Text style={styles.question}>
               Do you have any medical conditions or injuries that might affect
               exercise choices?
@@ -216,7 +236,6 @@ export default function BasicQuiz() {
                 onChangeText={setCustomMedicalConditions}
               />
             )}
-
             <Text style={styles.question}>Mental Health Conditions</Text>
             <View style={styles.optionContainer}>
               {[
@@ -256,9 +275,15 @@ export default function BasicQuiz() {
                 onChangeText={setCustomDisorder}
               />
             )}
-
             <View style={styles.navigationButtons}>
-              <Button title="Next" onPress={handleNext} />
+              <Button
+                mode="contained"
+                onPress={handleNext}
+                textColor="#390a84"
+                theme={{ colors: { primary: "#C3B1E1" } }}
+              >
+                Next
+              </Button>
             </View>
           </>
         );
@@ -266,20 +291,32 @@ export default function BasicQuiz() {
       case 1:
         return (
           <>
-            <Text style={styles.sectionTitle}>Personal Goals</Text>
+            <View style={{ marginBottom: 20 }}>
+              <ProgressBar
+                progress={(step + 1) / totalSteps}
+                color="#A084DC"
+                style={{ height: 10, borderRadius: 5 }}
+              />
+              <Text style={{ textAlign: "center", fontSize: 16, marginTop: 5 }}>
+                Step {step + 1} of {totalSteps}
+              </Text>
+            </View>
+            ;<Text style={styles.sectionTitle}>Personal Goals</Text>
             <Text style={styles.question}>
-              What are your primary reasons for using this app? (Select up to
-              two)
+              What are your primary reasons for using this app? (Select up to 3)
             </Text>
             <View style={styles.optionContainer}>
+              {goalError ? (
+                <Text style={{ color: "red", marginBottom: 10 }}>
+                  {goalError}
+                </Text>
+              ) : null}
               {[
                 "General fitness/health",
                 "Weight management or body recomposition",
-                "Improve mental well-being (reduce stress, anxiety, depression, etc.)",
+                "Improve mental well-being",
                 "Build consistent eating habits",
-                "Increase energy levels",
-                "Improve physical performance (strength, endurance, etc.)",
-                "Improve flexibility or mobility",
+
                 "Enhance social connections or community support",
                 "Learn about nutrition and healthy eating",
                 "Track progress and set goals",
@@ -295,7 +332,7 @@ export default function BasicQuiz() {
                     setPrimaryGoals((prev) =>
                       prev.includes(option)
                         ? prev.filter((g) => g !== option)
-                        : prev.length < 2
+                        : prev.length < 3
                         ? [...prev, option]
                         : prev
                     )
@@ -308,8 +345,24 @@ export default function BasicQuiz() {
               ))}
             </View>
             <View style={styles.navigationButtons}>
-              <Button title="Back" onPress={handleBack} />
-              <Button title="Submit" onPress={handleSubmitForm} />
+              <Button
+                mode="contained"
+                onPress={handleBack}
+                textColor="#390a84"
+                theme={{ colors: { primary: "#C3B1E1" } }}
+              >
+                
+                Back
+              </Button>
+              <Button
+                mode="contained"
+                onPress={handleSubmitForm}
+                textColor="#390a84"
+                theme={{ colors: { primary: "#C3B1E1" } }}
+              >
+                
+                Submit
+              </Button>
             </View>
           </>
         );
@@ -334,13 +387,16 @@ export default function BasicQuiz() {
       marginBottom: 30,
     },
     sectionTitle: {
-      fontSize: 22,
+      fontSize: 40,
       fontWeight: "bold",
-      marginBottom: 15,
+      marginBottom: 0,
+      fontFamily: "PatrickHand-Regular",
     },
     question: {
+      // fontFamily: "Comfortaa-Regular",
       fontSize: 18,
       marginVertical: 10,
+      marginBottom: 10,
     },
     input: {
       borderWidth: 1,
@@ -362,48 +418,33 @@ export default function BasicQuiz() {
     },
 
     optionButton: {
-      backgroundColor: "#F8F9FA",
-      fontFamily:"Serif-font",
+      backgroundColor: "#eae9ee",
+      fontFamily: "Serif-font",
       padding: 15,
       margin: 5,
-      borderWidth: 1,
-      borderRadius: 15,
+      borderWidth: 0,
+      borderRadius: 35,
       width: "100%",
-      alignItems: "center",
+      textAlign: "left",
+      // alignItems: "center",
       justifyContent: "center",
     },
     selectedOption: {
-      backgroundColor: "#e1dbe5",
+      color: "#390a84",
+      borderColor: "#390a84",
+      borderWidth: 0,
+      backgroundColor: "#C3B1E1",
     },
     optionText: {
-      fontSize: 14,
+      fontSize: 15,
     },
     navigationButtons: {
       flexDirection: "row",
       justifyContent: "space-between",
     },
-    disclaimerContainer: {
-      marginVertical: 15,
-      padding: 10,
-      backgroundColor: "#f9f9f9",
-      borderRadius: 5,
-    },
-    disclaimerText: {
-      fontSize: 16,
-      marginBottom: 10,
-      color: "#555",
-    },
-    consentButtons: {
-      flexDirection: "row",
-      justifyContent: "space-around",
-    },
-    consentButton: {
-      backgroundColor: "#e0e0e0",
-      paddingVertical: 10,
-      paddingHorizontal: 15,
-      borderRadius: 5,
-    },
+
     selectedConsentButton: {
+      color: "#390a84",
       backgroundColor: "#C3B1E1",
     },
     buttonText: {
