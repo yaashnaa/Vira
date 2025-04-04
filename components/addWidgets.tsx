@@ -9,7 +9,7 @@ import {
   UIManager 
 } from "react-native";
 import Entypo from "@expo/vector-icons/Entypo";
-import BasicButton from "./basicButton";
+import BasicButton from "./Buttons/basicButton";
 import { lightTheme } from "@/config/theme";
 
 // Enable LayoutAnimation on Android

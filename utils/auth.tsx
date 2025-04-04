@@ -69,4 +69,5 @@ export async function deleteAccount() {
     throw error;
   }
 }
+
 export { auth }; // convenient for testing or reusing

@@ -1,5 +1,6 @@
 import Constants from "expo-constants";
-
+import { auth, db } from "@/config/firebaseConfig";
+import { deleteDoc, doc } from "firebase/firestore";
 const APP_ID = Constants.expoConfig?.extra?.NUTRITIONIX_APP_ID;
 const API_KEY = Constants.expoConfig?.extra?.NUTRITIONIX_API_KEY;
 
@@ -17,3 +18,13 @@ export async function getNutritionData(query: string) {
   if (!res.ok) throw new Error("Nutritionix API error");
   return res.json();
 }
+
+async function deleteMeal(mealId: string) {
+    const user = auth.currentUser;
+    if (!user) return;
+  
+    const docRef = doc(db, "users", user.uid, "loggedMeals", mealId);
+    await deleteDoc(docRef);
+    console.log("🗑️ Meal deleted:", mealId);
+  }
+  

@@ -3,6 +3,8 @@ import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import SplashScreenComponent from "../components/SplashScreen";
 import useCustomLocalFonts from "@/hooks/useCustomFonts";
+import { Provider } from "react-native-paper";
+import "react-native-get-random-values";
 
 export default function Index() {
   const router = useRouter();
@@ -12,7 +14,9 @@ export default function Index() {
   useEffect(() => {
     if (!showSplash && fontsLoaded) {
       const checkAndRoute = async () => {
-        const onboardingComplete = await AsyncStorage.getItem("@onboardingComplete");
+        const onboardingComplete = await AsyncStorage.getItem(
+          "@onboardingComplete"
+        );
         const loggedIn = await AsyncStorage.getItem("@loggedIn");
 
         if (!onboardingComplete) {
@@ -29,7 +33,11 @@ export default function Index() {
   }, [showSplash, fontsLoaded]);
 
   if (showSplash && fontsLoaded) {
-    return <SplashScreenComponent onFinish={() => setShowSplash(false)} />;
+    return (
+      <>
+        <SplashScreenComponent onFinish={() => setShowSplash(false)} />;
+      </>
+    );
   }
 
   return null;

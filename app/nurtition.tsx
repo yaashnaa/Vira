@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import {
   View,
-  ScrollView,
   StyleSheet,
   TextInput as RNTextInput,
+  FlatList,
+  Dimensions,
 } from "react-native";
 import {
   Text,
@@ -11,179 +12,160 @@ import {
   Button,
   Divider,
   useTheme,
-  Snackbar,
   Appbar,
+  SegmentedButtons,
 } from "react-native-paper";
-import DailyOverviewNutrition from "@/components/dailyOverviewNutrition";
+import EvilIcons from "@expo/vector-icons/EvilIcons";
+import Feather from "@expo/vector-icons/Feather";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import DailyOverviewNutrition from "@/components/Nutrition/dailyOverviewNutrition";
 import { useUserPreferences } from "@/context/userPreferences";
 import { useRouter } from "expo-router";
-import LogMeal from "@/components/logMeal";
+import LogMealCardModal from "@/components/Nutrition/logMeal";
+import SuggestMeals from "@/components/Nutrition/suggestMeals";
+import NutritionSearch from "@/components/Nutrition/searchNutrionalInfo";
+import ViewLoggedMeals from "@/components/Nutrition/viewLoggedMeals";
 
 export default function NutritionScreen() {
   const { userPreferences } = useUserPreferences();
-  const [meal, setMeal] = useState("");
-  const [snackVisible, setSnackVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [mealsLogged, setMealsLogged] = useState(0);
+  const [searchModal, setSearchModal] = useState(false);
+  const [selectedSegment, setSelectedSegment] = useState("log");
+  const [value, setValue] = React.useState("");
+  const [totalMeals] = useState(3);
   const theme = useTheme();
-  const router = useRouter();
-  const [mealLogData, setMealLogData] = useState({
-    mealsLogged: 0,
-    totalMeals: 3,
+  const [nutritionTotals, setNutritionTotals] = useState({
     calories: 0,
     protein: 0,
     carbs: 0,
     fat: 0,
-    mood: "",
   });
+  const [mealMood, setMealMood] = useState("");
 
-  const handleLogMeal = () => {
-    if (meal.trim()) {
-      // You could also save it to Firebase or AsyncStorage here
-      console.log("Meal logged:", meal);
-      setSnackVisible(true);
-      setMeal("");
-    }
+  const router = useRouter();
+
+  const handleLog = ({ nutrition, mood }: any) => {
+    setMealsLogged((prev) => prev + 1);
+    setNutritionTotals((prev) => ({
+      calories: prev.calories + nutrition.calories,
+      protein: prev.protein + nutrition.protein,
+      carbs: prev.carbs + nutrition.carbs,
+      fat: prev.fat + nutrition.fat,
+    }));
+    setMealMood(mood);
   };
 
-  const getSuggestedMeals = () => {
-    const diet = userPreferences?.dietaryPreferences || [];
-    const suggestions = [
-      { title: "Veggie Wrap", tags: ["Vegetarian", "Vegan"] },
-      { title: "Quinoa Bowl", tags: ["Gluten-free"] },
-      { title: "Chickpea Salad", tags: ["Dairy-free", "Vegan"] },
-    ];
-    return suggestions.filter((item) =>
-      diet.length ? item.tags.some((tag) => diet.includes(tag)) : true
-    );
-  };
   const handleBackPress = () => {
     router.replace("/dashboard");
   };
+  const renderHeader = () => (
+    <View style={styles.container}>
+      <Text style={styles.greeting}>
+        Hello, {userPreferences?.name || "friend"} 🥗
+      </Text>
+      
+      {(userPreferences?.calorieViewing || userPreferences?.macroViewing) && (
+        <View>
+          <DailyOverviewNutrition
+            mealsLogged={mealsLogged}
+            totalMeals={totalMeals}
+            calories={nutritionTotals.calories}
+            protein={nutritionTotals.protein}
+            carbs={nutritionTotals.carbs}
+            fat={nutritionTotals.fat}
+            mood={mealMood}
+          />
+        </View>
+      )}
+
+      <SegmentedButtons
+        value={selectedSegment}
+        onValueChange={setSelectedSegment}
+
+        buttons={[
+          {
+            value: "log",
+            icon: "silverware-fork-knife", // ✅ string name
+            label: "Log ",
+            disabled: userPreferences?.hideMealTracking,
+            },
+            {
+            value: "view",
+            label: "View logs",
+            icon: "clipboard-list",
+            disabled: userPreferences?.hideMealTracking,
+            },
+            {
+            value: "search",
+            label: "Search info",
+            icon: "magnify",
+            disabled: userPreferences?.hideMealTracking,
+            },
+          ]}
+           
+          />
+          {selectedSegment === "log" && !userPreferences?.hideMealTracking && (
+          <LogMealCardModal onLog={handleLog} />
+          )}
+
+          {selectedSegment === "view" && !userPreferences?.hideMealTracking && (
+          <ViewLoggedMeals />
+          )}
+
+          {selectedSegment === "search" && (
+          <NutritionSearch />
+          )}
+      {/* <Button
+        mode="contained"
+        onPress={() => setSearchModal(true)}
+        theme={{ colors: { primary: "#f6dfdb" } }}
+        textColor="#333"
+        style={styles.button}
+      >
+        <View style={styles.iconButtonContent}>
+          <AntDesign name="search1" size={20} color="black" />
+          <Text style={styles.iconButtonText}>Search Nutritional Info</Text>
+        </View>
+      </Button> */}
+      {/* <NutritionSearch
+        visible={searchModal}
+        onDismiss={() => setSearchModal(false)}
+      /> */}
+      {/* <View style={styles.section}>
+        <SuggestMeals />
+      </View>
+
+      <View style={styles.section}>
+        <ViewLoggedMeals />
+      </View> */}
+    </View>
+  );
 
   return (
     <>
-      <Appbar.Header elevated={true}>
+      <Appbar.Header
+        elevated={false}
+        dark={false}
+        theme={{ colors: { primary: "#f5f5f5" } }}
+      >
         <Appbar.BackAction onPress={handleBackPress} />
         <Appbar.Content title="Nutrition" />
       </Appbar.Header>
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.greeting}>
-          Hello, {userPreferences?.name || "friend"} 🥗
-        </Text>
 
-        {userPreferences?.hideMealTracking ? (
-          <View>
-            <Text style={styles.sectionTitle}>Log Your Meal</Text>
-            <Text style={styles.disabledText}>
-              You’ve opted out of meal logging. You can change this in Settings.
-            </Text>
-          </View>
-        ) : (
-          <Card style={styles.card}>
-            <Card.Content>
-              <RNTextInput
-                placeholder="What did you eat?"
-                value={meal}
-                onChangeText={setMeal}
-                style={styles.input}
-                multiline
-              />
-              <Button
-                mode="contained"
-                onPress={handleLogMeal}
-                style={styles.button}
-                textColor="#390a84"
-                buttonColor="#C3B1E1"
-              >
-                Log Meal
-              </Button>
-            </Card.Content>
-          </Card>
-        )}
-        <LogMeal
-          onLogged={() => {
-            setMealLogData((prev) => ({
-              ...prev,
-              mealsLogged: prev.mealsLogged + 1,
-              calories: prev.calories + 100, // Replace with actual logic to update calories
-              protein: prev.protein + 10,   // Replace with actual logic to update protein
-              carbs: prev.carbs + 20,      // Replace with actual logic to update carbs
-              fat: prev.fat + 5,           // Replace with actual logic to update fat
-              mood: "Happy",               // Replace with actual logic to update mood
-            }));
-          }}
-        />
-
-        <DailyOverviewNutrition
-          mealsLogged={mealLogData.mealsLogged}
-          totalMeals={mealLogData.totalMeals}
-          calories={mealLogData.calories}
-          protein={mealLogData.protein}
-          carbs={mealLogData.carbs}
-          fat={mealLogData.fat}
-          mood={mealLogData.mood}
-        />
-
-        {userPreferences?.calorieViewing && (
-          <>
-            <Text style={styles.sectionTitle}>Today’s Nutrition Summary</Text>
-            <Card style={styles.card}>
-              <Card.Content>
-                <Text>Calories: 1450 kcal</Text>
-                {userPreferences?.macroViewing && (
-                  <>
-                    <Text>Protein: 80g</Text>
-                    <Text>Carbs: 160g</Text>
-                    <Text>Fat: 50g</Text>
-                  </>
-                )}
-              </Card.Content>
-            </Card>
-          </>
-        )}
-
-        <Text style={styles.sectionTitle}>Suggested Meals</Text>
-        {getSuggestedMeals().map((meal) => (
-          <Card key={meal.title} style={styles.card}>
-            <Card.Title title={meal.title} />
-            <Card.Content>
-              <Text style={{ fontSize: 12, color: "gray" }}>
-                Tags: {meal.tags.join(", ")}
-              </Text>
-            </Card.Content>
-          </Card>
-        ))}
-
-        {userPreferences?.foodAnxietyLevel?.includes("anxious") && (
-          <>
-            <Divider style={{ marginVertical: 20 }} />
-            <Text style={styles.sectionTitle}>Gentle Support</Text>
-            <Card style={styles.card}>
-              <Card.Content>
-                <Text style={{ marginBottom: 10 }}>
-                  Feeling overwhelmed with food? Try a quick breathing exercise.
-                </Text>
-                <Button
-                  mode="outlined"
-                  onPress={() => router.push("/dashboard")}
-                >
-                  Calm Breathing Tool
-                </Button>
-              </Card.Content>
-            </Card>
-          </>
-        )}
-
-        <Snackbar
-          visible={snackVisible}
-          onDismiss={() => setSnackVisible(false)}
-          duration={2000}
-        >
-          Meal logged successfully!
-        </Snackbar>
-      </ScrollView>
+      <FlatList
+        data={[]} // Placeholder; could be a list of logged meals later
+        keyExtractor={(_: any, index: number) => `placeholder-${index}`}
+        renderItem={null}
+        ListHeaderComponent={renderHeader}
+        contentContainerStyle={{ paddingBottom: 20 }}
+      />
     </>
   );
 }
+
+const screenWidth = Dimensions.get("window").width;
 
 const styles = StyleSheet.create({
   container: {
@@ -191,35 +173,46 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8F9FA",
   },
   greeting: {
-    fontSize: 28,
+    fontSize: 26,
     fontFamily: "PatrickHand-Regular",
-    marginBottom: 10,
+    marginBottom: 16,
+    color: "#333",
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  card: {
-    marginBottom: 15,
-    borderRadius: 12,
+  section: {
     backgroundColor: "#fff",
-  },
-  input: {
-    borderColor: "#e0e0e0",
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 10,
-    minHeight: 60,
-    marginBottom: 10,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 20,
+    elevation: 2,
   },
   button: {
-    borderRadius: 8,
+    width: screenWidth - 40,
+    alignSelf: "center",
+    borderRadius: 10,
+    marginBottom: 16,
+    paddingVertical: 5,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
   },
-  disabledText: {
-    fontStyle: "italic",
-    color: "gray",
-    marginBottom: 20,
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 12,
+    color: "#444",
+  },
+  iconButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+
+  iconButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "black",
+    fontFamily: "Comfortaa-Regular",
   },
 });

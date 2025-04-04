@@ -30,8 +30,8 @@ export default function DailyOverviewNutrition({
     : "0";
 
   return (
-    <Card style={styles.card}>
-      <Card.Title title="💡 Today’s Summary" />
+    <Card style={styles.card} mode="elevated">
+      <Card.Title title="💡 Today’s Summary" titleStyle={{ color: "black" }} />
       <Card.Content>
         <Text style={styles.label}>
           Meals logged: {totalMeals === 0 ? "No meals added yet" : `${mealsLogged} of ${totalMeals}`}
@@ -39,16 +39,20 @@ export default function DailyOverviewNutrition({
 
         <ProgressBar progress={progress} color="#A084DC" style={styles.bar} />
 
-        {userPreferences.calorieViewing && (
-          <Text style={styles.label}>Calories: {formattedCalories} kcal</Text>
-        )}
+        {(userPreferences.calorieViewing || userPreferences.macroViewing) && (
+          <>
+            {userPreferences.calorieViewing && (
+              <Text style={styles.label}>Calories: {formattedCalories} kcal</Text>
+            )}
 
-        {userPreferences.macroViewing && (
-          <View style={styles.macroContainer}>
-            <Text style={styles.macroText}>Protein: {protein ?? 0}g</Text>
-            <Text style={styles.macroText}>Carbs: {carbs ?? 0}g</Text>
-            <Text style={styles.macroText}>Fat: {fat ?? 0}g</Text>
-          </View>
+            {userPreferences.macroViewing && (
+              <View style={styles.macroContainer}>
+          <Text style={styles.macroText}>Protein: {protein ?? 0}g</Text>
+          <Text style={styles.macroText}>Carbs: {carbs ?? 0}g</Text>
+          <Text style={styles.macroText}>Fat: {fat ?? 0}g</Text>
+              </View>
+            )}
+          </>
         )}
 
         {userPreferences.moodcCheckInBool && mood?.trim() !== "" && (
@@ -64,10 +68,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 12,
     backgroundColor: "#fff",
-    elevation: 2,
+    elevation: 3,
+    width: "100%",
   },
   label: {
     marginBottom: 8,
+    color: "#666",
     fontSize: 16,
   },
   bar: {

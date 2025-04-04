@@ -78,7 +78,7 @@ export default function MentalHealthCheckboxModal({
   return (
     <View style={{ marginTop: 20 }}>
       <Text style={styles.label}>
-        Diagnosed or self-identified mental health conditions{" "}
+        Diagnosed or self-identified mental health conditions
         <Text style={{ fontWeight: "normal" }}>(Select all that apply)</Text>
       </Text>
 

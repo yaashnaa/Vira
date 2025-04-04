@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { logoutUser } from '../utils/auth'; // adjust the path as needed
+import { logoutUser } from '../../utils/auth'; // adjust the path as needed
 
 export default function LogoutButton() {
   const router = useRouter();

@@ -16,7 +16,7 @@ const moodTexts = [
   "On top of the world!",
   "Feeling good.",
   "Just okay.",
-  "Not my best day”",
+  "Not my best day",
   "Feeling really low",
 ];
 const moodSubText = [
@@ -58,7 +58,7 @@ export default function MoodSlider({ value, onChange }: MoodSliderProps) {
       <View style={styles.sliderWrapper}>
         <RadialSlider
           value={mood}
-          isHideValue={true} // Hide the default numeric value
+          isHideValue={true} 
           min={0}
           max={100}
           step={25}

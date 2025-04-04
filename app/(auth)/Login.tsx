@@ -17,6 +17,7 @@ import {
 import { useRouter } from "expo-router";
 import { loginUser } from "../../utils/auth"; // Firebase authentication function
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ensureUserDocumentExists } from "../../utils/firestore"; // Function to ensure user document exists
 export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -29,8 +30,8 @@ export default function LoginScreen() {
       if (currentUser) {
         await AsyncStorage.setItem('@currentUserId', currentUser.uid);
       }
-
-      Alert.alert("Login Successful!");
+      await ensureUserDocumentExists();
+      // Alert.alert("Login Successful!");
       router.replace("/dashboard"); // Redirect to Home Screen
     } catch (error) {
       Alert.alert("Login Failed", (error as Error).message);

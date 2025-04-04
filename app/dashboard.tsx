@@ -12,18 +12,19 @@ import {
   ActivityIndicator,
   FlatList,
 } from "react-native";
-import DeleteButton from "@/components/deleteAccount";
+import WaterTracker from "@/components/waterTracker";
+import DeleteButton from "@/components/Buttons/deleteAccount";
 import { useMoodContext } from "@/context/moodContext";
-import LogMoodButton from "@/components/logMoodBtn";
+import LogMoodButton from "@/components/Buttons/logMoodBtn";
 import RecommendedWidgetsBanner from "@/components/recommendedWidegts";
 import { Link } from "expo-router";
 import { useRouter } from "expo-router";
 import { lightTheme } from "@/config/theme";
 import { resetOnboarding } from "../utils/resetOnboarding";
-import LogoutButton from "@/components/logoutButton";
+import LogoutButton from "@/components/Buttons/logoutButton";
 import FadeInText from "@/components/fadeInText";
 import AddWidgetButton from "@/components/addWidgets";
-import BasicButton from "@/components/basicButton";
+import BasicButton from "@/components/Buttons/basicButton";
 import Quotes from "./quotes";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import TakeQuizButton from "@/components/takeQuiz";
@@ -139,10 +140,10 @@ export default function Dashboard() {
               <Text style={styles.snapshotTitle}>Today's Quote</Text>
               <Text>Quote will be here</Text>
             </View>
-
+            <DeleteButton />
+            <LogoutButton />
             <View style={{ alignItems: "center" }}>
-              <DeleteButton />
-              <LogoutButton />
+             
               {userPreferences.moodCheckIn && (
                 <LogMoodButton
                   onPress={handleLogMood}
@@ -150,6 +151,7 @@ export default function Dashboard() {
                 />
               )}
             </View>
+            {/* <WaterTracker /> */}
             <Button onPress={handleLogMeal} title="Log Meal" />
             <Button onPress={handleSettings} title="Settings" />
             <MoodCalendar />

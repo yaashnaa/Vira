@@ -5,11 +5,7 @@ import { auth, db } from "../config/firebaseConfig";
 import { onAuthStateChanged } from "firebase/auth";
 
 import { initializeApp } from "firebase/app";
-import {
-  initializeAuth,
-  getReactNativePersistence,
-  Auth,
-} from "firebase/auth"; // ✅ Keep this
+import { initializeAuth, getReactNativePersistence, Auth } from "firebase/auth"; // ✅ Keep this
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { doc, setDoc, getDoc, collection, getDocs } from "firebase/firestore";
@@ -38,22 +34,23 @@ export function MoodProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUserId(user.uid);
-        fetchTodaysMood();
       } else {
         setUserId(null);
         setMood(null);
         setLastLoggedDate(null);
       }
     });
-    return unsubscribe;
-  }, []);
-
+  });
+  useEffect(() => {
+    if (userId) {
+      fetchTodaysMood();
+    }
+  }, [userId]);
   const fetchTodaysMood = async () => {
     if (!userId) return;
     const dateStr = today;
     try {
       const docRef = doc(db, "users", userId, "moods", dateStr);
-
 
       const snapshot = await getDoc(docRef);
       if (snapshot.exists()) {
@@ -63,12 +60,14 @@ export function MoodProvider({ children }: { children: React.ReactNode }) {
         console.log(`Fetched today's mood from Firestore: ${data.mood}`);
       } else {
         // 🔁 fallback to local storage
-        const moods = await getMoodHistory(userId); 
+        const moods = await getMoodHistory(userId);
 
         if (moods[dateStr] !== undefined) {
           setMood(moods[dateStr]);
           setLastLoggedDate(dateStr);
-          console.log(`Fetched today's mood from AsyncStorage: ${moods[dateStr]}`);
+          console.log(
+            `Fetched today's mood from AsyncStorage: ${moods[dateStr]}`
+          );
         } else {
           setMood(null);
           setLastLoggedDate(null);
@@ -79,7 +78,6 @@ export function MoodProvider({ children }: { children: React.ReactNode }) {
       console.error("Error fetching today's mood:", error);
     }
   };
-  
 
   const logMood = async (value: number) => {
     if (!userId) return;
@@ -89,41 +87,44 @@ export function MoodProvider({ children }: { children: React.ReactNode }) {
       const docRef = doc(db, "users", userId, "moods", dateStr);
 
       await setDoc(docRef, { mood: value, date: dateStr });
-  
+
       // 🔁 Save to local storage
       await logMoodLocally(userId, value);
-  
+
       setMood(value);
       setLastLoggedDate(dateStr);
-      console.log(`Mood logged successfully for user ${userId} on ${dateStr}: ${value}`);
+      console.log(
+        `Mood logged successfully for user ${userId} on ${dateStr}: ${value}`
+      );
     } catch (error) {
       console.error("Error logging mood:", error);
     }
   };
-  
 
   const fetchAllMoods = async () => {
     if (!userId) return [];
     try {
       const collectionRef = collection(db, "users", userId, "moods");
 
-
       const snapshot = await getDocs(collectionRef);
       const moodEntries: { date: string; mood: number }[] = [];
-  
+
       snapshot.forEach((docSnap) => {
         const data = docSnap.data();
         if (data.date && data.mood !== undefined) {
           moodEntries.push({ date: data.date, mood: data.mood });
         }
       });
-  
+
       // 🔁 fallback: try from AsyncStorage if nothing in Firestore
       if (moodEntries.length === 0) {
         const localMoods = await getMoodHistory(userId);
-        return Object.entries(localMoods).map(([date, mood]) => ({ date, mood }));
+        return Object.entries(localMoods).map(([date, mood]) => ({
+          date,
+          mood,
+        }));
       }
-  
+
       return moodEntries;
     } catch (error) {
       console.error("Error fetching all moods:", error);
@@ -132,7 +133,6 @@ export function MoodProvider({ children }: { children: React.ReactNode }) {
       return Object.entries(localMoods).map(([date, mood]) => ({ date, mood }));
     }
   };
-  
 
   const value: MoodContextType = {
     userId,

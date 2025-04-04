@@ -21,7 +21,7 @@ import { db } from "../config/firebaseConfig"; // adjust path as needed
 import { getAuth } from "firebase/auth";
 import MentalHealthCheckboxModal from "@/components/mentalHealthModal";
 import { storePreferencesLocally } from "../utils/asyncStorage"; // Adjust the path as necessary
-import BasicButton from "@/components/basicButton";
+import BasicButton from "@/components/Buttons/basicButton";
 import { useUserPreferences } from "../context/userPreferences"; // Adjust the path as necessary
 import { useRouter } from "expo-router";
 import { auth } from "@/config/firebaseConfig";

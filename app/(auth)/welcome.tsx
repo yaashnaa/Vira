@@ -56,8 +56,8 @@ export default function WelcomeScreen() {
         style={styles.image}
       />
       <Text style={[styles.title, { color: lightTheme.text }]}>
-        {" "}
-        Get started{" "}
+
+        Get started
       </Text>
       <Text style={[styles.subtitle, { color: lightTheme.text }]}>
         Please log in or sign up to continue.

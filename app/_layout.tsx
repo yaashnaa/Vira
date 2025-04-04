@@ -7,6 +7,9 @@ import { auth } from "../config/firebaseConfig";
 import { UserPreferencesProvider } from "../context/userPreferences";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MoodProvider } from "@/context/moodContext";
+import { Provider } from "react-native-paper";
+import "react-native-get-random-values";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function RootLayout() {
   const router = useRouter();
@@ -45,11 +48,11 @@ export default function RootLayout() {
   }
 
   return (
-    <UserPreferencesProvider>
-      <MoodProvider> 
-
-    
-      {/* <Stack screenOptions={{
+    <GestureHandlerRootView>
+    <Provider>
+      <UserPreferencesProvider>
+        <MoodProvider>
+          {/* <Stack screenOptions={{
 
         headerTitle:"",
         headerShown: true,
@@ -59,16 +62,23 @@ export default function RootLayout() {
         headerLeft: () => <HomeButton />,
         headerRight: () => <SettingsButton />,
       }}> */}
-        <Slot />
-      {/* </Stack> */}
-      </MoodProvider>
-    </UserPreferencesProvider>
+          <Slot />
+          {/* </Stack> */}
+        </MoodProvider>
+      </UserPreferencesProvider>
+    </Provider>
+    </GestureHandlerRootView >
   );
 }
 function HomeButton() {
   return (
     <Link href="/dashboard">
-      <Ionicons name="home" size={24} color="black" style={{ marginLeft: 15 }} />
+      <Ionicons
+        name="home"
+        size={24}
+        color="black"
+        style={{ marginLeft: 15 }}
+      />
     </Link>
   );
 }
