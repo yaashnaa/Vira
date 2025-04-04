@@ -24,25 +24,23 @@ export default function QuizScreen() {
   const router = useRouter();
   const scrollViewRef = useRef<ScrollView>(null);
 
-  // Example state variables for a few questions.
   const [dietPreferences, setDietPreferences] = useState<string[]>([]);
   const [customDiet, setCustomDiet] = useState("");
-  const [mealLoggingComfort, setMealLoggingComfort] = useState("");
-  const [physicalHealth, setPhysicalHealth] = useState("");
-  const [medicalConditions, setMedicalConditions] = useState("");
-  const [mentalDisorder, setMentalDisorder] = useState("");
-  const [calorieViewing, setCalorieViewing] = useState("");
+  const [mealLoggingComfort, setMealLoggingComfort] = useState<string>("");
+  const [physicalHealth, setPhysicalHealth] = useState<string>("");
+  const [calorieViewing, setCalorieViewing] = useState<string>("");
+  const [macroViewing, setMacroViewing] = useState<string>("");
   const [remindersFrequency, setRemindersFrequency] = useState("Standard");
-  const [hideMealTracking, setHideMealTracking] = useState(false);
-  const [anxiousFood, setAnxiousFood] = useState("");
-  const [primaryGoals, setPrimaryGoals] = useState<string[]>([]);
   const [moodCheckIn, setMoodCheckIn] = useState("");
-  const [mentalHealthResouces, setmentalHealthResouces] = useState("");
+  const [mentalHealthResouces, setMentalHealthResouces] = useState(""); // string
   const [customMedicalConditions, setCustomMedicalConditions] = useState("");
   const [customDisorder, setCustomDisorder] = useState("");
   const [hideTriggers, setHideTriggers] = useState("");
   const [approach, setApproach] = useState("");
-  const [customGoal, setCustomGoal] = useState("");
+  const [caloriePreference, setCaloriePreference] = useState("");
+  const [macroPreference, setMacroPreference] = useState("");
+  const [foodAnxietyLevel, setFoodAnxietyLevel] = useState(""); // string
+
   const { updatePreferences } = useUserPreferences();
   const [dataConsent, setDataConsent] = useState(false);
   const [showResourceConsent, setShowResourceConsent] = useState<
@@ -56,84 +54,63 @@ export default function QuizScreen() {
   const handleResourceYes = () => setShowResourceConsent(true);
   const handleResourceNo = () => setShowResourceConsent(false);
   const handleFinalSubmit = async () => {
-    // calorieViewing is a boolean in UserPreferences
-    let calorieViewingBool = false;
-    let macroViewingBool = false;
-    if (calorieViewing === "Yes, I’d like to see them.") {
-      calorieViewingBool = true;
-    } else if (calorieViewing === "I’d prefer to see only the calories.") {
-      calorieViewingBool = true;
-      macroViewingBool = false;
-    } else if (calorieViewing === "I’d prefer to see only the macros.") {
-      calorieViewingBool = false;
-      macroViewingBool = true;
-    } else if (calorieViewing === "I don’t want to see them.") {
-      macroViewingBool = false;
-      calorieViewingBool = false;
-    }
+    const calorieViewingBool = caloriePreference === "Yes, I’d like to see calories.";
+    const macroViewingBool = macroPreference === "Yes, I’d like to see macros.";
+    
 
-    // moodCheckIn is a boolean in UserPreferences
-    let moodCheckInBool = false;
-    if (moodCheckIn === "Yes, definitely.") {
-      moodCheckInBool = true;
-    } else if (moodCheckIn === "Maybe, but not sure.") {
-      moodCheckInBool = false;
-    } else if (moodCheckIn === "No, I’d rather keep it simple.") {
-      moodCheckInBool = false;
-    }
+    const moodCheckInBool = moodCheckIn !== "No, I’d rather keep it simple.";
 
-    // If "Other" was chosen for dietPreferences, and customDiet is not empty,
-    // you might want to push it into the dietaryPreferences array:
     const finalDietaryPreferences = [...dietPreferences];
-    const finalCustomDietaryPreferences: string[] = [];
-    if (dietPreferences.includes("Other") && customDiet.trim()) {
-      // Option A: Put the user’s custom input in a separate array
-      finalCustomDietaryPreferences.push(customDiet.trim());
-    }
+    const finalCustomDietaryPreferences: string[] = customDiet.trim()
+      ? [customDiet.trim()]
+      : [];
 
-    // Hide meal tracking logic (optional)
-    // e.g. set hideMealTracking to true if user isn't comfortable with meal logging
-    let hideMealTrackingBool = false;
-    if (mealLoggingComfort === "I’m not comfortable logging meals.") {
-      hideMealTrackingBool = true;
-    }
+    const hideMealTrackingBool = [
+      "I’m not comfortable logging meals.",
+      "I’d prefer to log only general descriptions of meals.",
+    ].includes(mealLoggingComfort);
 
-    // Combine customGoals if “Other” is selected:
-    let finalGoals = [...primaryGoals];
-    if (primaryGoals.includes("Other") && customGoal.trim()) {
-      finalGoals.push(customGoal.trim());
-    }
+    const anxiousFoodBool = [
+      "Yes, I often feel anxious",
+      "Sometimes, but it's manageable",
+    ].includes(foodAnxietyLevel);
 
-    // Finally, call updatePreferences with the merged data
-    updatePreferences({
+    const mentalHealthResourcesBool =
+      mentalHealthResouces === "Yes, please show me available resources." ||
+      mentalHealthResouces === "Not sure, remind me later.";
+
+    const hideTriggersBool =
+      hideTriggers === "Yes, please hide numeric data when possible.";
+
+    const updated = {
       dietaryPreferences: finalDietaryPreferences,
-      customDietaryPreferences: customDiet ? [customDiet.trim()] : [],
-      mealLogging: mealLoggingComfort,
+      physicalHealth: physicalHealth ?? "",
+      customDietaryPreferences: finalCustomDietaryPreferences,
+      mealLogging: mealLoggingComfort ?? "",
       hideMealTracking: hideMealTrackingBool,
-      macroViewing: macroViewingBool,
       calorieViewing: calorieViewingBool,
-      physicalHealth,
-      customMedicalConditions,
-      customMentalHealthConditions: customDisorder,
-      foodAnxiety: anxiousFood,
-      triggerWarnings: hideTriggers,
-      remindersFrequency,
-      approach,
-      primaryGoals: finalGoals,
-      moodCheckIn: moodCheckInBool,
-      // For mental health support
-      mentalHealthSupport: mentalHealthResouces,
-    });
+      macroViewing: macroViewingBool,
+      caloriePreference: caloriePreference ?? "",
+      macroPreference: macroPreference ?? "",
+      
+      customMedicalConditions: customMedicalConditions ?? "",
+      customMentalHealthConditions: customDisorder ?? "",
+      foodAnxietyLevel: foodAnxietyLevel ?? "",
+      anxiousFood: foodAnxietyLevel,
 
-    // Navigate to your next screen, e.g. the home screen:
-    // router.replace('/(tabs)/home');
+      mentalHealthSupport: mentalHealthResouces ?? "",
+      triggerWarnings: hideTriggers ?? "",
+      remindersFrequency,
+      moodCheckIn: moodCheckIn ?? "", // user selection string
+      moodcCheckInBool: ["Yes, definitely.", "Maybe, but not sure."].includes(
+        moodCheckIn
+      ), // derived boolean
+      approach: approach ?? "",
+    };
+
+    updatePreferences(updated);
+
     console.log("User Preferences Submitted!");
-    // const currentUser = auth.currentUser;
-    // if (currentUser) {
-    //   await setDoc(doc(db, "users", currentUser.uid, "preferences", "main"), {
-    //     ...transformedData,
-    //   });
-    // }
     router.replace("/dashboard");
   };
 
@@ -243,22 +220,41 @@ export default function QuizScreen() {
                   ))}
                 </View>
                 <Text style={styles.question}>
-                  Would you want to see the calories or macros for your meals?
+                  Would you like to see calorie information?
                 </Text>
                 <View style={styles.optionContainer}>
                   {[
-                    "Yes, I’d like to see them.",
-                    "I’d prefer to see only the calories.",
-                    "I’d prefer to see only the macros.",
-                    "I don’t want to see them.",
+                    "Yes, I’d like to see calories.",
+                    "No, I’d prefer not to see calories.",
                   ].map((option) => (
                     <TouchableOpacity
                       key={option}
                       style={[
                         styles.optionButton,
-                        calorieViewing === option && styles.selectedOption,
+                        caloriePreference === option && styles.selectedOption,
                       ]}
-                      onPress={() => setCalorieViewing(option)}
+                      onPress={() => setCaloriePreference(option)}
+                    >
+                      <Text style={styles.optionText}>{option}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <Text style={styles.question}>
+                  Would you like to see macro (protein/fat/carb) information?
+                </Text>
+                <View style={styles.optionContainer}>
+                  {[
+                    "Yes, I’d like to see macros.",
+                    "No, I’d prefer not to see macros.",
+                  ].map((option) => (
+                    <TouchableOpacity
+                      key={option}
+                      style={[
+                        styles.optionButton,
+                        macroPreference === option && styles.selectedOption,
+                      ]}
+                      onPress={() => setMacroPreference(option)}
                     >
                       <Text style={styles.optionText}>{option}</Text>
                     </TouchableOpacity>
@@ -335,11 +331,11 @@ export default function QuizScreen() {
                     ))}
                   </View>
                 </View>
-                
+
                 <Text style={styles.sectionTitle}>
                   2.2 Mental Health & Emotional State (Opt-In)
                 </Text>
-              
+
                 <View>
                   <Text style={styles.question}>
                     Do you ever feel anxious around mealtimes or tracking your
@@ -357,9 +353,9 @@ export default function QuizScreen() {
                         key={option}
                         style={[
                           styles.optionButton,
-                          anxiousFood === option && styles.selectedOption,
+                          foodAnxietyLevel === option && styles.selectedOption,
                         ]}
-                        onPress={() => setAnxiousFood(option)}
+                        onPress={() => setFoodAnxietyLevel(option)}
                       >
                         <Text>{option}</Text>
                       </TouchableOpacity>
@@ -377,7 +373,7 @@ export default function QuizScreen() {
                     {[
                       "Yes, please hide numeric data when possible.",
                       " I’m okay with seeing all data.",
-                      "I’m not sure, let me decide later in Settings.",
+                      "I’m not sure, let me decide later.",
                     ].map((option) => (
                       <TouchableOpacity
                         key={option}
@@ -450,8 +446,7 @@ export default function QuizScreen() {
                       key={option}
                       style={[
                         styles.optionButton,
-                        remindersFrequency.includes(option) &&
-                          styles.selectedOption,
+                        remindersFrequency === option && styles.selectedOption,
                       ]}
                       onPress={() => setRemindersFrequency(option)}
                     >
@@ -526,7 +521,7 @@ export default function QuizScreen() {
                         mentalHealthResouces.includes(option) &&
                           styles.selectedOption,
                       ]}
-                      onPress={() => setmentalHealthResouces(option)}
+                      onPress={() => setMentalHealthResouces(option)}
                     >
                       <Text>{option}</Text>
                     </TouchableOpacity>

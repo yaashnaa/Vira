@@ -42,8 +42,20 @@ export default function Settings() {
 
   // For medical conditions, we'll assume the user types a comma-separated string
   const [medicalConditions, setMedicalConditions] = useState(
-    userPreferences.medicalConditions.join(", ")
+    (userPreferences.medicalConditions ?? []).join(", ")
   );
+  const [moodCheckIn, setMoodCheckIn] = useState<string>(
+    userPreferences.moodCheckIn ?? ""
+  );
+  const [anxiousFood, setAnxiousFood] = useState<string>(
+    userPreferences.anxiousFood ?? ""
+  );
+
+  const [showReminderMenu, setShowReminderMenu] = useState(false);
+  const [showFoodAnxietyMenu, setShowFoodAnxietyMenu] = useState(false);
+  const [showMentalResourcesMenu, setShowMentalResourcesMenu] = useState(false);
+  const [showTriggerMenu, setShowTriggerMenu] = useState(false);
+
   // For mental disorder, if multiple selections are not allowed, use a single string.
   const [mentalDisorder, setMentalDisorder] = useState<string[]>(
     userPreferences.mentalHealthConditions
@@ -54,12 +66,21 @@ export default function Settings() {
   const [customMedicalConditions, setCustomMedicalConditions] = useState(
     userPreferences.customMedicalConditions
   );
+  const [caloriePreference, setCaloriePreference] = useState(
+    userPreferences.caloriePreference ?? ""
+  );
+  const [macroPreference, setMacroPreference] = useState(
+    userPreferences.macroPreference ?? ""
+  );
+
   // Dietary preferences as an array; if you want to edit them via a comma-separated string, you could also store them as string.
   const [dietPreferences, setDietPreferences] = useState<string[]>(
-    userPreferences.dietaryPreferences
+    userPreferences.dietaryPreferences ?? []
   );
+  const [showMealLoggingMenu, setShowMealLoggingMenu] = useState(false);
+
   const [customDiet, setCustomDiet] = useState(
-    userPreferences.customDietaryPreferences.join(", ")
+    (userPreferences.customDietaryPreferences ?? []).join(", ")
   );
   const [mealLoggingComfort, setMealLoggingComfort] = useState(
     userPreferences.mealLogging
@@ -67,22 +88,18 @@ export default function Settings() {
   const [physicalHealth, setPhysicalHealth] = useState(
     userPreferences.physicalHealth
   );
-  // For booleans stored as strings in an input, we convert on save.
-  const [calorieViewing, setCalorieViewing] = useState(
-    userPreferences.calorieViewing.toString()
-  );
+
   const [remindersFrequency, setRemindersFrequency] = useState(
     userPreferences.remindersFrequency
   );
   const [hideMealTracking, setHideMealTracking] = useState(
     userPreferences.hideMealTracking
   );
-  const [anxiousFood, setAnxiousFood] = useState(userPreferences.foodAnxiety);
-  const [primaryGoals, setPrimaryGoals] = useState<string[]>(
-    userPreferences.primaryGoals
+  const [foodAnxietyLevel, setFoodAnxietyLevel] = useState(
+    userPreferences.foodAnxietyLevel ?? ""
   );
-  const [moodCheckIn, setMoodCheckIn] = useState(
-    userPreferences.moodCheckIn.toString()
+  const [primaryGoals, setPrimaryGoals] = useState<string[]>(
+    userPreferences.primaryGoals ?? []
   );
   const [mentalHealthResouces, setMentalHealthResouces] = useState(
     userPreferences.mentalHealthSupport
@@ -91,16 +108,13 @@ export default function Settings() {
     userPreferences.triggerWarnings
   );
   const [approach, setApproach] = useState(userPreferences.approach);
-  const [customGoal, setCustomGoal] = useState(
-    userPreferences.customGoals.join(", ")
-  );
   const [showAgeMenu, setShowAgeMenu] = useState(false);
   const [showActivityMenu, setshowActivityMenu] = useState(false);
   const [showDietMenu, setShowDietMenu] = useState(false);
-
-  // Optional additional fields:
-  // (If you have fields like dataConsent or showResourceConsent in context, include them as needed.)
-
+  const [showCalorieMenu, setShowCalorieMenu] = useState(false);
+  const [showPhysicalMenu, setShowPhysicalMenu] = useState(false);
+  const [showMoodCheckInMenu, setShowMoodCheckInMenu] = useState(false);
+  const [showMacroMenu, setShowMacroMenu] = useState(false);
   useEffect(() => {
     // Update local state when context changes
     setName(userPreferences.name);
@@ -108,75 +122,92 @@ export default function Settings() {
     setActivityLevel(userPreferences.activityLevel);
     setMentalDisorder(userPreferences.mentalHealthConditions);
     setCustomDisorder(userPreferences.customMentalHealthConditions);
+    setCaloriePreference(userPreferences.caloriePreference ?? "");
+    setMacroPreference(userPreferences.macroPreference ?? "");
     setCustomMedicalConditions(userPreferences.customMedicalConditions);
-    setDietPreferences(userPreferences.dietaryPreferences);
-    setCustomDiet(userPreferences.customDietaryPreferences.join(", "));
+    setFoodAnxietyLevel(userPreferences.foodAnxietyLevel ?? true);
+    setDietPreferences(userPreferences.dietaryPreferences ?? []);
+    setCustomDiet((userPreferences.customDietaryPreferences ?? []).join(", "));
     setMealLoggingComfort(userPreferences.mealLogging);
     setPhysicalHealth(userPreferences.physicalHealth);
-    setCalorieViewing(userPreferences.calorieViewing.toString());
+
     setRemindersFrequency(userPreferences.remindersFrequency);
     setHideMealTracking(userPreferences.hideMealTracking);
-    setAnxiousFood(userPreferences.foodAnxiety);
     setPrimaryGoals(userPreferences.primaryGoals);
-    setMoodCheckIn(userPreferences.moodCheckIn.toString());
+    setMoodCheckIn(
+      userPreferences.moodcCheckInBool === true
+        ? "Yes, definitely."
+        : userPreferences.moodcCheckInBool === false
+        ? "No, I’d rather keep it simple."
+        : ""
+    );
+
     setMentalHealthResouces(userPreferences.mentalHealthSupport);
     setHideTriggers(userPreferences.triggerWarnings);
     setApproach(userPreferences.approach);
-    setCustomGoal(userPreferences.customGoals.join(", "));
   }, [userPreferences]);
 
   const handleSave = async () => {
     const updated = {
       name,
       ageGroup,
-      activityLevel,
-      medicalConditions: medicalConditions
+      activityLevel: activityLevel ?? "",
+      medicalConditions: (medicalConditions ?? "")
         .split(",")
         .map((item) => item.trim())
         .filter((item) => item !== ""),
-      mentalHealthConditions: mentalDisorder,
-      customMentalHealthConditions: customDisorder,
-      customMedicalConditions: customMedicalConditions,
-      dietaryPreferences: dietPreferences,
+      mentalHealthConditions: Array.isArray(mentalDisorder)
+        ? mentalDisorder
+        : [],
+      customMentalHealthConditions: customDisorder ?? "",
+      customMedicalConditions: customMedicalConditions ?? "",
+      dietaryPreferences: Array.isArray(dietPreferences) ? dietPreferences : [],
       customDietaryPreferences: customDiet
         .split(",")
         .map((item) => item.trim())
         .filter((item) => item !== ""),
-      mealLogging: mealLoggingComfort,
-      physicalHealth,
-      calorieViewing: calorieViewing.toLowerCase() === "true",
-      macroViewing: userPreferences.macroViewing,
-      foodAnxiety: anxiousFood,
-      primaryGoals: primaryGoals,
-      moodCheckIn: moodCheckIn.toLowerCase() === "true",
-      mentalHealthSupport: mentalHealthResouces,
-      triggerWarnings: hideTriggers,
-      approach,
-      customGoals: customGoal
-        .split(",")
-        .map((item) => item.trim())
-        .filter((item) => item !== ""),
-      mentalHealthOptIn: userPreferences.mentalHealthOptIn,
-      remindersFrequency,
-      hideMealTracking,
+      mealLogging: mealLoggingComfort ?? "",
+      physicalHealth: physicalHealth ?? "",
+      calorieViewing: caloriePreference === "Yes, I’d like to see calories.",
+      macroViewing: macroPreference === "Yes, I’d like to see macros.",
+      caloriePreference: caloriePreference ?? "",
+      macroPreference: macroPreference ?? "",
+
+      foodAnxiety: [
+        "Yes, I often feel anxious",
+        "Sometimes, but it's manageable",
+      ].includes(anxiousFood),
+      foodAnxietyLevel: anxiousFood ?? "",
+      primaryGoals: Array.isArray(primaryGoals) ? primaryGoals : [],
+      moodCheckIn: moodCheckIn ?? "",
+      mentalHealthSupport: mentalHealthResouces ?? "",
+      triggerWarnings: hideTriggers ?? "",
+      approach: approach ?? "",
     };
 
     try {
       updatePreferences(updated);
-  
+
       const currentUser = auth.currentUser;
       if (currentUser) {
-        const userDocRef = doc(db, "users", currentUser.uid);
+        const userDocRef = doc(
+          db,
+          "users",
+          currentUser.uid,
+          "preferences",
+          "main"
+        );
         await setDoc(userDocRef, updated, { merge: true });
+
         console.log("✅ Firestore updated for UID:", currentUser.uid);
-  
+
         await storePreferencesLocally(currentUser.uid, {
           ...userPreferences,
           ...updated,
         });
         console.log("✅ Preferences saved locally for UID:", currentUser.uid);
       }
-  
+
       console.log("🎉 User Preferences Submitted & Stored!");
       router.replace("/dashboard");
     } catch (error) {
@@ -308,7 +339,7 @@ export default function Settings() {
               that apply)
             </Text>
             <MentalHealthCheckboxModal
-              mentalDisorder={mentalDisorder}
+              mentalDisorder={userPreferences.mentalHealthConditions ?? []}
               setMentalDisorder={setMentalDisorder}
               customDisorder={customDisorder}
               setCustomDisorder={setCustomDisorder}
@@ -329,7 +360,7 @@ export default function Settings() {
                   <Text
                     style={{ color: dietPreferences.length ? "#000" : "#888" }}
                   >
-                    {dietPreferences.length > 0
+                    {(dietPreferences?.length ?? 0) > 0
                       ? dietPreferences.join(", ")
                       : "Select your dietary preferences"}
                   </Text>
@@ -387,105 +418,315 @@ export default function Settings() {
               />
             )}
           </View>
-          <Text style={styles.label}>Meal Logging Comfort</Text>
-          <TextInput
-            style={styles.input}
-            value={mealLoggingComfort}
-            onChangeText={setMealLoggingComfort}
-            placeholder="Enter your comfort level with meal logging"
-          />
+          <Text style={styles.label}>
+            Are you comfortable logging your meals?
+          </Text>
+          <Menu
+            visible={showMealLoggingMenu}
+            onDismiss={() => setShowMealLoggingMenu(false)}
+            anchor={
+              <TouchableOpacity
+                onPress={() => setShowMealLoggingMenu(true)}
+                style={styles.dropdown}
+              >
+                <Text style={{ color: mealLoggingComfort ? "#000" : "#888" }}>
+                  {mealLoggingComfort || "Select your comfort level"}
+                </Text>
+              </TouchableOpacity>
+            }
+          >
+            {[
+              "Yes, I’m okay with logging (including approximate calories or macros).",
+              "I’d prefer to log only general descriptions of meals.",
+              "I’m not comfortable logging meals.",
+              "I’m not sure, but I’d like to learn more.",
+            ].map((option) => (
+              <Menu.Item
+                key={option}
+                onPress={() => {
+                  setMealLoggingComfort(option);
+                  setShowMealLoggingMenu(false);
+                }}
+                title={option}
+              />
+            ))}
+          </Menu>
 
-          <Text style={styles.label}>Physical Health</Text>
-          <TextInput
-            style={styles.input}
-            value={physicalHealth}
-            onChangeText={setPhysicalHealth}
-            placeholder="Describe your physical health"
-          />
+          <Text style={styles.label}>
+            How would you rate your current physical health?
+          </Text>
+          <Menu
+            visible={showPhysicalMenu}
+            onDismiss={() => setShowPhysicalMenu(false)}
+            anchor={
+              <TouchableOpacity
+                onPress={() => setShowPhysicalMenu(true)}
+                style={styles.dropdown}
+              >
+                <Text style={{ color: physicalHealth ? "#000" : "#888" }}>
+                  {physicalHealth || "Select your physical health"}
+                </Text>
+              </TouchableOpacity>
+            }
+          >
+            {[
+              "Very poor",
+              "Poor",
+              "Average",
+              "Good",
+              "Excellent",
+              "Prefer not to say",
+            ].map((option) => (
+              <Menu.Item
+                key={option}
+                onPress={() => {
+                  setPhysicalHealth(option);
+                  setShowPhysicalMenu(false);
+                }}
+                title={option}
+              />
+            ))}
+          </Menu>
 
-          <Text style={styles.label}>Calorie Viewing (true/false)</Text>
-          <TextInput
-            style={styles.input}
-            value={calorieViewing}
-            onChangeText={setCalorieViewing}
-            placeholder="true or false"
-          />
+          <Text style={styles.label}>Would you like to see calorie info?</Text>
+          <Menu
+            visible={showCalorieMenu}
+            onDismiss={() => setShowCalorieMenu(false)}
+            anchor={
+              <TouchableOpacity
+                onPress={() => setShowCalorieMenu(true)}
+                style={styles.dropdown}
+              >
+                <Text style={{ color: caloriePreference ? "#000" : "#888" }}>
+                  {caloriePreference || "Select your preference"}
+                </Text>
+              </TouchableOpacity>
+            }
+          >
+            {[
+              "Yes, I’d like to see calories.",
+              "No, I’d prefer not to see calories.",
+            ].map((option) => (
+              <Menu.Item
+                key={option}
+                title={option}
+                onPress={() => {
+                  setCaloriePreference(option);
+                  setShowCalorieMenu(false);
+                }}
+              />
+            ))}
+          </Menu>
+
+          <Text style={styles.label}>Would you like to see macro info?</Text>
+          <Menu
+            visible={showMacroMenu}
+            onDismiss={() => setShowMacroMenu(false)}
+            anchor={
+              <TouchableOpacity
+                onPress={() => setShowMacroMenu(true)}
+                style={styles.dropdown}
+              >
+                <Text style={{ color: macroPreference ? "#000" : "#888" }}>
+                  {macroPreference || "Select your preference"}
+                </Text>
+              </TouchableOpacity>
+            }
+          >
+            {[
+              "Yes, I’d like to see macros.",
+              "No, I’d prefer not to see macros.",
+            ].map((option) => (
+              <Menu.Item
+                key={option}
+                title={option}
+                onPress={() => {
+                  setMacroPreference(option);
+                  setShowMacroMenu(false);
+                }}
+              />
+            ))}
+          </Menu>
 
           <Text style={styles.label}>Reminders Frequency</Text>
-          <TextInput
-            style={styles.input}
-            value={remindersFrequency}
-            onChangeText={setRemindersFrequency}
-            placeholder="Enter reminders frequency (e.g., Standard)"
-          />
-
-          <Text style={styles.label}>Hide Meal Tracking (true/false)</Text>
-          <TextInput
-            style={styles.input}
-            value={hideMealTracking ? "true" : "false"}
-            onChangeText={(text) =>
-              setHideMealTracking(text.toLowerCase() === "true")
+          <Menu
+            visible={showReminderMenu}
+            onDismiss={() => setShowReminderMenu(false)}
+            anchor={
+              <TouchableOpacity
+                onPress={() => setShowReminderMenu(true)}
+                style={styles.dropdown}
+              >
+                <Text style={{ color: remindersFrequency ? "#000" : "#888" }}>
+                  {remindersFrequency || "Select your reminder frequency"}
+                </Text>
+              </TouchableOpacity>
             }
-            placeholder="true or false"
-          />
-
-          <Text style={styles.label}>Food Anxiety</Text>
-          <TextInput
-            style={styles.input}
-            value={anxiousFood}
-            onChangeText={setAnxiousFood}
-            placeholder="Describe your food anxiety"
-          />
+          >
+            {[
+              "None (I’ll check in manually)",
+              "Minimal (once per day)",
+              "Standard (2–3 times per day)",
+              "Frequent (several times per day)",
+              "Not sure, will adjust later",
+            ].map((option) => (
+              <Menu.Item
+                key={option}
+                title={option}
+                onPress={() => {
+                  setRemindersFrequency(option);
+                  setShowReminderMenu(false);
+                }}
+              />
+            ))}
+          </Menu>
+          <Text style={styles.label}>
+            Do you experience anxiety around food?
+          </Text>
+          <Menu
+            visible={showFoodAnxietyMenu}
+            onDismiss={() => setShowFoodAnxietyMenu(false)}
+            anchor={
+              <TouchableOpacity
+                onPress={() => setShowFoodAnxietyMenu(true)}
+                style={styles.dropdown}
+              >
+                <Text style={{ color: anxiousFood ? "#000" : "#888" }}>
+                  {foodAnxietyLevel || "Select your response"}
+                </Text>
+              </TouchableOpacity>
+            }
+          >
+            {[
+              "Yes, I often feel anxious",
+              "Sometimes, but it's manageable",
+              "Rarely, but it's there",
+              "No, I don't feel anxious",
+              "Prefer not to say",
+            ].map((option) => (
+              <Menu.Item
+                key={option}
+                title={option}
+                onPress={() => {
+                  setAnxiousFood(option);
+                  setShowFoodAnxietyMenu(false);
+                }}
+              />
+            ))}
+          </Menu>
 
           <Text style={styles.label}>Primary Goals</Text>
           <TextInput
             style={styles.input}
-            value={primaryGoals.join(", ")}
+            value={(primaryGoals ?? []).join(", ")}
             onChangeText={(text) =>
               setPrimaryGoals(text.split(",").map((item) => item.trim()))
             }
             placeholder="Enter primary goals separated by commas"
           />
 
-          <Text style={styles.label}>Mood Check-In (true/false)</Text>
-          <TextInput
-            style={styles.input}
-            value={moodCheckIn}
-            onChangeText={setMoodCheckIn}
-            placeholder="true or false"
-          />
+          <Text style={styles.label}>
+            Are you interested in a regular mood check-in to adapt recipes and
+            fitness suggestions?
+          </Text>
+          <Menu
+            visible={showMoodCheckInMenu}
+            onDismiss={() => setShowMoodCheckInMenu(false)}
+            anchor={
+              <TouchableOpacity
+                onPress={() => setShowMoodCheckInMenu(true)}
+                style={styles.dropdown}
+              >
+                <Text style={{ color: moodCheckIn ? "#000" : "#888" }}>
+                  {moodCheckIn || "Select your preference"}
+                </Text>
+              </TouchableOpacity>
+            }
+          >
+            {[
+              "Yes, definitely.",
+              "Maybe, but not sure.",
+              "No, I’d rather keep it simple.",
+            ].map((option) => (
+              <Menu.Item
+                key={option}
+                title={option}
+                onPress={() => {
+                  setMoodCheckIn(option);
+                  setShowMoodCheckInMenu(false);
+                }}
+              />
+            ))}
+          </Menu>
 
-          <Text style={styles.label}>Mental Health Support</Text>
-          <TextInput
-            style={styles.input}
-            value={mentalHealthResouces}
-            onChangeText={setMentalHealthResouces}
-            placeholder="Enter details on mental health support"
-          />
+          <Text style={styles.label}>
+            Do you want access to mental health resources (hotlines, articles,
+            etc.) in the app?
+          </Text>
+          <Menu
+            visible={showMentalResourcesMenu}
+            onDismiss={() => setShowMentalResourcesMenu(false)}
+            anchor={
+              <TouchableOpacity
+                onPress={() => setShowMentalResourcesMenu(true)}
+                style={styles.dropdown}
+              >
+                <Text style={{ color: mentalHealthResouces ? "#000" : "#888" }}>
+                  {mentalHealthResouces || "Select your preference"}
+                </Text>
+              </TouchableOpacity>
+            }
+          >
+            {[
+              "Yes, please show me available resources.",
+              "Not right now.",
+              "Not sure, remind me later.",
+            ].map((option) => (
+              <Menu.Item
+                key={option}
+                title={option}
+                onPress={() => {
+                  setMentalHealthResouces(option);
+                  setShowMentalResourcesMenu(false);
+                }}
+              />
+            ))}
+          </Menu>
 
-          <Text style={styles.label}>Trigger Warnings</Text>
-          <TextInput
-            style={styles.input}
-            value={hideTriggers}
-            onChangeText={setHideTriggers}
-            placeholder="Enter any trigger warnings"
-          />
-
-          <Text style={styles.label}>Approach</Text>
-          <TextInput
-            style={styles.input}
-            value={approach}
-            onChangeText={setApproach}
-            placeholder="Describe your approach"
-          />
-
-          <Text style={styles.label}>Custom Goals</Text>
-          <TextInput
-            style={styles.input}
-            value={customGoal}
-            onChangeText={setCustomGoal}
-            placeholder="Enter custom goals separated by commas"
-          />
+          <Text style={styles.label}>
+            Would you like us to adjust the app to minimize triggers (e.g.,
+            hiding calorie counts, providing gentle prompts instead of strict
+            daily targets)?
+          </Text>
+          <Menu
+            visible={showTriggerMenu}
+            onDismiss={() => setShowTriggerMenu(false)}
+            anchor={
+              <TouchableOpacity
+                onPress={() => setShowTriggerMenu(true)}
+                style={styles.dropdown}
+              >
+                <Text style={{ color: hideTriggers ? "#000" : "#888" }}>
+                  {hideTriggers || "Select your preference"}
+                </Text>
+              </TouchableOpacity>
+            }
+          >
+            {[
+              "Yes, please hide numeric data when possible.",
+              "I’m okay with seeing all data.",
+              "I’m not sure, let me decide later in Settings.",
+            ].map((option) => (
+              <Menu.Item
+                key={option}
+                title={option}
+                onPress={() => {
+                  setHideTriggers(option);
+                  setShowTriggerMenu(false);
+                }}
+              />
+            ))}
+          </Menu>
 
           <BasicButton onPress={handleSave}>
             <Text style={{ color: "black" }}>Save Changes</Text>

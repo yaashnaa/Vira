@@ -86,10 +86,17 @@ export default function MentalHealthCheckboxModal({
         style={styles.dropdown}
         onPress={() => setShowModal(true)}
       >
-        <Text style={{ color: mentalDisorder.length ? "#000" : "#888" }}>
-          {mentalDisorder.length > 0
+        <Text
+          style={{
+            color:
+              Array.isArray(mentalDisorder) && mentalDisorder.length > 0
+                ? "#000"
+                : "#888",
+          }}
+        >
+          {Array.isArray(mentalDisorder) && mentalDisorder.length > 0
             ? mentalDisorder.join(", ")
-            : "Select conditions (optional)"}
+            : "Select your mental health conditions"}
         </Text>
       </TouchableOpacity>
 
@@ -97,7 +104,9 @@ export default function MentalHealthCheckboxModal({
       <Modal visible={showModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select mental health conditions</Text>
+            <Text style={styles.modalTitle}>
+              Select mental health conditions
+            </Text>
             <ScrollView>
               {mentalHealthOptions.map((option) => (
                 <TouchableOpacity
@@ -117,7 +126,12 @@ export default function MentalHealthCheckboxModal({
               {/* Animated input for "Other" */}
               {mentalDisorder.includes("Other") && (
                 <Animated.View style={{ opacity: fadeAnim }}>
-                  <Text style={[styles.label, { fontWeight: "normal", fontSize: 14 }]}>
+                  <Text
+                    style={[
+                      styles.label,
+                      { fontWeight: "normal", fontSize: 14 },
+                    ]}
+                  >
                     Describe it in your own words:
                   </Text>
                   <TextInput

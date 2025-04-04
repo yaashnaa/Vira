@@ -53,7 +53,7 @@ export default function Dashboard() {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (!user) {
         console.log("No user logged in – redirecting...");
-        router.replace("/(auth)/login"); 
+        router.replace("/(auth)/login");
       }
     });
 
@@ -115,7 +115,7 @@ export default function Dashboard() {
   const mood = () => {
     router.push("/mood");
   };
-  if (loading || !auth.currentUser || !userPreferences?.name) {
+  if (loading || !auth.currentUser || !userPreferences?.name|| !userPreferences.hasOwnProperty("moodCheckIn")) {
     return (
       <View>
         <ActivityIndicator size="large" color={lightTheme.primary} />
@@ -143,10 +143,12 @@ export default function Dashboard() {
             <View style={{ alignItems: "center" }}>
               <DeleteButton />
               <LogoutButton />
-              <LogMoodButton
-                onPress={handleLogMood}
-                isLogged={hasLoggedToday}
-              />
+              {userPreferences.moodCheckIn && (
+                <LogMoodButton
+                  onPress={handleLogMood}
+                  isLogged={hasLoggedToday}
+                />
+              )}
             </View>
             <Button onPress={handleLogMeal} title="Log Meal" />
             <Button onPress={handleSettings} title="Settings" />

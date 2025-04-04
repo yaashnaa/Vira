@@ -18,6 +18,7 @@ import { auth } from "../../config/firebaseConfig"; // ← Required for currentU
 import { markQuizComplete } from "@/utils/asyncStorage";
 export default function BasicQuiz() {
   const { updatePreferences, userPreferences } = useUserPreferences();
+  const [step, setStep] = useState(0);
   const router = useRouter();
   const [error, setError] = useState("");
   const [goalError, setGoalError] = useState("");
@@ -28,20 +29,21 @@ export default function BasicQuiz() {
   const [name, setName] = useState(userPreferences.name);
   const [ageGroup, setAgeGroup] = useState(userPreferences.ageGroup);
   const [activityLevel, setactivityLevel] = useState(
-    userPreferences.physicalHealth
+    userPreferences.activityLevel
   );
   const [medicalConditions, setMedicalConditions] = useState("");
 
-  const [mentalDisorder, setMentalDisorder] = useState(
-    userPreferences.mentalHealthConditions
+  const [mentalDisorder, setMentalDisorder] = useState<string[]>(
+    userPreferences.mentalHealthConditions || []
   );
+  
   const [customDisorder, setCustomDisorder] = useState(
-    userPreferences.customMentalHealthConditions
+    userPreferences.customMentalHealthConditions || ""
   );
-  const [step, setStep] = useState(0);
   const [customMedicalConditions, setCustomMedicalConditions] = useState(
-    userPreferences.customMedicalConditions
+    userPreferences.customMedicalConditions || ""
   );
+  
   const handleSubmit = () => {
     if (!name.trim()) {
       setError("This field is required.");
@@ -69,6 +71,7 @@ export default function BasicQuiz() {
   ) {
     finalMentalHealthConditions.push(mentalDisorder.join(", "));
   }
+  
   // If user typed a customDisorder:
   if (mentalDisorder.includes("Other") && customDisorder.trim()) {
     finalMentalHealthConditions.push(customDisorder.trim());
@@ -106,7 +109,7 @@ export default function BasicQuiz() {
     const newPrefs = {
       name,
       ageGroup,
-      activityLevel,
+      activityLevel:activityLevel ?? "",
       medicalConditions: finalMedicalConditions,
       mentalHealthConditions: finalMentalHealthConditions,
       customMentalHealthConditions: customDisorder,

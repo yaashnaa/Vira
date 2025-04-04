@@ -7,9 +7,7 @@ import React, {
 } from "react";
 import { auth } from "../config/firebaseConfig";
 import {
-  initializeAuth,
-  getReactNativePersistence,
-  onAuthStateChanged, // ✅ Add this line
+  onAuthStateChanged, 
   getAuth,
 } from "firebase/auth";
 import { migrateNameToPreferences } from "@/utils/migrateNameToPreferences";
@@ -34,17 +32,51 @@ export interface UserPreferences {
   medicalConditions: string[];
   calorieViewing: boolean;
   macroViewing: boolean;
-  foodAnxiety: string;
+  caloriePreference: string;
+  macroPreference: string;
+  foodAnxiety: boolean;
+  anxiousFood: string;
+  foodAnxietyLevel: string;
   primaryGoals: string[];
-  moodCheckIn: boolean;
+  moodCheckIn: string;
   mentalHealthSupport: string;
   triggerWarnings: string;
   approach: string;
-  customGoals: string[];
+  moodcCheckInBool: boolean;
   customMedicalConditions: string;
   customMentalHealthConditions: string;
   customDietaryPreferences: string[];
 }
+export const DEFAULT_PREFS: UserPreferences = {
+  name: "",
+  ageGroup: "",
+  activityLevel: "",
+  dietaryPreferences: [],
+  mealLogging: "",
+  physicalHealth: "",
+  mentalHealthOptIn: true,
+  remindersFrequency: "Standard",
+  hideMealTracking: false,
+  mentalHealthConditions: [],
+  medicalConditions: [],
+  calorieViewing: true,
+  macroViewing: true,
+  foodAnxietyLevel: "",
+  foodAnxiety: false,
+  anxiousFood: "",
+  primaryGoals: [],
+  moodCheckIn: "",
+  caloriePreference:"",
+  macroPreference: "",
+  moodcCheckInBool: true,
+  mentalHealthSupport: "",
+  triggerWarnings: "",
+  approach: "",
+  customMedicalConditions: "",
+  customMentalHealthConditions: "",
+  customDietaryPreferences: [],
+};
+
 
 interface UserPreferencesContextProps {
   userPreferences: UserPreferences;
@@ -85,31 +117,8 @@ export const UserPreferencesProvider = ({
   const [hasLoaded, setHasLoaded] = useState(false); 
   const [loading, setLoading] = useState(true); 
 
-  const [userPreferences, setUserPreferences] = useState<UserPreferences>({
-    name: "",
-    ageGroup: "",
-    activityLevel: "",
-    dietaryPreferences: [],
-    mealLogging: "",
-    physicalHealth: "",
-    mentalHealthOptIn: false,
-    remindersFrequency: "Standard",
-    hideMealTracking: false,
-    mentalHealthConditions: [],
-    medicalConditions: [],
-    calorieViewing: false,
-    macroViewing: false,
-    foodAnxiety: "",
-    primaryGoals: [],
-    moodCheckIn: false,
-    mentalHealthSupport: "",
-    triggerWarnings: "",
-    approach: "",
-    customGoals: [],
-    customMedicalConditions: "",
-    customMentalHealthConditions: "",
-    customDietaryPreferences: [],
-  });
+  const [userPreferences, setUserPreferences] = useState<UserPreferences>(DEFAULT_PREFS);
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -118,9 +127,11 @@ export const UserPreferencesProvider = ({
         await migrateNameToPreferences(user.uid);
         const prefs = await loadUserPreferences(user.uid);
         if (prefs) {
-          setUserPreferences(prefs);
+          setUserPreferences({ ...DEFAULT_PREFS, ...prefs });
+          setHasLoaded(true); 
           console.log("Loaded user preferences from Firestore:", prefs);
         } else {
+          setHasLoaded(true)
           console.log("No saved preferences found. Using defaults.");
         }
       }
@@ -130,22 +141,20 @@ export const UserPreferencesProvider = ({
     return unsubscribe;
   }, []);
   
-
-  useEffect(() => {
-    if (userId && hasLoaded) {
-      console.log("Saving preferences for", userId);
-      saveUserPreferences(userId, userPreferences);
-    }
-  }, [userId, hasLoaded, userPreferences]);
+  
   const updatePreferences = (newPreferences: Partial<UserPreferences>) => {
     setUserPreferences((prev) => {
       const updated = { ...prev, ...newPreferences };
+  
       if (userId) {
         storePreferencesLocally(userId, updated); // ✅ save locally
+        saveUserPreferences(userId, updated);     // ✅ only save the merged version
       }
+  
       return updated;
     });
   };
+  
   
 
   return (

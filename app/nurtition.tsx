@@ -14,8 +14,10 @@ import {
   Snackbar,
   Appbar,
 } from "react-native-paper";
+import DailyOverviewNutrition from "@/components/dailyOverviewNutrition";
 import { useUserPreferences } from "@/context/userPreferences";
 import { useRouter } from "expo-router";
+import LogMeal from "@/components/logMeal";
 
 export default function NutritionScreen() {
   const { userPreferences } = useUserPreferences();
@@ -23,6 +25,15 @@ export default function NutritionScreen() {
   const [snackVisible, setSnackVisible] = useState(false);
   const theme = useTheme();
   const router = useRouter();
+  const [mealLogData, setMealLogData] = useState({
+    mealsLogged: 0,
+    totalMeals: 3,
+    calories: 0,
+    protein: 0,
+    carbs: 0,
+    fat: 0,
+    mood: "",
+  });
 
   const handleLogMeal = () => {
     if (meal.trim()) {
@@ -46,25 +57,26 @@ export default function NutritionScreen() {
   };
   const handleBackPress = () => {
     router.replace("/dashboard");
-  }
+  };
 
   return (
     <>
-      <Appbar.Header elevated={true} >
+      <Appbar.Header elevated={true}>
         <Appbar.BackAction onPress={handleBackPress} />
         <Appbar.Content title="Nutrition" />
-      
       </Appbar.Header>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.greeting}>
           Hello, {userPreferences?.name || "friend"} 🥗
         </Text>
 
-        <Text style={styles.sectionTitle}>Log Your Meal</Text>
         {userPreferences?.hideMealTracking ? (
-          <Text style={styles.disabledText}>
-            You’ve opted out of meal logging. You can change this in Settings.
-          </Text>
+          <View>
+            <Text style={styles.sectionTitle}>Log Your Meal</Text>
+            <Text style={styles.disabledText}>
+              You’ve opted out of meal logging. You can change this in Settings.
+            </Text>
+          </View>
         ) : (
           <Card style={styles.card}>
             <Card.Content>
@@ -87,6 +99,29 @@ export default function NutritionScreen() {
             </Card.Content>
           </Card>
         )}
+        <LogMeal
+          onLogged={() => {
+            setMealLogData((prev) => ({
+              ...prev,
+              mealsLogged: prev.mealsLogged + 1,
+              calories: prev.calories + 100, // Replace with actual logic to update calories
+              protein: prev.protein + 10,   // Replace with actual logic to update protein
+              carbs: prev.carbs + 20,      // Replace with actual logic to update carbs
+              fat: prev.fat + 5,           // Replace with actual logic to update fat
+              mood: "Happy",               // Replace with actual logic to update mood
+            }));
+          }}
+        />
+
+        <DailyOverviewNutrition
+          mealsLogged={mealLogData.mealsLogged}
+          totalMeals={mealLogData.totalMeals}
+          calories={mealLogData.calories}
+          protein={mealLogData.protein}
+          carbs={mealLogData.carbs}
+          fat={mealLogData.fat}
+          mood={mealLogData.mood}
+        />
 
         {userPreferences?.calorieViewing && (
           <>
@@ -118,7 +153,7 @@ export default function NutritionScreen() {
           </Card>
         ))}
 
-        {userPreferences?.foodAnxiety?.includes("anxious") && (
+        {userPreferences?.foodAnxietyLevel?.includes("anxious") && (
           <>
             <Divider style={{ marginVertical: 20 }} />
             <Text style={styles.sectionTitle}>Gentle Support</Text>
@@ -156,7 +191,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8F9FA",
   },
   greeting: {
-    fontSize: 24,
+    fontSize: 28,
     fontFamily: "PatrickHand-Regular",
     marginBottom: 10,
   },
