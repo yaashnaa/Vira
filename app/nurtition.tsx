@@ -15,13 +15,12 @@ import {
   Appbar,
   SegmentedButtons,
 } from "react-native-paper";
-import { TouchableOpacity } from "react-native-gesture-handler";
 import { Header as HeaderRNE, HeaderProps, Icon } from "@rneui/themed";
 import EvilIcons from "@expo/vector-icons/EvilIcons";
 import Feather from "@expo/vector-icons/Feather";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import AntDesign from "@expo/vector-icons/AntDesign";
-
+import { TouchableOpacity } from "react-native-gesture-handler";
 import DailyOverviewNutrition from "@/components/Nutrition/dailyOverviewNutrition";
 import { useUserPreferences } from "@/context/userPreferences";
 import { useRouter } from "expo-router";
@@ -67,7 +66,7 @@ export default function NutritionScreen() {
     <>
       <HeaderRNE
         containerStyle={{
-          backgroundColor: "#D7C4EB", // soft lilac or any color you want
+          backgroundColor: "#f8edeb", // soft lilac or any color you want
           borderBottomWidth: 0,
           paddingTop: 10,
         }}
@@ -96,6 +95,14 @@ export default function NutritionScreen() {
           </View>
         }
       />
+      {/* <Appbar.Header
+        elevated={true}
+        dark={true}
+        theme={{ colors: { primary: "#f5f5f5" } }}
+      >
+        <Appbar.BackAction onPress={handleBackPress} />
+        <Appbar.Content title="Nutrition" />
+      </Appbar.Header> */}
       <View style={styles.container}>
         <Text style={styles.greeting}>
           Hello, {userPreferences?.name || "friend"} 🥗

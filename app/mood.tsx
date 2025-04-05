@@ -6,6 +6,12 @@ import { useMoodContext } from "../context/moodContext";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
 import { Header as HeaderRNE, HeaderProps, Icon } from "@rneui/themed";
+import { LogBox } from "react-native";
+
+LogBox.ignoreLogs([
+  'Support for defaultProps will be removed from function components',
+]);
+
 // Array of mood images for discrete steps (0, 25, 50, 75, 100)
 const moodImages = [
   require("../assets/images/mood/vhappy.png"), // For mood = 0–24 (e.g., very happy)
@@ -61,7 +67,7 @@ export default function MoodSlider({ value, onChange }: MoodSliderProps) {
     <>
       <HeaderRNE
         containerStyle={{
-          backgroundColor: "#D7C4EB", // soft lilac or any color you want
+          backgroundColor: "#f8edeb", // soft lilac or any color you want
           borderBottomWidth: 0,
           paddingTop: 10,
         }}

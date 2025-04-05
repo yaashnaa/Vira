@@ -7,6 +7,7 @@ import {
   Dimensions,
   ScrollView,
 } from "react-native";
+import WidgetCardWithAction from "./widgetCardWithAction";
 import { IconButton } from "react-native-paper";
 import { useUserPreferences } from "@/context/userPreferences";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -17,39 +18,46 @@ const recommendedWidgets = [
   {
     id: "1",
     title: "Nutrition",
-    image: require("../assets/images/widgetImages/vegetable.jpg"),
+    image: require("../assets/images/widgets/diet.png"),
     link: "../app/nutrition.tsx",
   },
   {
     id: "2",
     title: "Mindfullness",
-    image: require("../assets/images/widgetImages/meditation.png"),
+    image: require("../assets/images/widgets/yoga.png"),
   },
   {
     id: "3",
     title: "Water Intake",
-    image: require("../assets/images/widgetImages/water.jpg"),
+    image: require("../assets/images/widgets/water.png"),
   },
   {
     id: "4",
     title: "Fitness",
-    image: require("../assets/images/widgetImages/stretch.jpg"),
+    image: require("../assets/images/widgets/triangle.png"),
   },
   {
     id: "5",
     title: "Journal",
-    image: require("../assets/images/widgetImages/journal.png"),
+    image: require("../assets/images/widgets/notebook.png"),
   },
   {
     id: "6",
     title: "Mood Tracker",
-    image: require("../assets/images/widgetImages/mood.jpg"),
+    image: require("../assets/images/widgets/mood.png"),
   },
 ];
 
 const { width } = Dimensions.get("window");
+interface RecommendedWidgetsBannerProps {
+  triggerRefresh?: number;
+  onAddWidget?: (id: string) => void;
+}
 
-export default function RecommendedWidgetsBanner() {
+export default function RecommendedWidgetsBanner({
+  triggerRefresh,
+  onAddWidget,
+}: RecommendedWidgetsBannerProps) {
   const { userPreferences } = useUserPreferences();
   const [enabledWidgets, setEnabledWidgets] = useState<string[]>([]);
 
@@ -61,11 +69,15 @@ export default function RecommendedWidgetsBanner() {
       }
     };
     fetchWidgets();
-  }, []);
+  }, [triggerRefresh]);
 
-  const handleAddWidget = async (widgetId: string) => {
-    const updatedWidgets = [...enabledWidgets, widgetId.toLowerCase()];
+  const handleAddWidget = async (widgetTitle: string) => {
+    const widgetId = widgetTitle.toLowerCase(); // normalize
+    if (enabledWidgets.includes(widgetId)) return;
+
+    const updatedWidgets = [...enabledWidgets, widgetId];
     setEnabledWidgets(updatedWidgets);
+
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedWidgets));
   };
 
@@ -96,11 +108,13 @@ export default function RecommendedWidgetsBanner() {
     .map((title) =>
       recommendedWidgets.find(
         (widget) =>
-          widget.title === title &&
+          widget.title.toLowerCase() === title.toLowerCase() &&
           !enabledWidgets.includes(widget.title.toLowerCase())
       )
     )
     .filter(Boolean);
+  console.log("📦 Recommended left:", prioritizedWidgets.length);
+  console.log("📦 Recommended widgets:", prioritizedWidgets);
 
   if (prioritizedWidgets.length === 0) return null;
 
@@ -115,20 +129,15 @@ export default function RecommendedWidgetsBanner() {
         {prioritizedWidgets.map(
           (widget) =>
             widget && (
-              <View key={widget.id} style={styles.widgetCard}>
-                <Image source={widget.image} style={styles.widgetImage} />
-                <View style={styles.cardFooter}>
-                  <Text style={styles.widgetTitle}>{widget.title}</Text>
-                  <IconButton
-                    icon="plus"
-                    mode="outlined"
-                    theme={{ colors: { primary: "#C3B1E1" } }}
-                    containerColor="rgba(195,177,225, 0.3)"
-                    size={30}
-                    onPress={() => handleAddWidget(widget.title)}
-                  />
-                </View>
-              </View>
+              <WidgetCardWithAction
+                key={widget.id}
+                title={widget.title}
+                imageSource={widget.image}
+                onPress={() => onAddWidget?.(widget.title)}
+                onAction={() => onAddWidget?.(widget.title)}
+                actionIcon="plus-circle"
+                actionColor="#856ab0"
+              />
             )
         )}
       </ScrollView>
@@ -140,9 +149,45 @@ const styles = StyleSheet.create({
   container: {
     marginVertical: 20,
   },
+  card: {
+    backgroundColor: "#f8f6f4",
+    borderRadius: 16,
+    padding: 1,
+    width: 145,
+    height: 155,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2,
+    margin: 10,
+  },
+  image: {
+    width: 64,
+    height: 67,
+    resizeMode: "contain",
+    marginBottom: 6,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "600",
+    fontFamily: "Main-font",
+    color: "#100f0d",
+    textAlign: "center",
+  },
+  subtitle: {
+    fontSize: 13,
+    color: "#1c110d",
+    fontFamily: "Comfortaa-Regular",
+    marginTop: 4,
+    textAlign: "center",
+  },
   heading: {
-    fontSize: 18,
+    fontSize: 26,
     fontWeight: "bold",
+    fontFamily: "PatrickHand-Regular",
     marginBottom: 10,
     marginLeft: 16,
   },

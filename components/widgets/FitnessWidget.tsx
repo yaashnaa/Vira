@@ -1,20 +1,45 @@
 import React from 'react';
-import { useRouter, Link } from "expo-router";
+import { useRouter } from "expo-router";
 import WidgetCard from "../widgetCard";
-const FitnessWidget: React.FC = () => {
- 
-    const router = useRouter();
-    const handlePress = () => {
-         router.replace("/fitness");
-    };
+import { Icon } from "@rneui/themed";
+import { Pressable, StyleSheet, View } from "react-native";
 
-    return (
-        <WidgetCard
+interface FitnessWidgetProps {
+  onRemove?: () => void;
+}
+
+const FitnessWidget: React.FC<FitnessWidgetProps> = ({ onRemove }) => {
+  const router = useRouter();
+  const handlePress = () => {
+    router.replace("/fitness");
+  };
+
+  return (
+    <View style={styles.container}>
+      {onRemove && (
+        <Pressable onPress={onRemove} style={styles.removeIcon}>
+          <Icon name="minus-circle" type="feather" color="#c13e6a" size={20} />
+        </Pressable>
+      )}
+      <WidgetCard
         title="Fitness"
-        image={require('../../assets/images/widgetImages/stretch.jpg')}
-        route="/fitness"
+        imageSource={require('../../assets/images/widgets/triangle.png')}
+        onPress={handlePress}
       />
-    );
+    </View>
+  );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    position: "relative",
+  },
+  removeIcon: {
+    position: "absolute",
+    top: 25,
+    right: 19,
+    zIndex: 1,
+  },
+});
 
 export default FitnessWidget;

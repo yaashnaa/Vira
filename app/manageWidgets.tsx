@@ -60,17 +60,17 @@ export default function ManageWidgetsScreen() {
     <>
  <HeaderRNE
         containerStyle={{
-          backgroundColor: "#D7C4EB", // soft lilac or any color you want
+          backgroundColor: "#f8edeb", // soft lilac or any color you want
           borderBottomWidth: 0,
           paddingTop: 10,
         }}
         leftComponent={
           <TouchableOpacity onPress={handleBackPress}>
-            <Icon name="arrow-back" size={25} type="ionicon" color="#5A3E9B" />
+            <Icon name="arrow-back" size={25} type="ionicon" color="#271949" />
           </TouchableOpacity>
         }
         centerComponent={{
-          text: "NUTRITION",
+          text: "MANAGE WIDGETS",
           style: {
             color: "#271949",
             fontSize: 20,
@@ -84,7 +84,7 @@ export default function ManageWidgetsScreen() {
               style={{ marginLeft: 12 }}
               onPress={handleBackPress}
             >
-              <Icon name="settings" size={25} type="feather" color="#5A3E9B" />
+              <Icon name="settings" size={25} type="feather" color="#271949" />
             </TouchableOpacity>
           </View>
         }

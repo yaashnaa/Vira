@@ -207,7 +207,6 @@ const styles = StyleSheet.create({
     // alignItems: "center",
     justifyContent: "center",
     margin: "auto",
-    marginTop: 20,
   },
   title: {
     fontSize: 20,

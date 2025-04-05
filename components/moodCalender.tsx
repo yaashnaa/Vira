@@ -1,34 +1,95 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList } from "react-native";
+import { View, Text, StyleSheet, Image } from "react-native";
 import { useMoodContext } from "../context/moodContext";
+import { Calendar } from "react-native-calendars";
+
+const moodImages = {
+  0: require("../assets/images/mood/vhappy.png"),
+  25: require("../assets/images/mood/happy.png"),
+  50: require("../assets/images/mood/neutral.png"),
+  75: require("../assets/images/mood/sad.png"),
+  100: require("../assets/images/mood/vsad.png"),
+};
 
 export default function MoodCalendar() {
-  const { fetchAllMoods, userId } = useMoodContext(); // ✅ pull in userId
-  const [moodEntries, setMoodEntries] = useState<{ date: string; mood: number }[]>([]);
+  const { fetchAllMoods, userId } = useMoodContext();
+  const [markedDates, setMarkedDates] = useState<{ [key: string]: any }>({});
 
   useEffect(() => {
     if (!userId) return;
     const load = async () => {
       const allMoods = await fetchAllMoods();
-      
-      allMoods.sort((a, b) => (a.date < b.date ? 1 : -1));
-      setMoodEntries(allMoods);
+      const marked: { [key: string]: any } = {};
+
+      allMoods.forEach((entry) => {
+        const discreteMood = Math.round(entry.mood / 25) * 25;
+        marked[entry.date] = {
+          customStyles: {
+            container: { backgroundColor: "transparent" },
+            text: { display: "none" },
+          },
+          mood: discreteMood,
+        };
+      });
+
+      setMarkedDates(marked);
     };
+
     load();
-  }, [userId]); // ✅ re-run when userId becomes available
+  }, [userId]);
 
   return (
-    <View style={{ flex: 1, padding: 20 }}>
-    <Text style={{ fontSize: 18, marginBottom: 10 }}>Mood Calendar</Text>
-    <FlatList
-      data={moodEntries}
-      keyExtractor={(item) => item.date}
-      renderItem={({ item }) => (
-        <View style={{ padding: 10, marginBottom: 5, backgroundColor: "#eee", borderRadius: 8 }}>
-          <Text>{item.date}: Mood {item.mood}</Text>
-        </View>
-      )}
-    />
-  </View>
+    <View style={styles.container}>
+      <Text style={styles.title}>Mood Calendar</Text>
+      <Calendar
+        markingType={"custom"}
+        markedDates={markedDates}
+        dayComponent={({ date, marking }: { date: { day: number }; marking?: { mood?: number } }) => {
+          const mood = marking?.mood;
+          return (
+            <View style={styles.dayContainer}>
+              <Text style={styles.dayText}>{date.day}</Text>
+              {mood !== undefined && (
+                <Image source={moodImages[mood as keyof typeof moodImages]} style={styles.moodIcon} />
+              )}
+            </View>
+          );
+        }}
+        style={styles.calendar}
+      />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 20,
+    borderRadius: 12,
+    backgroundColor: "#fff",
+    marginBottom: 30,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+    fontFamily: "Main-font",
+  },
+  calendar: {
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  dayContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dayText: {
+    fontSize: 14,
+    color: "#333",
+  },
+  moodIcon: {
+    width: 34,
+    height: 34,
+    marginTop: 4,
+    resizeMode: "contain",
+  },
+});

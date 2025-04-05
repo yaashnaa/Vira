@@ -60,13 +60,13 @@ export default function LogMoodButton({
 const styles = StyleSheet.create({
   recommendationBox: {
     width: width * 0.9,
-    backgroundColor: "#ffeaf1",
+    backgroundColor: "#F5F0FF",
     padding: 16,
     borderRadius: 16,
     alignSelf: "center",
     marginVertical: 10,
     borderLeftWidth: 5,
-    borderLeftColor: "#c13e6a",
+    borderLeftColor: "#C3B1E1",
   },
   
   recommendationText: {
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
   suggestion: {
     fontSize: 21,
     fontFamily: "PatrickHand-Regular",
-    color: "#622f00",
+    color: "#6B46C1",
   },
   
   card: {

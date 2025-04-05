@@ -1,5 +1,5 @@
 // Redesigned Dashboard Layout with cleaner structure and visual hierarchy
-import React, { useEffect, useRef, useState , useCallback} from "react";
+import React, { useRef, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -10,8 +10,8 @@ import {
   Button,
   ScrollView,
 } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
-
+import { Divider, useTheme } from "@rneui/themed";
+import { useFocusEffect } from "expo-router";
 import { Header as HeaderRNE, HeaderProps, Icon } from "@rneui/themed";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
@@ -38,11 +38,14 @@ import NutritionWidget from "@/components/widgets/NutritionWidget";
 import JournalWidget from "@/components/widgets/JournalWidget";
 import WaterWidget from "@/components/widgets/WaterWidget";
 import MoodWidget from "@/components/widgets/MoodWidget";
+import { useEffect } from "react";
+import { useIsFocused } from "@react-navigation/native";
 
 export default function Dashboard() {
   const router = useRouter();
   const { userPreferences, loading } = useUserPreferences();
   const { hasLoggedToday } = useMoodContext();
+  const [authReady, setAuthReady] = useState(false);
   const opacity = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0.5)).current;
   const slideAnim = useRef(new Animated.Value(100)).current; // starts 100px down
@@ -50,10 +53,12 @@ export default function Dashboard() {
     useState<boolean>(false);
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
+      setAuthReady(true);
       if (!user) router.replace("/(auth)/login");
     });
     return unsubscribe;
   }, []);
+
   useEffect(() => {
     Animated.timing(slideAnim, {
       toValue: 0,
@@ -69,6 +74,23 @@ export default function Dashboard() {
     checkScreening();
   }, []);
   const [enabledWidgets, setEnabledWidgets] = useState<string[]>([]);
+  const [widgetChangeTrigger, setWidgetChangeTrigger] = useState(0);
+
+  const removeWidget = async (widgetId: string) => {
+    const updated = enabledWidgets.filter((id) => id !== widgetId);
+    setEnabledWidgets(updated);
+    await AsyncStorage.setItem("@enabledWidgets", JSON.stringify(updated));
+    setWidgetChangeTrigger(prev => prev + 1); // 🔁 trigger refresh
+  };
+  
+  const STORAGE_KEY = "@enabledWidgets";
+  const handleAddWidget = async (widgetId: string) => {
+    const updatedWidgets = [...enabledWidgets, widgetId.toLowerCase()];
+    setEnabledWidgets(updatedWidgets);
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedWidgets));
+    setWidgetChangeTrigger(prev => prev + 1); // ✅ force refresh for RecommendedWidgets
+  };
+  
   useFocusEffect(
     useCallback(() => {
       const loadWidgets = async () => {
@@ -77,7 +99,7 @@ export default function Dashboard() {
           setEnabledWidgets(JSON.parse(stored));
         }
       };
-  
+
       loadWidgets();
     }, [])
   );
@@ -114,6 +136,9 @@ export default function Dashboard() {
     loading ||
     !auth.currentUser ||
     !userPreferences?.name ||
+    !authReady ||
+    loading ||
+    !auth.currentUser ||
     !userPreferences.hasOwnProperty("moodCheckIn")
   ) {
     return (
@@ -129,13 +154,13 @@ export default function Dashboard() {
     <>
       <HeaderRNE
         containerStyle={{
-          backgroundColor: "#D7C4EB", // soft lilac or any color you want
+          backgroundColor: "#f8edeb", // soft lilac or any color you want
           borderBottomWidth: 0,
           paddingTop: 10,
         }}
         leftComponent={
           <TouchableOpacity>
-            <Icon name="home" type="ionicon" color="#5A3E9B" />
+            <Icon name="home" type="ionicon" color="#150b01" />
           </TouchableOpacity>
         }
         centerComponent={{
@@ -150,13 +175,13 @@ export default function Dashboard() {
         rightComponent={
           <View style={styles.headerRight}>
             <TouchableOpacity onPress={() => handleNavigate("/manageWidgets")}>
-              <Icon name="grid" type="feather" color="#5A3E9B" />
+              <Icon name="grid" type="feather" color="#150b01" />
             </TouchableOpacity>
             <TouchableOpacity
               style={{ marginLeft: 12 }}
               onPress={() => handleNavigate("/settings")}
             >
-              <Icon name="settings" type="feather" color="#5A3E9B" />
+              <Icon name="settings" type="feather" color="#150b01" />
             </TouchableOpacity>
           </View>
         }
@@ -187,42 +212,55 @@ export default function Dashboard() {
               )}
               <ScrollView contentContainerStyle={styles.widgets}>
                 <View style={styles.gridContainer}>
-                  {enabledWidgets.includes("water") && <WaterWidget />}
-                  {enabledWidgets.includes("mood") && <MoodWidget />}
-                  {enabledWidgets.includes("journal") && <JournalWidget />}
-                  {enabledWidgets.includes("fitness") && <FitnessWidget />}
-                  {enabledWidgets.includes("nutrition") && <NutritionWidget />}
+                  {enabledWidgets.includes("water") && (
+                    <WaterWidget onRemove={() => removeWidget("water")} />
+                  )}
+                  {enabledWidgets.includes("fitness") && (
+                    <FitnessWidget onRemove={() => removeWidget("fitness")} />
+                  )}
+
+                  {enabledWidgets.includes("nutrition") && (
+                    <NutritionWidget
+                      onRemove={() => removeWidget("nutrition")}
+                    />
+                  )}
+
+                  {enabledWidgets.includes("journal") && (
+                    <JournalWidget onRemove={() => removeWidget("journal")} />
+                  )}
+
+                  {enabledWidgets.includes("mood") && (
+                    <MoodWidget onRemove={() => removeWidget("water")} />
+                  )}
                 </View>
               </ScrollView>
-
-              <Button
-                title="Log Meal"
-                onPress={() => handleNavigate("/nurtition")}
+              <Divider
+                style={{
+                  width: "200%",
+                  height: 1.3,
+                  backgroundColor: "#ccc",
+                  alignSelf: "center",
+                }}
               />
-              <Button
-                title="Settings"
-                onPress={() => handleNavigate("/settings")}
+              {!hasCompletedScreening && (
+                <TakeQuizButton
+                  onPress={() => handleNavigate("/quizzes/screening")}
+                />
+              )}
+              <Divider
+                style={{
+                  width: "200%",
+                  height: 1.3,
+                  backgroundColor: "#ccc",
+                  alignSelf: "center",
+                }}
               />
 
               <MoodCalendar />
-              <TakeQuizButton
-                onPress={() => handleNavigate("/quizzes/screening")}
-              />
-
-              <RecommendedWidgetsBanner />
-
-              <View style={styles.card}>
-                {/* <Button title="Reset Onboarding" onPress={() => handleNavigate("/utils/resetOnboarding")} /> */}
-                {!hasCompletedScreening && (
-                  <Button
-                    title="Personalise"
-                    onPress={() => handleNavigate("/quizzes/screening")}
-                  />
-                )}
-              </View>
-
+              <RecommendedWidgetsBanner onAddWidget={handleAddWidget} triggerRefresh={widgetChangeTrigger}/>
               <DeleteButton />
               <LogoutButton />
+              {/* <Button title="Reset Onboarding" onPress={() => handleNavigate("/utils/resetOnboarding")} /> */}
             </View>
           )}
           keyExtractor={(item) => item.key}
@@ -235,8 +273,8 @@ export default function Dashboard() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    backgroundColor: "#f8f6f4",
+    // padding: 20,
+    backgroundColor: "#ffffff",
     flexGrow: 1,
   },
   loadingContainer: {
@@ -248,7 +286,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: "#666",
+    color: "#150b01",
   },
   title: {
     fontSize: 32,
@@ -258,7 +296,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   widgets: {
-    paddingVertical: 20,
+    paddingVertical: 5,
   },
   gridContainer: {
     flexDirection: "row",
@@ -276,6 +314,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 1,
+  },
+  quizContainer: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: "auto",
   },
   sectionTitle: {
     fontSize: 18,

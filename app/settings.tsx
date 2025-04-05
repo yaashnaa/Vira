@@ -234,17 +234,17 @@ export default function Settings() {
     <Provider>
   <HeaderRNE
         containerStyle={{
-          backgroundColor: "#D7C4EB", // soft lilac or any color you want
+          backgroundColor: "#f8edeb", // soft lilac or any color you want
           borderBottomWidth: 0,
           paddingTop: 10,
         }}
         leftComponent={
           <TouchableOpacity onPress={handleBackPress}>
-            <Icon name="arrow-back" size={25} type="ionicon" color="#5A3E9B" />
+            <Icon name="arrow-back" size={25} type="ionicon" color="#150b01" />
           </TouchableOpacity>
         }
         centerComponent={{
-          text: "NUTRITION",
+          text: "SETTINGS",
           style: {
             color: "#271949",
             fontSize: 20,
@@ -258,7 +258,7 @@ export default function Settings() {
               style={{ marginLeft: 12 }}
               onPress={handleBackPress}
             >
-              <Icon name="settings" size={25} type="feather" color="#5A3E9B" />
+              <Icon name="settings" size={25} type="feather" color="#150b01" />
             </TouchableOpacity>
           </View>
         }

@@ -44,14 +44,15 @@ export default function TakeQuiz({ onPress }: TakeQuizButtonProps) {
 const styles = StyleSheet.create({
   button: {
     marginTop: 20,
-    width: width ,
+    width: width * 0.9,
     justifyContent: "center",
     margin: "auto",
     alignItems: "center",
     height: 200,
     display: "flex",
     flexDirection: "row",
- 
+    // borderTopWidth: 1,
+    // borderBottomWidth: 1,
     backgroundColor: "#ffffff",
     borderRadius: 10,
     // Optional shadow/elevation

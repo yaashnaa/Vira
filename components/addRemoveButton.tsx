@@ -56,7 +56,7 @@ export const AddRemoveButton: React.FC<AddRemoveButtonProps> = ({
     >
       <View
         style={{
-          backgroundColor: operation == "add" ? "#1ca3ec" : "red",
+          backgroundColor: operation == "add" ? "#79dae8" : "#e86e6e",
           width: 50,
           height: 50,
           borderRadius: 25,

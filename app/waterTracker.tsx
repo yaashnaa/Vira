@@ -13,6 +13,8 @@ import ConfettiCannon from "react-native-confetti-cannon";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import { AddRemoveButton } from "../components/addRemoveButton";
+
+import { IconButton, MD3Colors } from "react-native-paper";
 import { useRouter } from "expo-router";
 
 const amounts = [250, 500, 1000, 1500];
@@ -130,19 +132,19 @@ export default function WaterTrackerScreen() {
     <>
       <HeaderRNE
         containerStyle={{
-          backgroundColor: "#D7C4EB",
+          backgroundColor: "#f8edeb",
           borderBottomWidth: 0,
           paddingTop: 10,
         }}
         leftComponent={
           <TouchableOpacity onPress={handleBackPress}>
-            <Icon name="arrow-back" size={25} type="ionicon" color="#5A3E9B" />
+            <Icon name="arrow-back" size={25} type="ionicon" color="#150b01" />
           </TouchableOpacity>
         }
         centerComponent={{
           text: "WATER TRACKER",
           style: {
-            color: "#271949",
+            color: "#13100d",
             fontSize: 20,
             fontWeight: "bold",
             fontFamily: "PatrickHand-Regular",
@@ -158,20 +160,29 @@ export default function WaterTrackerScreen() {
         <Text style={styles.tip}>{randomTip}</Text>
 
         <View style={styles.waterGoalContainer}>
-          <Text style={styles.blueTitle}>Your Goal</Text>
+          <Text style={styles.brownTitle}>Your Goal:</Text>
           <View style={styles.goalRow}>
+            <IconButton
+              icon={() => (
+                <Ionicons name="add-circle" size={25} color="#472608" />
+              )}
+              onPress={() => setWaterGoal(waterGoal + 250)}
+              style={{ marginLeft: 0, marginRight: 0 }}
+            />
             <Text style={styles.goalText}>{waterGoal} mL</Text>
-            <TouchableOpacity onPress={() => setWaterGoal(waterGoal + 250)}>
-              <Ionicons name="add-circle" size={28} color="#5abcd8" />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => setWaterGoal(waterGoal - 250)}>
-              <Ionicons name="remove-circle" size={28} color="#5abcd8" />
-            </TouchableOpacity>
+
+            <IconButton
+              icon={() => (
+                <Ionicons name="remove-circle" size={25} color="#472608" />
+              )}
+              onPress={() => setWaterGoal(waterGoal - 250)}
+              style={{ marginLeft: 0, marginRight: 0 }}
+            />
           </View>
         </View>
 
         <View style={styles.progressSection}>
-          <View style={styles.charactertext}>
+          <View style={styles.characterContainer}>
             <Image source={getMoodImage()} style={styles.character} />
             <View>
               <Text style={styles.label}>You've drunk</Text>
@@ -184,7 +195,7 @@ export default function WaterTrackerScreen() {
             <Animated.View
               style={{
                 height: progressPercent,
-                backgroundColor: "#5abcd8",
+                backgroundColor: "#79dae8",
                 borderRadius: 40,
               }}
             />
@@ -222,7 +233,7 @@ export default function WaterTrackerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF",
+    backgroundColor: "#f8f6f4",
     alignItems: "center",
   },
   character: {
@@ -233,32 +244,38 @@ const styles = StyleSheet.create({
   },
   tip: {
     fontSize: 16,
-    color: "#888",
+    color: "#5a4137",
     fontStyle: "italic",
     marginBottom: 10,
     textAlign: "center",
     paddingHorizontal: 20,
     fontFamily: "Main-font",
+    marginTop: 40,
   },
   waterGoalContainer: {
     alignItems: "center",
-    paddingVertical: 30,
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    margin: "auto",
+    // paddingVertical: 30,
   },
-  blueTitle: {
+  brownTitle: {
     fontSize: 22,
-    color: "#1ca3ec",
+    marginRight: 10,
+    color: "#150b01",
     fontWeight: "600",
     fontFamily: "Main-font",
   },
   goalRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 10,
+    gap: 0,
+    // marginTop: 10,
   },
   goalText: {
-    fontSize: 26,
-    fontWeight: "600",
-    marginRight: 10,
+    fontSize: 22,
+    // fontWeight: "600",
     color: "#333",
     fontFamily: "Main-font",
   },
@@ -275,18 +292,25 @@ const styles = StyleSheet.create({
     height: 300,
     justifyContent: "flex-end",
     overflow: "hidden",
-    borderColor: "#ccc",
+    borderColor: "#e2d6cc",
+  },
+  characterContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
   },
   label: {
     fontSize: 22,
     fontFamily: "PatrickHand-Regular",
-    color: "#323033",
+    color: "#150b01",
     textAlign: "center",
   },
   amount: {
     fontSize: 38,
     fontWeight: "bold",
-    color: "#1ca3ec",
+    color: "#53aebc",
     textAlign: "center",
   },
   waterButtonsContainer: {
@@ -295,10 +319,4 @@ const styles = StyleSheet.create({
     width: "90%",
     justifyContent: "space-between",
   },
-  charactertext: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-  }
 });

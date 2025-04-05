@@ -13,11 +13,17 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  Dimensions,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ScrollView,
+  Platform,
 } from "react-native";
 import { Button } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { loginUser } from "../../utils/auth"; // Firebase authentication function
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ensureUserDocumentExists } from "../../utils/firestore"; // Function to ensure user document exists
 export default function LoginScreen() {
   const router = useRouter();
@@ -29,7 +35,7 @@ export default function LoginScreen() {
       await loginUser(email, password);
       const currentUser = auth.currentUser;
       if (currentUser) {
-        await AsyncStorage.setItem('@currentUserId', currentUser.uid);
+        await AsyncStorage.setItem("@currentUserId", currentUser.uid);
       }
       await ensureUserDocumentExists();
       // Alert.alert("Login Successful!");
@@ -41,61 +47,80 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Logo Image */}
+   
       <Image
         style={styles.image}
-        source={require("../../assets/images/final.png")}
+        source={require("../../assets/images/Vira.png")}
       />
       <StatusBar style="auto" />
-      {/* <Header title="Log In" /> */}
-      <View style={styles.insideCont}>
-        <View style={styles.inputs}>
-          <View style={styles.inputView}>
-            <AntDesign
-              name="user"
-              size={24}
-              color="#622f00"
-              style={{ marginLeft: 10 }}
-            />
-            <TextInput
-              style={styles.TextInput}
-              placeholder="Email"
-              placeholderTextColor="#003f5c"
-              onChangeText={(text) => setEmail(text)}
-              keyboardType="email-address"
-            />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView
+            contentContainerStyle={{
+              // flexGrow: 1,
+              justifyContent: "center",
+              padding: 20,
+            }}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.insideCont}>
+              <View style={styles.inputs}>
+                <View style={styles.inputView}>
+                  <AntDesign
+                    name="user"
+                    size={24}
+                    color="#150b01"
+                    style={{ marginLeft: 10 }}
+                  />
+                  <TextInput
+                    style={styles.TextInput}
+                    placeholder="Email"
+                    placeholderTextColor="#003f5c"
+                    onChangeText={(text) => setEmail(text)}
+                    keyboardType="email-address"
+                  />
+                </View>
 
-          </View>
+                <View style={styles.inputView}>
+                  <MaterialIcons
+                    name="password"
+                    size={24}
+                    color="black"
+                    style={{ marginLeft: 10 }}
+                  />
+                  <TextInput
+                    style={styles.TextInput}
+                    placeholder="Password"
+                    placeholderTextColor="#0c5e84"
+                    secureTextEntry
+                    onChangeText={(text) => setPassword(text)}
+                  />
+                </View>
+              </View>
 
-          {/* Password Input */}
-          <View style={styles.inputView}>
-            <MaterialIcons
-              name="password"
-              size={24}
-              color="black"
-              style={{ marginLeft: 10 }}
-            />
-            <TextInput
-              style={styles.TextInput}
-              placeholder="Password"
-              placeholderTextColor="#0c5e84"
-              secureTextEntry
-              onChangeText={(text) => setPassword(text)}
-            />
-          </View>
-        </View>
-        {/* Forgot Password */}
-        <TouchableOpacity>
-          <Text style={styles.forgot_button}>Forgot Password?</Text>
-        </TouchableOpacity>
+              <TouchableOpacity>
+                <Text style={styles.forgot_button}>Forgot Password?</Text>
+              </TouchableOpacity>
 
-        {/* Login Button */}
-        <Button mode="contained-tonal" buttonColor="#c13e6a" textColor="#fffdfb" onPress={handleLogin}>
-          <Text style={styles.loginText}>LOGIN</Text>
-        </Button>
+              <Button
+                mode="contained-tonal"
+                buttonColor="#86508f"
+                textColor="#fefefe"
+                onPress={handleLogin}
+              >
+                <Text style={styles.loginText}>LOGIN</Text>
+              </Button>
 
-        {/* Navigate to Signup */}
-        <TouchableOpacity onPress={() => router.push("/signup")}>
+
+            </View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+      <View style={styles.link}>
+        <TouchableOpacity onPress={() => router.push("/(auth)/signup")}>
           <Text style={styles.signupText}>Don't have an account? Sign up</Text>
         </TouchableOpacity>
       </View>
@@ -103,58 +128,60 @@ export default function LoginScreen() {
   );
 }
 
-// 🔹 Styles from your provided code
+const width = Dimensions.get("window").width;
 const styles = StyleSheet.create({
   container: {
     display: "flex",
     flex: 1,
-    backgroundColor: "#f8f6f4",
+    backgroundColor: "#ffffff",
     alignItems: "center",
     justifyContent: "center",
     margin: 0,
     color: lightTheme.accent,
+  },
+  link:{
+    bottom: 65,
+    position: "absolute",
   },
   insideCont: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    bottom: 30,
-    width: "100%",
+    top: 50,
+    bottom: 0,
+    width: width * 0.7,
   },
   image: {
-    height: 440,
-    width: 440,
+    height: 400,
+    width: 400,
+    top: 40,
     marginBottom: 10,
   },
 
   mainText: {
-    color: "#622f00",
+    color: "#150b01",
     marginBottom: 10,
   },
   inputView: {
-    // backgroundColor: lightTheme.accent, \
-    // opacity: 0.5,
     display: "flex",
     borderRadius: 20,
-    width: "70%",
+    width: "100%",
     height: 50,
     marginBottom: 20,
-    // justifyContent: "center",
+
     alignItems: "center",
     flexDirection: "row",
     gap: 1,
     borderBottomWidth: 1.5,
-    borderBottomColor: "##622f00",
-    // backgroundColor: lightTheme.secondary,
-    // Android elevation
+    borderBottomColor: lightTheme.accent3,
     elevation: 5,
   },
   TextInput: {
     height: 50,
     flex: 1,
     padding: 5,
-    width: "80%",
+    width: "100%",
     color: "black",
   },
   forgot_button: {
@@ -171,7 +198,7 @@ const styles = StyleSheet.create({
     // justifyContent: "center",
     // position: "absolute",
   },
-  loginBtn: {
+  signupBtn: {
     width: "40%",
     borderRadius: 15,
     height: 50,
@@ -180,12 +207,12 @@ const styles = StyleSheet.create({
     marginTop: 20,
     color: "black",
     borderWidth: 3,
-    borderColor: lightTheme.accent,
+    borderColor: "#150b01",
     borderStyle: "solid",
     // backgroundColor: lightTheme.accent, // Use secondary color for the button
   },
   loginText: {
-    // color: "black",
+    color: "#eae6ed",
     fontWeight: "bold",
   },
   signupText: {

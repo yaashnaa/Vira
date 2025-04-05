@@ -118,11 +118,15 @@ export default function FitnessScreen() {
     }
   };
 
+  function handleNav(){
+    router.push("./findExercises");
+  }
+
   return (
     <>
       <HeaderRNE
         containerStyle={{
-          backgroundColor: "#D7C4EB", // soft lilac or any color you want
+          backgroundColor: "#f8edeb", // soft lilac or any color you want
           borderBottomWidth: 0,
           paddingTop: 10,
         }}
@@ -200,7 +204,7 @@ export default function FitnessScreen() {
               mode="outlined"
               style={styles.button}
               onPress={() =>
-                router.push("../components/Exercise/findExercises.tsx")
+                router.push("./c")
               }
             >
               Find More Exercises
