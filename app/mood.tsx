@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
 import { RadialSlider } from "react-native-radial-slider";
-import { Button } from "react-native-paper";
+import { Button, Appbar } from "react-native-paper";
 import { useMoodContext } from "../context/moodContext";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
+import { Header as HeaderRNE, HeaderProps, Icon } from "@rneui/themed";
 // Array of mood images for discrete steps (0, 25, 50, 75, 100)
 const moodImages = [
   require("../assets/images/mood/vhappy.png"), // For mood = 0–24 (e.g., very happy)
@@ -52,43 +54,79 @@ export default function MoodSlider({ value, onChange }: MoodSliderProps) {
     // Navigate to the mood page (or any page you desire)
     router.push("/dashboard");
   };
+  const handleBackPress = () => {
+    router.replace("/dashboard");
+  };
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>How are you feeling today?</Text>
-      <View style={styles.sliderWrapper}>
-        <RadialSlider
-          value={mood}
-          isHideValue={true} 
-          min={0}
-          max={100}
-          step={25}
-          onChange={handleSliderChange}
-          subTitle=""
-          unit=""
-          lineSpace={0}
-          valueStyle={{ color: "transparent" }}
-          radius={150}
-          linearGradient={[
-            { offset: "0%", color: "#e2d2ed" },
-            { offset: "100%", color: "#ffd2cb" },
-          ]}
-        />
-        <View style={styles.centerOverlay}>
-          <Image source={moodImages[index]} style={styles.centerImage} />
+    <>
+      <HeaderRNE
+        containerStyle={{
+          backgroundColor: "#D7C4EB", // soft lilac or any color you want
+          borderBottomWidth: 0,
+          paddingTop: 10,
+        }}
+        leftComponent={
+          <TouchableOpacity onPress={handleBackPress}>
+            <Icon name="arrow-back" size={25} type="ionicon" color="#5A3E9B" />
+          </TouchableOpacity>
+        }
+        centerComponent={{
+          text: "NUTRITION",
+          style: {
+            color: "#271949",
+            fontSize: 20,
+            fontWeight: "bold",
+            fontFamily: "PatrickHand-Regular",
+          },
+        }}
+        rightComponent={
+          <View style={styles.headerRight}>
+            <TouchableOpacity
+              style={{ marginLeft: 12 }}
+              onPress={handleBackPress}
+            >
+              <Icon name="settings" size={25} type="feather" color="#5A3E9B" />
+            </TouchableOpacity>
+          </View>
+        }
+      />
+      <View style={styles.container}>
+        <Text style={styles.title}>How are you feeling today?</Text>
+        <View style={styles.sliderWrapper}>
+          <RadialSlider
+            value={mood}
+            isHideValue={true}
+            min={0}
+            max={100}
+            step={25}
+            onChange={handleSliderChange}
+            subTitle=""
+            unit=""
+            lineSpace={0}
+            valueStyle={{ color: "transparent" }}
+            radius={150}
+            linearGradient={[
+              { offset: "0%", color: "#e2d2ed" },
+              { offset: "100%", color: "#ffd2cb" },
+            ]}
+          />
+          <View style={styles.centerOverlay}>
+            <Image source={moodImages[index]} style={styles.centerImage} />
+          </View>
         </View>
+        <Text style={styles.moodText}>{moodTexts[index]}</Text>
+        <Text style={styles.submoodText}>{moodSubText[index]}</Text>
+        <Button
+          mode="elevated"
+          onPress={handleLogMood}
+          buttonColor="#ebdaf6"
+          textColor="black"
+          style={{ marginTop: 20 }}
+        >
+          Log Mood
+        </Button>
       </View>
-      <Text style={styles.moodText}>{moodTexts[index]}</Text>
-      <Text style={styles.submoodText}>{moodSubText[index]}</Text>
-      <Button
-        mode="elevated"
-        onPress={handleLogMood}
-        buttonColor="#ebdaf6"
-        textColor="black"
-        style={{ marginTop: 20 }}
-      >
-        Log Mood
-      </Button>
-    </View>
+    </>
   );
 }
 
@@ -137,5 +175,10 @@ const styles = StyleSheet.create({
     color: "#333",
     textAlign: "center",
     fontFamily: "Main-font",
+  },
+  headerRight: {
+    display: "flex",
+    flexDirection: "row",
+    marginTop: 5,
   },
 });

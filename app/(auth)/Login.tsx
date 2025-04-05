@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
+import { Button } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { loginUser } from "../../utils/auth"; // Firebase authentication function
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -43,7 +44,7 @@ export default function LoginScreen() {
       {/* Logo Image */}
       <Image
         style={styles.image}
-        source={require("../../assets/images/vira.png")}
+        source={require("../../assets/images/final.png")}
       />
       <StatusBar style="auto" />
       {/* <Header title="Log In" /> */}
@@ -53,7 +54,7 @@ export default function LoginScreen() {
             <AntDesign
               name="user"
               size={24}
-              color="black"
+              color="#622f00"
               style={{ marginLeft: 10 }}
             />
             <TextInput
@@ -89,9 +90,9 @@ export default function LoginScreen() {
         </TouchableOpacity>
 
         {/* Login Button */}
-        <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
+        <Button mode="contained-tonal" buttonColor="#c13e6a" textColor="#fffdfb" onPress={handleLogin}>
           <Text style={styles.loginText}>LOGIN</Text>
-        </TouchableOpacity>
+        </Button>
 
         {/* Navigate to Signup */}
         <TouchableOpacity onPress={() => router.push("/signup")}>
@@ -107,7 +108,7 @@ const styles = StyleSheet.create({
   container: {
     display: "flex",
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: "#f8f6f4",
     alignItems: "center",
     justifyContent: "center",
     margin: 0,
@@ -118,17 +119,17 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    bottom: 80,
+    bottom: 30,
     width: "100%",
   },
   image: {
-    height: 450,
-    width: 250,
+    height: 440,
+    width: 440,
     marginBottom: 10,
   },
 
   mainText: {
-    color: "black",
+    color: "#622f00",
     marginBottom: 10,
   },
   inputView: {
@@ -144,7 +145,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 1,
     borderBottomWidth: 1.5,
-    borderBottomColor: lightTheme.accent3,
+    borderBottomColor: "##622f00",
     // backgroundColor: lightTheme.secondary,
     // Android elevation
     elevation: 5,
@@ -184,11 +185,11 @@ const styles = StyleSheet.create({
     // backgroundColor: lightTheme.accent, // Use secondary color for the button
   },
   loginText: {
-    color: "black",
+    // color: "black",
     fontWeight: "bold",
   },
   signupText: {
     marginTop: 20,
-    color: "#007BFF",
+    color: "#1d5ea4",
   },
 });

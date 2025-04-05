@@ -5,12 +5,11 @@ import { Stack, useRouter, Slot, Link } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../config/firebaseConfig";
 import { UserPreferencesProvider } from "../context/userPreferences";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { MoodProvider } from "@/context/moodContext";
 import { Provider } from "react-native-paper";
 import "react-native-get-random-values";
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 export default function RootLayout() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -38,36 +37,19 @@ export default function RootLayout() {
 
   // While loading, render a basic navigator with a loading indicator
   if (!hasMounted || isAuthenticated === null) {
-    return (
-      <SafeAreaView
-        style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-      >
-        <ActivityIndicator size="large" />
-      </SafeAreaView>
-    );
+    return <ActivityIndicator size="large" />;
   }
 
   return (
     <GestureHandlerRootView>
-    <Provider>
-      <UserPreferencesProvider>
-        <MoodProvider>
-          {/* <Stack screenOptions={{
-
-        headerTitle:"",
-        headerShown: true,
-
-        headerTitleAlign: "center",
-
-        headerLeft: () => <HomeButton />,
-        headerRight: () => <SettingsButton />,
-      }}> */}
-          <Slot />
-          {/* </Stack> */}
-        </MoodProvider>
-      </UserPreferencesProvider>
-    </Provider>
-    </GestureHandlerRootView >
+      <Provider>
+        <UserPreferencesProvider>
+          <MoodProvider>
+            <Slot />
+          </MoodProvider>
+        </UserPreferencesProvider>
+      </Provider>
+    </GestureHandlerRootView>
   );
 }
 function HomeButton() {
@@ -83,6 +65,14 @@ function HomeButton() {
   );
 }
 
+function ManageWidgets() {
+  return (
+    <Link href="/manageWidgets">
+      <MaterialCommunityIcons name="dots-grid" size={24} color="black" />
+    </Link>
+  );
+}
+
 function SettingsButton() {
   return (
     <Link href="/settings">
@@ -90,7 +80,7 @@ function SettingsButton() {
         name="settings"
         size={24}
         color="black"
-        style={{ marginRight: 15 }}
+        style={{ marginRight: 15, marginLeft: 15 }}
       />
     </Link>
   );

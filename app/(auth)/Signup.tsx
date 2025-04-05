@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
+import { Button } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { registerUser } from "../../utils/auth"; // Firebase authentication function
 
@@ -83,9 +84,9 @@ export default function SignupScreen() {
           </View>
         </View>
         {/* Signup Button */}
-        <TouchableOpacity style={styles.signupBtn} onPress={handleSignup}>
+        <Button mode="contained-tonal" buttonColor="#c13e6a" textColor="#fffdfb" onPress={handleSignup}>
           <Text style={styles.loginText}>SIGN UP</Text>
-        </TouchableOpacity>
+        </Button>
 
         {/* Navigate to Login */}
         <TouchableOpacity onPress={() => router.push("/login")}>
@@ -101,7 +102,7 @@ const styles = StyleSheet.create({
   container: {
     display: "flex",
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: "#f8f6f4",
     alignItems: "center",
     justifyContent: "center",
     margin: 0,
@@ -112,17 +113,17 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    bottom: 80,
+    bottom: 30,
     width: "100%",
   },
   image: {
-    height: 450,
-    width: 250,
+    height: 440,
+    width: 440,
     marginBottom: 10,
   },
 
   mainText: {
-    color: "black",
+    color: "#622f00",
     marginBottom: 10,
   },
   inputView: {
@@ -173,7 +174,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     color: "black",
     borderWidth: 3,
-    borderColor: lightTheme.accent,
+    borderColor: "#622f00",
     borderStyle: "solid",
     // backgroundColor: lightTheme.accent, // Use secondary color for the button
   },
@@ -183,6 +184,6 @@ const styles = StyleSheet.create({
   },
   signupText: {
     marginTop: 20,
-    color: "#007BFF",
+    color: "#1d5ea4",
   },
 });

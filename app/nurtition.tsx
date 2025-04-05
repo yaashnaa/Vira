@@ -15,10 +15,13 @@ import {
   Appbar,
   SegmentedButtons,
 } from "react-native-paper";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { Header as HeaderRNE, HeaderProps, Icon } from "@rneui/themed";
 import EvilIcons from "@expo/vector-icons/EvilIcons";
 import Feather from "@expo/vector-icons/Feather";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import AntDesign from "@expo/vector-icons/AntDesign";
+
 import DailyOverviewNutrition from "@/components/Nutrition/dailyOverviewNutrition";
 import { useUserPreferences } from "@/context/userPreferences";
 import { useRouter } from "expo-router";
@@ -61,98 +64,104 @@ export default function NutritionScreen() {
     router.replace("/dashboard");
   };
   const renderHeader = () => (
-    <View style={styles.container}>
-      <Text style={styles.greeting}>
-        Hello, {userPreferences?.name || "friend"} 🥗
-      </Text>
-      
-      {(userPreferences?.calorieViewing || userPreferences?.macroViewing) && (
-        <View>
-          <DailyOverviewNutrition
-            mealsLogged={mealsLogged}
-            totalMeals={totalMeals}
-            calories={nutritionTotals.calories}
-            protein={nutritionTotals.protein}
-            carbs={nutritionTotals.carbs}
-            fat={nutritionTotals.fat}
-            mood={mealMood}
-          />
-        </View>
-      )}
+    <>
+      <HeaderRNE
+        containerStyle={{
+          backgroundColor: "#D7C4EB", // soft lilac or any color you want
+          borderBottomWidth: 0,
+          paddingTop: 10,
+        }}
+        leftComponent={
+          <TouchableOpacity onPress={handleBackPress}>
+            <Icon name="arrow-back" size={25} type="ionicon" color="#5A3E9B" />
+          </TouchableOpacity>
+        }
+        centerComponent={{
+          text: "NUTRITION",
+          style: {
+            color: "#271949",
+            fontSize: 20,
+            fontWeight: "bold",
+            fontFamily: "PatrickHand-Regular",
+          },
+        }}
+        rightComponent={
+          <View style={styles.headerRight}>
+            <TouchableOpacity
+              style={{ marginLeft: 12 }}
+              onPress={handleBackPress}
+            >
+              <Icon name="settings" size={25} type="feather" color="#5A3E9B" />
+            </TouchableOpacity>
+          </View>
+        }
+      />
+      <View style={styles.container}>
+        <Text style={styles.greeting}>
+          Hello, {userPreferences?.name || "friend"} 🥗
+        </Text>
 
-      <SegmentedButtons
-        value={selectedSegment}
-        onValueChange={setSelectedSegment}
+        {(userPreferences?.calorieViewing || userPreferences?.macroViewing) && (
+          <View>
+            <DailyOverviewNutrition
+              mealsLogged={mealsLogged}
+              totalMeals={totalMeals}
+              calories={nutritionTotals.calories}
+              protein={nutritionTotals.protein}
+              carbs={nutritionTotals.carbs}
+              fat={nutritionTotals.fat}
+              mood={mealMood}
+            />
+          </View>
+        )}
 
-        buttons={[
-          {
-            value: "log",
-            icon: "silverware-fork-knife", // ✅ string name
-            label: "Log ",
-            disabled: userPreferences?.hideMealTracking,
+        <SegmentedButtons
+          value={selectedSegment}
+          onValueChange={setSelectedSegment}
+          buttons={[
+            {
+              value: "log",
+              icon: "silverware-fork-knife", // ✅ string name
+              label: "Log ",
+              disabled: userPreferences?.hideMealTracking,
             },
             {
-            value: "view",
-            label: "View logs",
-            icon: "clipboard-list",
-            disabled: userPreferences?.hideMealTracking,
+              value: "view",
+              label: "View logs",
+              icon: "clipboard-list",
+              disabled: userPreferences?.hideMealTracking,
             },
             {
-            value: "search",
-            label: "Search info",
-            icon: "magnify",
-            disabled: userPreferences?.hideMealTracking,
+              value: "search",
+              label: "Search info",
+              icon: "magnify",
+              disabled: userPreferences?.hideMealTracking,
             },
           ]}
-           
-          />
-          {selectedSegment === "log" && !userPreferences?.hideMealTracking && (
+        />
+        {selectedSegment === "log" && !userPreferences?.hideMealTracking && (
           <LogMealCardModal onLog={handleLog} />
-          )}
+        )}
 
-          {selectedSegment === "view" && !userPreferences?.hideMealTracking && (
+        {selectedSegment === "view" && !userPreferences?.hideMealTracking && (
           <ViewLoggedMeals />
-          )}
+        )}
 
-          {selectedSegment === "search" && (
-          <NutritionSearch />
-          )}
-      {/* <Button
-        mode="contained"
-        onPress={() => setSearchModal(true)}
-        theme={{ colors: { primary: "#f6dfdb" } }}
-        textColor="#333"
-        style={styles.button}
-      >
-        <View style={styles.iconButtonContent}>
-          <AntDesign name="search1" size={20} color="black" />
-          <Text style={styles.iconButtonText}>Search Nutritional Info</Text>
-        </View>
-      </Button> */}
-      {/* <NutritionSearch
-        visible={searchModal}
-        onDismiss={() => setSearchModal(false)}
-      /> */}
-      {/* <View style={styles.section}>
-        <SuggestMeals />
+        {selectedSegment === "search" && <NutritionSearch />}
       </View>
-
-      <View style={styles.section}>
-        <ViewLoggedMeals />
-      </View> */}
-    </View>
+    </>
   );
 
   return (
     <>
-      <Appbar.Header
+      {/* <Appbar.Header
         elevated={false}
         dark={false}
         theme={{ colors: { primary: "#f5f5f5" } }}
       >
         <Appbar.BackAction onPress={handleBackPress} />
         <Appbar.Content title="Nutrition" />
-      </Appbar.Header>
+      </Appbar.Header> */}
 
       <FlatList
         data={[]} // Placeholder; could be a list of logged meals later
@@ -214,5 +223,28 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "black",
     fontFamily: "Comfortaa-Regular",
+  },
+  headerContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#397af8",
+    marginBottom: 20,
+    width: "100%",
+    paddingVertical: 15,
+  },
+  heading: {
+    color: "white",
+    fontSize: 22,
+    fontWeight: "bold",
+  },
+  headerRight: {
+    display: "flex",
+    flexDirection: "row",
+    marginTop: 5,
+  },
+  subheaderText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });

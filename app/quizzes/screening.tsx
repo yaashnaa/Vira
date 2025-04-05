@@ -12,7 +12,8 @@ import {
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/config/firebaseConfig";
 import { auth } from "@/config/firebaseConfig";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { isScreeningQuizComplete } from "@/utils/asyncStorage";
 import { Button, ProgressBar } from "react-native-paper";
 import { useUserPreferences } from "../../context/userPreferences";
 import { useRouter } from "expo-router";
@@ -54,9 +55,9 @@ export default function QuizScreen() {
   const handleResourceYes = () => setShowResourceConsent(true);
   const handleResourceNo = () => setShowResourceConsent(false);
   const handleFinalSubmit = async () => {
-    const calorieViewingBool = caloriePreference === "Yes, I’d like to see calories.";
+    const calorieViewingBool =
+      caloriePreference === "Yes, I’d like to see calories.";
     const macroViewingBool = macroPreference === "Yes, I’d like to see macros.";
-    
 
     const moodCheckInBool = moodCheckIn !== "No, I’d rather keep it simple.";
 
@@ -92,7 +93,7 @@ export default function QuizScreen() {
       macroViewing: macroViewingBool,
       caloriePreference: caloriePreference ?? "",
       macroPreference: macroPreference ?? "",
-      
+
       customMedicalConditions: customMedicalConditions ?? "",
       customMentalHealthConditions: customDisorder ?? "",
       foodAnxietyLevel: foodAnxietyLevel ?? "",
@@ -109,7 +110,7 @@ export default function QuizScreen() {
     };
 
     updatePreferences(updated);
-
+    await AsyncStorage.setItem("@screening_quiz_complete", "true");
     console.log("User Preferences Submitted!");
     router.replace("/dashboard");
   };

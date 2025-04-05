@@ -1,78 +1,94 @@
-// app/(tabs)/home.tsx
-import React, { useEffect, useRef, useState } from "react";
+// Redesigned Dashboard Layout with cleaner structure and visual hierarchy
+import React, { useEffect, useRef, useState , useCallback} from "react";
 import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  Button,
-  Animated,
   SafeAreaView,
   ActivityIndicator,
   FlatList,
+  Button,
+  ScrollView,
 } from "react-native";
-import WaterTracker from "@/components/waterTracker";
-import DeleteButton from "@/components/Buttons/deleteAccount";
-import { useMoodContext } from "@/context/moodContext";
-import LogMoodButton from "@/components/Buttons/logMoodBtn";
-import RecommendedWidgetsBanner from "@/components/recommendedWidegts";
-import { Link } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
+
+import { Header as HeaderRNE, HeaderProps, Icon } from "@rneui/themed";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
-import { lightTheme } from "@/config/theme";
-import { resetOnboarding } from "../utils/resetOnboarding";
-import LogoutButton from "@/components/Buttons/logoutButton";
-import FadeInText from "@/components/fadeInText";
-import AddWidgetButton from "@/components/addWidgets";
-import BasicButton from "@/components/Buttons/basicButton";
-import Quotes from "./quotes";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import TakeQuizButton from "@/components/takeQuiz";
-import MoodCalendar from "../components/moodCalender";
-import { UserPreferences, useUserPreferences } from "@/context/userPreferences";
+import { useMoodContext } from "@/context/moodContext";
+import { useUserPreferences } from "@/context/userPreferences";
 import { isOnboardingComplete, isQuizComplete } from "@/utils/asyncStorage";
 import { auth } from "@/config/firebaseConfig";
+import { lightTheme } from "@/config/theme";
+import { Animated } from "react-native";
+import { isScreeningQuizComplete } from "@/utils/asyncStorage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+// Components
+import FadeInText from "@/components/fadeInText";
+import MoodCalendar from "@/components/moodCalender";
+import LogMoodButton from "@/components/Buttons/logMoodBtn";
+import LogoutButton from "@/components/Buttons/logoutButton";
+import DeleteButton from "@/components/Buttons/deleteAccount";
+import TakeQuizButton from "@/components/takeQuiz";
+import RecommendedWidgetsBanner from "@/components/recommendedWidegts";
+import NutritionScreen from "./nurtition";
+import FitnessWidget from "@/components/widgets/FitnessWidget";
+import NutritionWidget from "@/components/widgets/NutritionWidget";
+// import JournalScreen from "./journal";
+import JournalWidget from "@/components/widgets/JournalWidget";
+import WaterWidget from "@/components/widgets/WaterWidget";
+import MoodWidget from "@/components/widgets/MoodWidget";
+
 export default function Dashboard() {
   const router = useRouter();
   const { userPreferences, loading } = useUserPreferences();
+  const { hasLoggedToday } = useMoodContext();
   const opacity = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0.5)).current;
-
-  const { hasLoggedToday, logMood } = useMoodContext();
-  useEffect(() => {
-    const user = auth.currentUser;
-    if (user) {
-      console.log("Logged in user:");
-      console.log("UID:", user.uid);
-      console.log("Email:", user.email);
-      console.log("Display Name:", user.displayName);
-    } else {
-      console.log("No user is logged in");
-    }
-  }, []);
+  const slideAnim = useRef(new Animated.Value(100)).current; // starts 100px down
+  const [hasCompletedScreening, setHasCompletedScreening] =
+    useState<boolean>(false);
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (!user) {
-        console.log("No user logged in – redirecting...");
-        router.replace("/(auth)/login");
-      }
+      if (!user) router.replace("/(auth)/login");
     });
-
     return unsubscribe;
   }, []);
+  useEffect(() => {
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 600,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+  useEffect(() => {
+    const checkScreening = async () => {
+      const completed = await isScreeningQuizComplete();
+      setHasCompletedScreening(completed);
+    };
+    checkScreening();
+  }, []);
+  const [enabledWidgets, setEnabledWidgets] = useState<string[]>([]);
+  useFocusEffect(
+    useCallback(() => {
+      const loadWidgets = async () => {
+        const stored = await AsyncStorage.getItem("@enabledWidgets");
+        if (stored) {
+          setEnabledWidgets(JSON.parse(stored));
+        }
+      };
+  
+      loadWidgets();
+    }, [])
+  );
 
   useEffect(() => {
     const checkProgress = async () => {
       const onboarded = await isOnboardingComplete();
       const quizDone = await isQuizComplete();
-
-      if (!onboarded) {
-        router.replace("/(auth)/OnBoarding");
-      } else if (!quizDone) {
-        router.replace("/quizzes/basic");
-      }
+      if (!onboarded) router.replace("/(auth)/OnBoarding");
+      else if (!quizDone) router.replace("/quizzes/basic");
     };
-
     checkProgress();
   }, []);
 
@@ -91,152 +107,209 @@ export default function Dashboard() {
     ]).start();
   }, [opacity, scale]);
 
-  const handleQuizPress = () => {
-    router.push("/quizzes/screening");
-  };
-  const handleLogMeal = () => {
-    // Navigate to the meal logging screen
-    router.push("/nurtition");
-  };
+  const handleNavigate = (route: Parameters<typeof router.push>[0]): void =>
+    router.push(route);
 
-  const handlePersonalize = () => {
-    router.push("/quizzes/screening");
-  };
-  const handleStartWorkout = () => {
-    // Navigate to the fitness/workout screen
-    router.push("/fitness");
-  };
-  const handleLogMood = async () => {
-    router.push("/mood");
-  };
-  const handleSettings = async () => {
-    router.push("/settings");
-  };
-  const data = [{ key: "dashboard" }];
-  const mood = () => {
-    router.push("/mood");
-  };
-  if (loading || !auth.currentUser || !userPreferences?.name|| !userPreferences.hasOwnProperty("moodCheckIn")) {
+  if (
+    loading ||
+    !auth.currentUser ||
+    !userPreferences?.name ||
+    !userPreferences.hasOwnProperty("moodCheckIn")
+  ) {
     return (
-      <View>
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={lightTheme.primary} />
         <LogoutButton />
-        <Text> no user</Text>
+        <Text style={styles.loadingText}>Loading your dashboard...</Text>
       </View>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <FlatList
-        data={data}
-        renderItem={() => (
-          <View>
-            <FadeInText style={styles.title}>
-              Hello, {userPreferences?.name} 👋
-            </FadeInText>
+    <>
+      <HeaderRNE
+        containerStyle={{
+          backgroundColor: "#D7C4EB", // soft lilac or any color you want
+          borderBottomWidth: 0,
+          paddingTop: 10,
+        }}
+        leftComponent={
+          <TouchableOpacity>
+            <Icon name="home" type="ionicon" color="#5A3E9B" />
+          </TouchableOpacity>
+        }
+        centerComponent={{
+          text: "",
+          style: {
+            color: "#3e2a6e",
+            fontSize: 20,
+            fontWeight: "bold",
+            fontFamily: "Main-font",
+          },
+        }}
+        rightComponent={
+          <View style={styles.headerRight}>
+            <TouchableOpacity onPress={() => handleNavigate("/manageWidgets")}>
+              <Icon name="grid" type="feather" color="#5A3E9B" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{ marginLeft: 12 }}
+              onPress={() => handleNavigate("/settings")}
+            >
+              <Icon name="settings" type="feather" color="#5A3E9B" />
+            </TouchableOpacity>
+          </View>
+        }
+      />
 
-            <View style={styles.snapshotContainer}>
-              <Text style={styles.snapshotTitle}>Today's Quote</Text>
-              <Text>Quote will be here</Text>
-            </View>
-            <DeleteButton />
-            <LogoutButton />
-            <View style={{ alignItems: "center" }}>
-             
+      <SafeAreaView style={styles.container}>
+        <FlatList
+          style={styles.cont}
+          data={[{ key: "dashboard" }]}
+          renderItem={() => (
+            <View>
+              <Text style={styles.title}>Hello, {userPreferences.name} 👋</Text>
+
+              <Animated.View style={{ transform: [{ translateY: slideAnim }] }}>
+                <View style={styles.card}>
+                  <Text style={styles.sectionTitle}>Today's Quote</Text>
+                  <Text style={styles.quote}>
+                    “Your body is your home — treat it gently.”
+                  </Text>
+                </View>
+              </Animated.View>
+
               {userPreferences.moodCheckIn && (
                 <LogMoodButton
-                  onPress={handleLogMood}
+                  onPress={() => handleNavigate("/mood")}
                   isLogged={hasLoggedToday}
                 />
               )}
-            </View>
-            {/* <WaterTracker /> */}
-            <Button onPress={handleLogMeal} title="Log Meal" />
-            <Button onPress={handleSettings} title="Settings" />
-            <MoodCalendar />
-            <TakeQuizButton onPress={handleQuizPress} />
+              <ScrollView contentContainerStyle={styles.widgets}>
+                <View style={styles.gridContainer}>
+                  {enabledWidgets.includes("water") && <WaterWidget />}
+                  {enabledWidgets.includes("mood") && <MoodWidget />}
+                  {enabledWidgets.includes("journal") && <JournalWidget />}
+                  {enabledWidgets.includes("fitness") && <FitnessWidget />}
+                  {enabledWidgets.includes("nutrition") && <NutritionWidget />}
+                </View>
+              </ScrollView>
 
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <AddWidgetButton />
-            </View>
+              <Button
+                title="Log Meal"
+                onPress={() => handleNavigate("/nurtition")}
+              />
+              <Button
+                title="Settings"
+                onPress={() => handleNavigate("/settings")}
+              />
 
-            <RecommendedWidgetsBanner />
+              <MoodCalendar />
+              <TakeQuizButton
+                onPress={() => handleNavigate("/quizzes/screening")}
+              />
 
-            <View style={{ marginTop: 20 }}>
-              <Button title="Reset Onboarding" onPress={resetOnboarding} />
-              <Button title="Personalise" onPress={handlePersonalize} />
+              <RecommendedWidgetsBanner />
+
+              <View style={styles.card}>
+                {/* <Button title="Reset Onboarding" onPress={() => handleNavigate("/utils/resetOnboarding")} /> */}
+                {!hasCompletedScreening && (
+                  <Button
+                    title="Personalise"
+                    onPress={() => handleNavigate("/quizzes/screening")}
+                  />
+                )}
+              </View>
+
+              <DeleteButton />
+              <LogoutButton />
             </View>
-          </View>
-        )}
-        keyExtractor={(item) => item.key}
-        contentContainerStyle={{ paddingBottom: 30 }}
-        ListFooterComponent={<View style={{ height: 50 }} />}
-      />
-    </SafeAreaView>
+          )}
+          keyExtractor={(item) => item.key}
+          contentContainerStyle={{ paddingBottom: 30 }}
+        />
+      </SafeAreaView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: "#F8F9FA",
+    backgroundColor: "#f8f6f4",
     flexGrow: 1,
   },
-  title: {
-    fontSize: 38,
-    fontWeight: "bold",
-    textAlign: "center",
-    fontFamily: "Title-font-regular",
-  },
-  header: {
-    fontSize: 28,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  snapshotContainer: {
-    backgroundColor: "#f5f5f5",
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 20,
-  },
-  snapshotTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    marginBottom: 10,
-  },
-  snapshotText: {
-    fontSize: 16,
-    marginBottom: 5,
-  },
-  actionsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  actionButton: {
+  loadingContainer: {
     flex: 1,
-    backgroundColor: "#007AFF",
-    padding: 12,
-    marginHorizontal: 5,
-    borderRadius: 8,
+    justifyContent: "center",
     alignItems: "center",
+    padding: 20,
   },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "600",
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: "#666",
   },
-  recommendationContainer: {
-    backgroundColor: "#e0f7fa",
-    padding: 15,
-    borderRadius: 8,
+  title: {
+    fontSize: 32,
+    fontWeight: "bold",
+    // textAlign: "center",
+    fontFamily: "Patrickhand-regular",
+    marginBottom: 20,
   },
-  recommendationTitle: {
+  widgets: {
+    paddingVertical: 20,
+  },
+  gridContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between", // Or "space-between" if you want gaps
+    gap: 12, // Optional: adds spacing between cards (for newer RN versions)
+  },
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
-    marginBottom: 5,
+    marginBottom: 8,
   },
-  recommendationText: {
+  quote: {
+    fontStyle: "italic",
+    color: "#555",
+  },
+  cont: {
+    padding: 20,
+  },
+  headerContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#397af8",
+    marginBottom: 20,
+    width: "100%",
+    paddingVertical: 15,
+  },
+  heading: {
+    color: "white",
+    fontSize: 22,
+    fontWeight: "bold",
+  },
+  headerRight: {
+    display: "flex",
+    flexDirection: "row",
+    marginTop: 5,
+  },
+  subheaderText: {
+    color: "white",
     fontSize: 16,
+    fontWeight: "bold",
   },
 });

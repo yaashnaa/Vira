@@ -73,3 +73,7 @@ export const isQuizComplete = async (): Promise<boolean> => {
   const value = await AsyncStorage.getItem(QUIZ_KEY);
   return value === 'true';
 };
+export async function isScreeningQuizComplete(): Promise<boolean> {
+  const value = await AsyncStorage.getItem("@screening_quiz_complete");
+  return value === "true";
+}

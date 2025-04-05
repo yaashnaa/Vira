@@ -323,7 +323,6 @@ export default function BasicQuiz() {
                 "Weight management or body recomposition",
                 "Improve mental well-being",
                 "Build consistent eating habits",
-
                 "Enhance social connections or community support",
                 "Learn about nutrition and healthy eating",
                 "Track progress and set goals",

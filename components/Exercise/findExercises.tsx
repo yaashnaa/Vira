@@ -7,21 +7,14 @@ import {
   ActivityIndicator,
   FlatList,
 } from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
-import { Header as HeaderRNE, HeaderProps, Icon } from "@rneui/themed";
 import { Button, Card, Chip } from "react-native-paper";
 import { useMoodContext } from "@/context/moodContext";
 import { useUserPreferences } from "@/context/userPreferences";
-import {
-  fetchExerciseData,
-  ExerciseProps,
-} from "@/utils/api/fetchExerciseData";
-import { useRouter } from "expo-router";
+import { fetchExerciseData, ExerciseProps } from "@/utils/api/fetchExerciseData";
 
 export default function FitnessScreen() {
   const { userPreferences } = useUserPreferences();
   const { mood } = useMoodContext();
-  const router = useRouter();
 
   const [loading, setLoading] = useState(false);
   const [exercises, setExercises] = useState<ExerciseProps[]>([]);
@@ -49,9 +42,6 @@ export default function FitnessScreen() {
     "powerlifting",
     "plyometrics",
   ];
-  const handleBackPress = () => {
-    router.replace("/dashboard");
-  };
 
   const difficultyOptions = ["beginner", "intermediate", "expert"];
 
@@ -112,103 +102,107 @@ export default function FitnessScreen() {
       const results = await fetchExerciseData(muscle, type, difficulty);
       setExercises(results);
     } catch (error) {
-      console.error("🔥 Error fetching exercises:", error);
+      console.error("Error fetching exercises:", error);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <>
-      <HeaderRNE
-        containerStyle={{
-          backgroundColor: "#D7C4EB", // soft lilac or any color you want
-          borderBottomWidth: 0,
-          paddingTop: 10,
-        }}
-        leftComponent={
-          <TouchableOpacity onPress={handleBackPress}>
-            <Icon name="arrow-back" size={25} type="ionicon" color="#5A3E9B" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "NUTRITION",
-          style: {
-            color: "#271949",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "PatrickHand-Regular",
-          },
-        }}
-        rightComponent={
-          <View style={styles.headerRight}>
-            <TouchableOpacity
-              style={{ marginLeft: 12 }}
-              onPress={handleBackPress}
-            >
-              <Icon name="settings" size={25} type="feather" color="#5A3E9B" />
-            </TouchableOpacity>
-          </View>
-        }
-      />
-      <ScrollView contentContainerStyle={styles.container}>
-        {mood !== null && (
-          <Text
-            style={{ fontStyle: "italic", marginBottom: 10, color: "#666" }}
+    <ScrollView contentContainerStyle={styles.container}>
+      {mood !== null && (
+        <Text style={{ fontStyle: "italic", marginBottom: 10, color: "#666" }}>
+          Suggestions based on how you're feeling today 💜
+        </Text>
+      )}
+
+      <Text style={styles.filterLabel}>Muscle Group</Text>
+      <View style={styles.chipContainer}>
+        {muscleOptions.map((item) => (
+          <Chip
+            key={item}
+            selected={muscle === item}
+            onPress={() => setMuscle(muscle === item ? "" : item)}
+            style={styles.chip}
+            selectedColor="#000000"
+            showSelectedOverlay={true}
+            textStyle={styles.chipText}
           >
-            Suggestions based on how you're feeling today 💜
-          </Text>
-        )}
+            {item}
+          </Chip>
+        ))}
+      </View>
 
-        <Button
-          mode="contained"
-          onPress={fetchExercises}
-          style={styles.button}
-          disabled={loading}
-        >
-          {loading ? "Loading..." : "See Exercises"}
-        </Button>
+      <Text style={styles.filterLabel}>Type</Text>
+      <View style={styles.chipContainer}>
+        {typeOptions.map((item) => (
+          <Chip
+            key={item}
+            selected={type === item}
+            onPress={() => setType(type === item ? "" : item)}
+            style={styles.chip}
+            selectedColor="#000000"
+            showSelectedOverlay={true}
+            textStyle={styles.chipText}
+          >
+            {item}
+          </Chip>
+        ))}
+      </View>
 
-        {loading && (
-          <ActivityIndicator size="large" style={{ marginTop: 20 }} />
-        )}
+      <Text style={{ fontStyle: "italic", color: "#666", marginBottom: 10 }}>
+        Based on your physical health, we've suggested {difficulty} exercises.
+      </Text>
 
-        {exercises.length > 0 && (
-          <>
-            <Text style={styles.filterLabel}>Today's Suggestions</Text>
-            <FlatList
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              data={exercises.slice(0, 2)}
-              keyExtractor={(_, index) => index.toString()}
-              contentContainerStyle={styles.resultsContainer}
-              renderItem={({ item }) => (
-                <Card style={styles.card}>
-                  <Card.Title title={item.name} subtitle={item.type} />
-                  <Card.Content>
-                    <Text style={styles.label}>Muscle:</Text>
-                    <Text>{item.muscle}</Text>
-                    <Text style={styles.label}>Difficulty:</Text>
-                    <Text>{item.difficulty}</Text>
-                    <Text style={styles.label}>Instructions:</Text>
-                    <Text>{item.instructions}</Text>
-                  </Card.Content>
-                </Card>
-              )}
-            />
-            <Button
-              mode="outlined"
-              style={styles.button}
-              onPress={() =>
-                router.push("../components/Exercise/findExercises.tsx")
-              }
-            >
-              Find More Exercises
-            </Button>
-          </>
+      <Text style={styles.filterLabel}>Difficulty</Text>
+      <View style={styles.chipContainer}>
+        {difficultyOptions.map((item) => (
+          <Chip
+            key={item}
+            selected={difficulty === item}
+            onPress={() => setDifficulty(difficulty === item ? "" : item)}
+            style={styles.chip}
+            selectedColor="#000000"
+            showSelectedOverlay={true}
+            textStyle={styles.chipText}
+          >
+            {item}
+          </Chip>
+        ))}
+      </View>
+
+      <Button
+        mode="contained"
+        onPress={fetchExercises}
+        style={styles.button}
+        disabled={loading}
+      >
+        {loading ? "Loading..." : "Search"}
+      </Button>
+
+      {loading && <ActivityIndicator size="large" style={{ marginTop: 20 }} />}
+
+      <FlatList
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        data={exercises}
+        keyExtractor={(_, index) => index.toString()}
+        contentContainerStyle={styles.resultsContainer}
+        renderItem={({ item }) => (
+          <Card style={styles.card}>
+            <Card.Title title={item.name} subtitle={item.type} />
+            <Card.Content>
+              <Text style={styles.label}>Muscle:</Text>
+              <Text>{item.muscle}</Text>
+              <Text style={styles.label}>Difficulty:</Text>
+              <Text>{item.difficulty}</Text>
+              <Text style={styles.label}>Instructions:</Text>
+              <Text>{item.instructions}</Text>
+            </Card.Content>
+          </Card>
         )}
-      </ScrollView>
-    </>
+      />
+    </ScrollView>
   );
 }
 
@@ -216,14 +210,29 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     backgroundColor: "#F8F9FA",
-    color: "black",
   },
   filterLabel: {
-    fontSize: 22,
+    fontSize: 16,
     fontWeight: "600",
     marginTop: 20,
     marginBottom: 8,
+    fontFamily: "Main-font",
+  },
+  chipContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 10,
+  },
+  chip: {
+    margin: 4,
+    backgroundColor: "#f2e6ff",
+  },
+  chipText: {
     fontFamily: "Comfortaa-regular",
+    fontWeight: "600",
+    fontSize: 12,
+    color: "#5A3E9B",
   },
   button: {
     marginVertical: 16,
@@ -237,19 +246,11 @@ const styles = StyleSheet.create({
     marginRight: 16,
     width: 300,
     borderRadius: 12,
-    color: "black",
     backgroundColor: "#ffffff",
   },
   label: {
     fontWeight: "600",
     marginTop: 8,
-    fontSize: 16,
-    fontFamily: "Comfortaa-regular",
-    color: "black",
-  },
-  headerRight: {
-    display: "flex",
-    flexDirection: "row",
-    marginTop: 5,
+    fontFamily: "Main-font",
   },
 });

@@ -1,35 +1,56 @@
-// SplashScreenComponent.tsx
-import React, { useEffect } from "react";
-import { View, Image } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { View, StyleSheet, Dimensions } from "react-native";
+import { Video, ResizeMode } from "expo-av";
 import * as SplashScreen from "expo-splash-screen";
+
+const { width } = Dimensions.get("window");
 
 interface SplashScreenProps {
   onFinish: () => void;
 }
 
 export default function SplashScreenComponent({ onFinish }: SplashScreenProps) {
+  const videoRef = useRef<Video>(null);
+
   useEffect(() => {
     const run = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // 2 sec delay
-      await SplashScreen.hideAsync();
-      onFinish(); // Tell Index.tsx we're done
+      try {
+        await SplashScreen.preventAutoHideAsync();
+        await new Promise((resolve) => setTimeout(resolve, 4000)); // wait 2 seconds
+        onFinish(); // Signal to the app that splash is done
+        await SplashScreen.hideAsync(); // Now hide splash screen
+      } catch (e) {
+        console.error("Error during splash screen logic:", e);
+      }
     };
+
     run();
   }, []);
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#ffffff",
-      }}
-    >
-      <Image
-        source={require("../assets/images/vira.gif")}
-        style={{ width: 500, height: 500 }}
+    <View style={styles.container}>
+      <Video
+        ref={videoRef}
+        source={require("../assets/images/Vira(2).mp4")}
+        style={styles.video}
+        resizeMode={ResizeMode.CONTAIN}
+        shouldPlay
+        isLooping
+        useNativeControls={false}
       />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  video: {
+    width: width,
+    height: width,
+  },
+});
