@@ -7,15 +7,17 @@ import {
   ActivityIndicator,
   FlatList,
 } from "react-native";
+import { Header as HeaderRNE, Icon } from "@rneui/themed";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import { Button, Card, Chip } from "react-native-paper";
 import { useMoodContext } from "@/context/moodContext";
 import { useUserPreferences } from "@/context/userPreferences";
 import { fetchExerciseData, ExerciseProps } from "@/utils/api/fetchExerciseData";
-
+import { useRouter } from "expo-router";
 export default function FitnessScreen() {
   const { userPreferences } = useUserPreferences();
   const { mood } = useMoodContext();
-
+const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [exercises, setExercises] = useState<ExerciseProps[]>([]);
   const [muscle, setMuscle] = useState("");
@@ -108,25 +110,52 @@ export default function FitnessScreen() {
     }
   };
 
-  return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {mood !== null && (
-        <Text style={{ fontStyle: "italic", marginBottom: 10, color: "#666" }}>
-          Suggestions based on how you're feeling today 💜
-        </Text>
-      )}
+  const handleBackPress = () => {
+    router.replace("/fitness");
+  };
 
+  return (
+    <>
+    <HeaderRNE
+          containerStyle={{
+            backgroundColor: "#f8edeb",
+            borderBottomWidth: 0,
+            paddingTop: 10,
+          }}
+          leftComponent={
+            <TouchableOpacity onPress={handleBackPress}>
+              <Icon
+                name="arrow-back"
+                size={25}
+                type="ionicon"
+                color="#271949"
+              />
+            </TouchableOpacity>
+          }
+          centerComponent={{
+            text: "FIND EXERCISES",
+            style: {
+              color: "#271949",
+              fontSize: 20,
+              fontWeight: "bold",
+              fontFamily: "PatrickHand-Regular",
+            },
+          }}
+        />
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.filterLabel}>Muscle Group</Text>
       <View style={styles.chipContainer}>
         {muscleOptions.map((item) => (
           <Chip
             key={item}
+            mode="outlined"
             selected={muscle === item}
             onPress={() => setMuscle(muscle === item ? "" : item)}
             style={styles.chip}
+            textStyle={[styles.chipText, { textTransform: "capitalize" }]}
             selectedColor="#000000"
             showSelectedOverlay={true}
-            textStyle={styles.chipText}
+ 
           >
             {item}
           </Chip>
@@ -138,12 +167,13 @@ export default function FitnessScreen() {
         {typeOptions.map((item) => (
           <Chip
             key={item}
+            mode="outlined"
             selected={type === item}
             onPress={() => setType(type === item ? "" : item)}
             style={styles.chip}
             selectedColor="#000000"
             showSelectedOverlay={true}
-            textStyle={styles.chipText}
+            textStyle={[styles.chipText, { textTransform: "capitalize" }]}
           >
             {item}
           </Chip>
@@ -159,12 +189,14 @@ export default function FitnessScreen() {
         {difficultyOptions.map((item) => (
           <Chip
             key={item}
+            mode="outlined"
+            style={styles.chip}
             selected={difficulty === item}
             onPress={() => setDifficulty(difficulty === item ? "" : item)}
-            style={styles.chip}
+            textStyle={[styles.chipText, { textTransform: "capitalize" }]}
             selectedColor="#000000"
             showSelectedOverlay={true}
-            textStyle={styles.chipText}
+        
           >
             {item}
           </Chip>
@@ -203,6 +235,8 @@ export default function FitnessScreen() {
         )}
       />
     </ScrollView>
+    </>
+
   );
 }
 
@@ -226,13 +260,13 @@ const styles = StyleSheet.create({
   },
   chip: {
     margin: 4,
-    backgroundColor: "#f2e6ff",
+    backgroundColor: "#ffffff",
   },
   chipText: {
-    fontFamily: "Comfortaa-regular",
+    fontFamily: "Main-font",
     fontWeight: "600",
     fontSize: 12,
-    color: "#5A3E9B",
+    color: "#0e0524",
   },
   button: {
     marginVertical: 16,

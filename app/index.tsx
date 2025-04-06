@@ -14,28 +14,27 @@ export default function Index() {
   useEffect(() => {
     if (!showSplash && fontsLoaded) {
       const checkAndRoute = async () => {
-        const onboardingComplete = await AsyncStorage.getItem(
-          "@onboardingComplete"
-        );
         const loggedIn = await AsyncStorage.getItem("@loggedIn");
-
-        if (!onboardingComplete) {
-          router.replace("/OnBoarding");
-        } else if (loggedIn === "true") {
+  
+        console.log("🔐 Logged in?", loggedIn);
+  
+        if (loggedIn === "true") {
           router.replace("/dashboard");
         } else {
-          router.replace("/login");
+          router.replace("/OnBoarding"); // always go to onboarding and let it decide what to show
         }
       };
-
+  
       checkAndRoute();
     }
   }, [showSplash, fontsLoaded]);
+  
+  
 
   if (showSplash && fontsLoaded) {
     return (
       <>
-        <SplashScreenComponent onFinish={() => setShowSplash(false)} />;
+        <SplashScreenComponent onFinish={() => setShowSplash(false)} />
       </>
     );
   }

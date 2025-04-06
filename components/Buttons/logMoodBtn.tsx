@@ -34,7 +34,7 @@ export default function LogMoodButton({
         <Text style={styles.recommendationText}>
           {`You indicated you ${getMoodDisplay(mood)} Here's something that might help:`}
         </Text>
-        {/* 🎯 Replace this with any component or suggestion */}
+
         <Text style={styles.suggestion}>🌿 Try a short breathing exercise</Text>
       </View>
     );
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   },
   
   recommendationText: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: "Main-font",
     marginBottom: 8,
     color: "#333",

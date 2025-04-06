@@ -1,9 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal, Pressable, ScrollView } from 'react-native';
-import { collection, getDocs } from 'firebase/firestore';
-import { auth, db } from '@/config/firebaseConfig';
-import dayjs from 'dayjs';
-import { useUserPreferences } from '@/context/userPreferences';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Modal,
+  Pressable,
+  ScrollView,
+} from "react-native";
+import { collection, getDocs } from "firebase/firestore";
+import { auth, db } from "@/config/firebaseConfig";
+import dayjs from "dayjs";
+import { useUserPreferences } from "@/context/userPreferences";
 
 interface Meal {
   id: string;
@@ -41,7 +49,7 @@ const ViewLoggedMeals: React.FC = () => {
           const docDate = dayjs(data.timestamp?.toDate()).format("YYYY-MM-DD");
           const meal = {
             id: doc.id,
-            name: data.description || 'Meal',
+            name: data.description || "Meal",
             calories: data.nutrition?.calories || 0,
             date: docDate,
           };
@@ -64,7 +72,10 @@ const ViewLoggedMeals: React.FC = () => {
 
   return (
     <View style={styles.wrapper}>
-      <Pressable style={styles.openButton} onPress={() => setModalVisible(true)}>
+      <Pressable
+        style={styles.openButton}
+        onPress={() => setModalVisible(true)}
+      >
         <Text style={styles.openButtonText}>View Logged Meals</Text>
       </Pressable>
       <Modal visible={modalVisible} animationType="slide">
@@ -73,13 +84,20 @@ const ViewLoggedMeals: React.FC = () => {
           <ScrollView>
             {meals.map((meal) => (
               <View key={meal.id} style={styles.mealContainer}>
-                <TouchableOpacity onPress={() => toggleMealDetails(meal.id)} style={styles.mealHeader}>
+                <TouchableOpacity
+                  onPress={() => toggleMealDetails(meal.id)}
+                  style={styles.mealHeader}
+                >
                   <Text style={styles.mealName}>{meal.name}</Text>
-                  <Text style={styles.toggleText}>{expandedMealId === meal.id ? '-' : '+'}</Text>
+                  <Text style={styles.toggleText}>
+                    {expandedMealId === meal.id ? "-" : "+"}
+                  </Text>
                 </TouchableOpacity>
                 {expandedMealId === meal.id && (
                   <View style={styles.mealDetails}>
-                    {userPreferences?.calorieViewing && <Text>Calories: {meal.calories}</Text>}
+                    {userPreferences?.calorieViewing && (
+                      <Text>Calories: {meal.calories}</Text>
+                    )}
                     <Text>Date: {meal.date}</Text>
                   </View>
                 )}
@@ -87,25 +105,38 @@ const ViewLoggedMeals: React.FC = () => {
             ))}
 
             <Pressable onPress={() => setShowPrevious(!showPrevious)}>
-              <Text style={styles.expandToggle}>{showPrevious ? 'Hide' : 'Show'} Previous Logged Meals</Text>
+              <Text style={styles.expandToggle}>
+                {showPrevious ? "Hide" : "Show"} Previous Logged Meals
+              </Text>
             </Pressable>
 
-            {showPrevious && previousMeals.map((meal) => (
-              <View key={meal.id} style={styles.mealContainer}>
-                <TouchableOpacity onPress={() => toggleMealDetails(meal.id)} style={styles.mealHeader}>
-                  <Text style={styles.mealName}>{meal.name}</Text>
-                  <Text style={styles.toggleText}>{expandedMealId === meal.id ? '-' : '+'}</Text>
-                </TouchableOpacity>
-                {expandedMealId === meal.id && (
-                  <View style={styles.mealDetails}>
-                    {userPreferences?.calorieViewing && <Text>Calories: {meal.calories}</Text>}
-                    <Text>Date: {meal.date}</Text>
-                  </View>
-                )}
-              </View>
-            ))}
+            {showPrevious &&
+              previousMeals.map((meal) => (
+                <View key={meal.id} style={styles.mealContainer}>
+                  <TouchableOpacity
+                    onPress={() => toggleMealDetails(meal.id)}
+                    style={styles.mealHeader}
+                  >
+                    <Text style={styles.mealName}>{meal.name}</Text>
+                    <Text style={styles.toggleText}>
+                      {expandedMealId === meal.id ? "-" : "+"}
+                    </Text>
+                  </TouchableOpacity>
+                  {expandedMealId === meal.id && (
+                    <View style={styles.mealDetails}>
+                      {userPreferences?.calorieViewing && (
+                        <Text>Calories: {meal.calories}</Text>
+                      )}
+                      <Text>Date: {meal.date}</Text>
+                    </View>
+                  )}
+                </View>
+              ))}
           </ScrollView>
-          <Pressable onPress={() => setModalVisible(false)} style={styles.closeButton}>
+          <Pressable
+            onPress={() => setModalVisible(false)}
+            style={styles.closeButton}
+          >
             <Text style={styles.closeText}>Close</Text>
           </Pressable>
         </View>
@@ -117,67 +148,67 @@ const ViewLoggedMeals: React.FC = () => {
 const styles = StyleSheet.create({
   wrapper: {
     padding: 16,
-    alignItems: 'center',
+    alignItems: "center",
   },
   openButton: {
-    backgroundColor: '#C3B1E1',
+    backgroundColor: "#C3B1E1",
     padding: 12,
     borderRadius: 8,
   },
   openButtonText: {
     fontSize: 16,
-    color: 'black',
-    fontWeight: '600',
+    color: "black",
+    fontWeight: "600",
   },
   modalContainer: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   modalTitle: {
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 10,
-    textAlign: 'center',
+    textAlign: "center",
   },
   mealContainer: {
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 8,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   mealHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     padding: 12,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#f0f0f0",
   },
   mealName: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   toggleText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   mealDetails: {
     padding: 12,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   expandToggle: {
-    textAlign: 'center',
+    textAlign: "center",
     marginVertical: 10,
-    color: '#5A67D8',
-    fontWeight: 'bold',
+    color: "#5A67D8",
+    fontWeight: "bold",
   },
   closeButton: {
     marginTop: 20,
-    alignSelf: 'center',
+    alignSelf: "center",
     padding: 10,
   },
   closeText: {
-    color: '#390a84',
+    color: "#390a84",
     fontSize: 16,
   },
 });

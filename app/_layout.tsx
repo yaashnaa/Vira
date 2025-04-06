@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, View, LogBox } from "react-native";
 import { Stack, useRouter, Slot, Link } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../config/firebaseConfig";
@@ -8,8 +8,13 @@ import { UserPreferencesProvider } from "../context/userPreferences";
 import { MoodProvider } from "@/context/moodContext";
 import { Provider } from "react-native-paper";
 import "react-native-get-random-values";
+import { MealLogProvider } from "@/context/mealLogContext";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+LogBox.ignoreLogs([
+  "Support for defaultProps will be removed from function components",
+  "Text strings must be rendered within a <Text> component."
+]);
 export default function RootLayout() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -26,7 +31,7 @@ export default function RootLayout() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setIsAuthenticated(true);
-        router.replace("/(auth)/welcome");
+        router.replace("/dashboard");
       } else {
         setIsAuthenticated(false);
         router.replace("/(auth)/login");
@@ -45,7 +50,9 @@ export default function RootLayout() {
       <Provider>
         <UserPreferencesProvider>
           <MoodProvider>
-            <Slot />
+            <MealLogProvider>
+              <Slot />
+            </MealLogProvider>
           </MoodProvider>
         </UserPreferencesProvider>
       </Provider>
@@ -73,15 +80,3 @@ function ManageWidgets() {
   );
 }
 
-function SettingsButton() {
-  return (
-    <Link href="/settings">
-      <Ionicons
-        name="settings"
-        size={24}
-        color="black"
-        style={{ marginRight: 15, marginLeft: 15 }}
-      />
-    </Link>
-  );
-}

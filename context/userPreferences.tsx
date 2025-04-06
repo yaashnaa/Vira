@@ -16,7 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { saveUserPreferences } from "../utils/firestore";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../config/firebaseConfig";
-import { loadPreferencesLocally, storePreferencesLocally } from "../utils/asyncStorage";
+
 
 export interface UserPreferences {
   name: string;
@@ -147,7 +147,6 @@ export const UserPreferencesProvider = ({
       const updated = { ...prev, ...newPreferences };
   
       if (userId) {
-        storePreferencesLocally(userId, updated); // ✅ save locally
         saveUserPreferences(userId, updated);     // ✅ only save the merged version
       }
   

@@ -2,6 +2,7 @@ import React from "react";
 import { useRouter, Link } from "expo-router";
 import WidgetCard from "../widgetCard";
 import { Icon } from "@rneui/themed";
+import { Header as HeaderRNE } from "@rneui/themed";
 import { Pressable, StyleSheet, View } from "react-native";
 interface MindfullnessWidgetProps {
   onRemove?: () => void;
@@ -12,7 +13,7 @@ const MindfullnessWidget: React.FC<MindfullnessWidgetProps> = ({
 }) => {
   const router = useRouter();
   const handlePress = () => {
-    router.replace("/nurtition");
+    router.replace("/mindfullness");
   };
 
   return (
@@ -36,8 +37,8 @@ const styles = StyleSheet.create({
   },
   removeIcon: {
     position: "absolute",
-    top: 0,
-    right: 6,
+    top: 20,
+    right: 20,
     zIndex: 1,
   },
 });

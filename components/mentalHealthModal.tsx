@@ -100,7 +100,7 @@ export default function MentalHealthCheckboxModal({
         </Text>
       </TouchableOpacity>
 
-      {/* Modal for checkbox selection */}
+
       <Modal visible={showModal} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
@@ -123,7 +123,6 @@ export default function MentalHealthCheckboxModal({
                 </TouchableOpacity>
               ))}
 
-              {/* Animated input for "Other" */}
               {mentalDisorder.includes("Other") && (
                 <Animated.View style={{ opacity: fadeAnim }}>
                   <Text

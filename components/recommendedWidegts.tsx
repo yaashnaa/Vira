@@ -7,42 +7,44 @@ import {
   Dimensions,
   ScrollView,
 } from "react-native";
+
+import { getEnabledWidgets, addWidget } from "@/utils/widgetStorage";
 import WidgetCardWithAction from "./widgetCardWithAction";
 import { IconButton } from "react-native-paper";
 import { useUserPreferences } from "@/context/userPreferences";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import { auth } from "@/config/firebaseConfig";
 const STORAGE_KEY = "@enabledWidgets";
 
 const recommendedWidgets = [
   {
-    id: "1",
+    id: "nutrition",
     title: "Nutrition",
     image: require("../assets/images/widgets/diet.png"),
     link: "../app/nutrition.tsx",
   },
   {
-    id: "2",
+    id: "mindfulness",
     title: "Mindfullness",
     image: require("../assets/images/widgets/yoga.png"),
   },
   {
-    id: "3",
+    id: "water",
     title: "Water Intake",
     image: require("../assets/images/widgets/water.png"),
   },
   {
-    id: "4",
+    id: "fitness",
     title: "Fitness",
     image: require("../assets/images/widgets/triangle.png"),
   },
   {
-    id: "5",
+    id: "journal",
     title: "Journal",
     image: require("../assets/images/widgets/notebook.png"),
   },
   {
-    id: "6",
+    id: "mood",
     title: "Mood Tracker",
     image: require("../assets/images/widgets/mood.png"),
   },
@@ -62,60 +64,62 @@ export default function RecommendedWidgetsBanner({
   const [enabledWidgets, setEnabledWidgets] = useState<string[]>([]);
 
   useEffect(() => {
-    const fetchWidgets = async () => {
-      const stored = await AsyncStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setEnabledWidgets(JSON.parse(stored));
-      }
+    const loadWidgets = async () => {
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+      const stored = await getEnabledWidgets(uid);
+      setEnabledWidgets(stored);
     };
-    fetchWidgets();
+    loadWidgets();
   }, [triggerRefresh]);
 
-  const handleAddWidget = async (widgetTitle: string) => {
-    const widgetId = widgetTitle.toLowerCase(); // normalize
-    if (enabledWidgets.includes(widgetId)) return;
-
-    const updatedWidgets = [...enabledWidgets, widgetId];
-    setEnabledWidgets(updatedWidgets);
-
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedWidgets));
-  };
+  useEffect(() => {
+    const loadWidgets = async () => {
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+      const stored = await getEnabledWidgets(uid);
+      setEnabledWidgets(stored);
+    };
+    loadWidgets();
+  }, [triggerRefresh]);
 
   const goals = userPreferences?.primaryGoals || [];
   const widgetPriorityMap: Record<string, string> = {
-    "Learn about nutrition and healthy eating": "Nutrition",
-    "Improve mindfulness or self-care habits": "Mindfullness",
-    "General fitness/health": "Exercise",
-    "Track progress and set goals": "Journal",
-    "Weight management or body recomposition": "Nutrition",
-    "Enhance social connections or community support": "Journal",
-    "Build consistent eating habits": "Nutrition",
-    "Improve mental well-being": "Mindfullness",
+    "Learn about nutrition and healthy eating": "nutrition",
+    "Improve mindfulness or self-care habits": "mindfullness",
+    "General fitness/health": "fitness",
+    "Track progress and set goals": "journal",
+    "Weight management or body recomposition": "nutrition",
+    "Enhance social connections or community support": "journal",
+    "Build consistent eating habits": "nutrition",
+    "Improve mental well-being": "mindfullness",
   };
 
   const goalBasedWidgetTitles = goals
     .map((goal) => widgetPriorityMap[goal])
     .filter(Boolean);
 
-  const sortedWidgets = [
-    ...goalBasedWidgetTitles,
-    ...recommendedWidgets.map((w) => w.title),
-  ];
+    const sortedWidgets = [
+      ...goalBasedWidgetTitles,
+      ...recommendedWidgets.map((w) => w.id),
+    ];
+    
 
   const deduplicatedSortedWidgets = Array.from(new Set(sortedWidgets));
 
   const prioritizedWidgets = deduplicatedSortedWidgets
-    .map((title) =>
+    .map((id) =>
       recommendedWidgets.find(
-        (widget) =>
-          widget.title.toLowerCase() === title.toLowerCase() &&
-          !enabledWidgets.includes(widget.title.toLowerCase())
+        (widget) => widget.id === id && !enabledWidgets.includes(widget.id)
       )
     )
-    .filter(Boolean);
+    .filter((widget): widget is typeof recommendedWidgets[0] => widget !== undefined);
+
   console.log("📦 Recommended left:", prioritizedWidgets.length);
   console.log("📦 Recommended widgets:", prioritizedWidgets);
-
+  console.log("🧩 Enabled widgets:", enabledWidgets);
+  console.log("🧠 Sorted candidates:", sortedWidgets);
+  
   if (prioritizedWidgets.length === 0) return null;
 
   return (
@@ -126,20 +130,17 @@ export default function RecommendedWidgetsBanner({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollRow}
       >
-        {prioritizedWidgets.map(
-          (widget) =>
-            widget && (
-              <WidgetCardWithAction
-                key={widget.id}
-                title={widget.title}
-                imageSource={widget.image}
-                onPress={() => onAddWidget?.(widget.title)}
-                onAction={() => onAddWidget?.(widget.title)}
-                actionIcon="plus-circle"
-                actionColor="#856ab0"
-              />
-            )
-        )}
+        {prioritizedWidgets.map((widget) => (
+          <WidgetCardWithAction
+            key={widget.id}
+            title={widget.title}
+            imageSource={widget.image}
+            onPress={() => onAddWidget?.(widget.id)}
+            onAction={() => onAddWidget?.(widget.id)}
+            actionIcon="plus-circle"
+            actionColor="#856ab0"
+          />
+        ))}
       </ScrollView>
     </View>
   );

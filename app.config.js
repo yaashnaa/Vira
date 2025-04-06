@@ -2,11 +2,11 @@ import "dotenv/config"; // loads from .env
 
 export default {
   expo: {
-    name: "test",
-    slug: "test",
+    name: "vira",
+    slug: "vira",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/images/vira.png",
+    icon: "./assets/images/Vira.png",
     scheme: "myapp",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
@@ -15,7 +15,7 @@ export default {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/images/vira.png",
+        foregroundImage: "./assets/images/Vira.png",
         backgroundColor: "#ffffff",
       },
     },

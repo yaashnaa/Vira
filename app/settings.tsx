@@ -4,23 +4,31 @@ import {
   Text,
   StyleSheet,
   TextInput,
-  Button,
   ScrollView,
   SafeAreaView,
-  
 } from "react-native";
+
 import {
   Appbar,
   Menu,
   RadioButton,
   Provider,
   Checkbox,
+  Divider,
+  Button,
+  Portal,
+  Modal,
 } from "react-native-paper";
+import { EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { resetOnboarding } from "@/utils/resetOnboarding";
 import { Header as HeaderRNE, HeaderProps, Icon } from "@rneui/themed";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebaseConfig"; // adjust path as needed
 import { getAuth } from "firebase/auth";
+import { signOut, deleteUser, sendPasswordResetEmail } from "firebase/auth";
 import MentalHealthCheckboxModal from "@/components/mentalHealthModal";
 import { storePreferencesLocally } from "../utils/asyncStorage"; // Adjust the path as necessary
 import BasicButton from "@/components/Buttons/basicButton";
@@ -119,7 +127,7 @@ export default function Settings() {
   const [showPhysicalMenu, setShowPhysicalMenu] = useState(false);
   const [showMoodCheckInMenu, setShowMoodCheckInMenu] = useState(false);
   const [showMacroMenu, setShowMacroMenu] = useState(false);
-
+  const [confirmDelete, setConfirmDelete] = useState(false);
   useEffect(() => {
     const checkScreening = async () => {
       const completed = await isScreeningQuizComplete();
@@ -158,6 +166,70 @@ export default function Settings() {
     setHideTriggers(userPreferences.triggerWarnings);
     setApproach(userPreferences.approach);
   }, [userPreferences]);
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.replace("/login");
+    } catch (error) {
+      console.error("🔥 Logout failed:", error);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (auth.currentUser?.email) {
+      try {
+        await sendPasswordResetEmail(auth, auth.currentUser.email);
+        alert("Password reset email sent!");
+      } catch (error) {
+        console.error("🔥 Reset email failed:", error);
+        alert("Failed to send reset email");
+      }
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user || !user.email) {
+        alert("No user is currently signed in.");
+        return;
+      }
+
+      // Prompt the user for password (or pass in securely from modal input)
+      const password = prompt(
+        "Please re-enter your password to confirm deletion."
+      ); // 👈🏽 Replace this with a secure password modal in production
+
+      if (!password) {
+        alert("Password required for deletion.");
+        return;
+      }
+
+      const credential = EmailAuthProvider.credential(user.email, password);
+
+      // Reauthenticate
+      await reauthenticateWithCredential(user, credential);
+
+      // Clear AsyncStorage
+      await AsyncStorage.clear();
+
+      // Delete account
+      await deleteUser(user);
+      setConfirmDelete(false);
+      router.replace("/signup");
+      alert("Your account has been deleted.");
+    } catch (error: any) {
+      console.error("🔥 Delete account failed:", error);
+
+      if (error.code === "auth/requires-recent-login") {
+        alert("Please re-login and try again.");
+      } else if (error.code === "auth/wrong-password") {
+        alert("Incorrect password.");
+      } else {
+        alert("Error deleting account. Try again.");
+      }
+    }
+  };
 
   const handleSave = async () => {
     const updated = {
@@ -211,13 +283,13 @@ export default function Settings() {
         );
         await setDoc(userDocRef, updated, { merge: true });
 
-        console.log("✅ Firestore updated for UID:", currentUser.uid);
+        console.log("Firestore updated for UID:", currentUser.uid);
 
         await storePreferencesLocally(currentUser.uid, {
           ...userPreferences,
           ...updated,
         });
-        console.log("✅ Preferences saved locally for UID:", currentUser.uid);
+        console.log("Preferences saved locally for UID:", currentUser.uid);
       }
 
       console.log("🎉 User Preferences Submitted & Stored!");
@@ -232,7 +304,7 @@ export default function Settings() {
   };
   return (
     <Provider>
-  <HeaderRNE
+      <HeaderRNE
         containerStyle={{
           backgroundColor: "#f8edeb", // soft lilac or any color you want
           borderBottomWidth: 0,
@@ -265,7 +337,6 @@ export default function Settings() {
       />
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.container}>
-  
           <View>
             <Text style={styles.label}>Name</Text>
             <TextInput
@@ -381,7 +452,6 @@ export default function Settings() {
             </View>
 
             <View>
-        
               <MentalHealthCheckboxModal
                 mentalDisorder={userPreferences.mentalHealthConditions ?? []}
                 setMentalDisorder={setMentalDisorder}
@@ -796,9 +866,34 @@ export default function Settings() {
           <BasicButton onPress={handleSave}>
             <Text style={{ color: "black" }}>Save Changes</Text>
           </BasicButton>
-
-          {/* Optionally, you can add a button to navigate back or to another screen */}
+          <Portal>
+            <Modal
+              visible={confirmDelete}
+              onDismiss={() => setConfirmDelete(false)}
+              contentContainerStyle={styles.confirmModal}
+            >
+              <Text style={styles.modalTitle}>Are you sure?</Text>
+              <Text style={styles.modalText}>
+                This will permanently delete your account and all saved data.
+                There's no undo.
+              </Text>
+              <Button
+                mode="contained"
+                onPress={handleDeleteAccount}
+                style={[styles.authButton, { backgroundColor: "#f8d7da" }]}
+              >
+                Yes, delete my account
+              </Button>
+              <Button onPress={() => setConfirmDelete(false)}>Cancel</Button>
+            </Modal>
+          </Portal>
         </ScrollView>
+        <View style={styles.buttons}>
+          <Button onPress={() => setConfirmDelete(true)}>Delete Account</Button>
+          <Button onPress={handleLogout}>Logout</Button>
+          <Button onPress={handleResetPassword}>Reset Password</Button>
+          <Button onPress={resetOnboarding} title="Reset" />
+        </View>
       </SafeAreaView>
     </Provider>
   );
@@ -809,6 +904,41 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 16,
     backgroundColor: "#ffffff",
+  },
+  buttonText: {
+    fontSize: 10,
+  },
+  confirmModal: {
+    backgroundColor: "#fff",
+    padding: 20,
+    margin: 20,
+    borderRadius: 12,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+    fontFamily: "Comfortaa-Regular",
+    color: "#180c37",
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
+    fontFamily: "Main-font",
+    color: "#333",
+  },
+  authButton: {
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttons: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    fontSize: 16,
+    justifyContent: "center",
   },
   title: {
     fontSize: 24,

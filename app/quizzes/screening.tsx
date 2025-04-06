@@ -19,7 +19,7 @@ import { useUserPreferences } from "../../context/userPreferences";
 import { useRouter } from "expo-router";
 import BasicQuiz from "./basic";
 import { lightTheme } from "@/config/theme";
-
+import AntDesign from '@expo/vector-icons/AntDesign';
 export default function QuizScreen() {
   const [step, setStep] = useState(0);
   const router = useRouter();
@@ -203,7 +203,7 @@ export default function QuizScreen() {
                 </Text>
                 <View style={styles.optionContainer}>
                   {[
-                    "Yes, I’m okay with logging (including approximate calories or macros).",
+                    "Yes, I’m okay with logging.",
                     "I’d prefer to log only general descriptions of meals.",
                     "I’m not comfortable logging meals.",
                     "Not sure yet.",
@@ -571,7 +571,7 @@ export default function QuizScreen() {
               <Text style={styles.sectionTitle}>Review & Submit</Text>
               <Text>Review your responses and submit your quiz.</Text>
 
-              {/* 4.1 Consent to Store and Use Data */}
+
               <View style={styles.disclaimerContainer}>
                 <Text style={styles.disclaimerText}>
                   Data Use: “By continuing, you agree that the app can store
@@ -602,7 +602,7 @@ export default function QuizScreen() {
                 </View>
               </View>
 
-              {/* 4.2 Confirmation of Non-Clinical Service */}
+
               <View style={styles.disclaimerContainer}>
                 <Text style={styles.disclaimerText}>
                   Disclaimer: “This app does not replace professional medical or
@@ -630,14 +630,29 @@ export default function QuizScreen() {
                     ]}
                     onPress={handleResourceNo}
                   >
+                    
                     <Text style={styles.buttonText}>No</Text>
                   </TouchableOpacity>
                 </View>
               </View>
 
+              <View style={styles.navigationButtons}>
+                
+                <Button
+                  mode="contained"
+                  textColor="#390a84"
+                  icon={"arrow-left"}
+                  theme={{ colors: { primary: "#C3B1E1" } }}
+                  onPress={handleBack}
+                >
+                  Back
+                </Button>
+
               <Button
                 mode="contained"
-                textColor="#390a84"
+                textColor="#1f0746"
+                style={{width:"35%", display:"flex", alignItems:"center", justifyContent:"center"}}
+                icon="check"
                 theme={{ colors: { primary: "#C3B1E1" } }}
                 onPress={() => {
                   // Only submit if data consent is given; otherwise, do nothing or exit.
@@ -648,17 +663,9 @@ export default function QuizScreen() {
                   }
                 }}
               >
+
                 Submit
               </Button>
-              <View style={styles.navigationButtons}>
-                <Button
-                  mode="contained"
-                  textColor="#390a84"
-                  theme={{ colors: { primary: "#C3B1E1" } }}
-                  onPress={handleBack}
-                >
-                  Back
-                </Button>
               </View>
             </SafeAreaView>
           </>

@@ -15,6 +15,8 @@ import {
   IconButton,
   Provider,
 } from "react-native-paper";
+import { useRouter } from "expo-router";
+import { logMealToFirestore } from "@/utils/firestore";
 import * as ImagePicker from "expo-image-picker";
 import { uploadImageAsync } from "@/utils/uploadImage";
 import { fetchNutritionData } from "@/utils/api/fetchNutritionData";
@@ -24,42 +26,41 @@ import { collection, doc, setDoc, serverTimestamp } from "firebase/firestore";
 const mealOptions = ["Breakfast", "Lunch", "Dinner", "Snack"];
 const moodOptions = [
   {
-    label: "Very Satisfied",
-    image: require("../../assets/images/foodMood/vsatisfied.png"),
+    label: "Uncomfortable",
+    image: require("../../assets/images/foodMood/vnothappy.png"),
+  },
+  {
+    label: "Still Hungry",
+    image: require("../../assets/images/foodMood/nothappy.png"),
+  },
+  {
+    label: "Content",
+    image: require("../../assets/images/foodMood/neutral.png"),
   },
   {
     label: "Satisfied",
     image: require("../../assets/images/foodMood/satisfied.png"),
   },
   {
-    label: "Neutral",
-    image: require("../../assets/images/foodMood/neutral.png"),
-  },
-  {
-    label: "Not Happy",
-    image: require("../../assets/images/foodMood/nothappy.png"),
-  },
-  {
-    label: "Very Unhappy",
-    image: require("../../assets/images/foodMood/vnothappy.png"),
+    label: "Nourished",
+    image: require("../../assets/images/foodMood/vsatisfied.png"),
   },
 ];
 
 interface LogMealCardModalProps {
- 
-  onLog: (data: { nutrition: any; mood: string }) => void;
+  onLog: (data: { nutrition: any; mood: string; name: string }) => void;
 }
 
-export default function LogMealCardModal({
-  onLog,
-}: LogMealCardModalProps) {
+export default function LogMealCardModal({ onLog }: LogMealCardModalProps) {
+  const [selectedSegment, setSelectedSegment] = useState("log");
+
   const [mealDescription, setMealDescription] = useState("");
   const [mealType, setMealType] = useState("Breakfast");
   const [satisfaction, setSatisfaction] = useState(3);
   const [mood, setMood] = useState("");
   const [descriptionError, setDescriptionError] = useState(false);
   const [imageUri, setImageUri] = useState<string | null>(null);
-
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   const pickImage = async () => {
@@ -89,21 +90,31 @@ export default function LogMealCardModal({
       const nutrition = await fetchNutritionData(mealDescription);
       const imageUrl = imageUri ? await uploadImageAsync(imageUri, uid) : null;
 
-      const mealDocRef = doc(collection(db, "users", uid, "meals"));
-      await setDoc(mealDocRef, {
-        timestamp: serverTimestamp(),
+      // Extract macros and calories from API response
+      const calories = nutrition?.calories ?? 0;
+      const protein = nutrition?.protein ?? 0;
+      const carbs = nutrition?.carbs ?? 0;
+      const fat = nutrition?.fat ?? 0;
+
+      await logMealToFirestore(uid, {
         description: mealDescription,
         mood,
         type: mealType,
         satisfaction,
-        nutrition,
         imageUrl,
+        nutrition,
+        calories,
+        protein,
+        carbs,
+        fat,
       });
-
-      onLog({ nutrition, mood });
-      console.log("✅ Meal saved to Firestore");
-      resetForm();
       
+
+      onLog({ nutrition, mood, name: mealDescription });
+      console.log("✅ Meal saved to Firestore with macros & calories");
+      alert("Meal logged successfully!");
+
+      resetForm();
     } catch (err) {
       console.error("Image upload failed (debug):", JSON.stringify(err));
       alert("Failed to log the meal.");
@@ -180,15 +191,15 @@ export default function LogMealCardModal({
         </View>
       </View>
       {/* 
-        <View style={styles.section}>
-          <Text style={styles.label}>Upload an Image</Text>
-          <Button mode="outlined" onPress={pickImage}>
-            Choose from Gallery
-          </Button>
-          {imageUri && (
-            <Image source={{ uri: imageUri }} style={styles.image} />
-          )}
-        </View> */}
+          <View style={styles.section}>
+            <Text style={styles.label}>Upload an Image</Text>
+            <Button mode="outlined" onPress={pickImage}>
+              Choose from Gallery
+            </Button>
+            {imageUri && (
+              <Image source={{ uri: imageUri }} style={styles.image} />
+            )}
+          </View> */}
 
       <Button mode="contained" loading={loading} onPress={handleLogMeal}>
         Save Meal
@@ -202,7 +213,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     padding: 20,
     borderRadius: 12,
-    width:"100%",
+    width: "100%",
     display: "flex",
     // alignItems: "center",
     justifyContent: "center",

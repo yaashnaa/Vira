@@ -11,6 +11,13 @@ import {
   ScrollView,
 } from "react-native";
 import { Divider, useTheme } from "@rneui/themed";
+import {
+  removeWidget as removeWidgetFromStorage,
+  setEnabledWidgets,
+  getEnabledWidgets,
+  addWidget,
+} from "@/utils/widgetStorage";
+import { isQuizCompletedInFirestore } from "@/utils/firestore";
 import { useFocusEffect } from "expo-router";
 import { Header as HeaderRNE, HeaderProps, Icon } from "@rneui/themed";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -23,6 +30,8 @@ import { lightTheme } from "@/config/theme";
 import { Animated } from "react-native";
 import { isScreeningQuizComplete } from "@/utils/asyncStorage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { resetAllAsyncStorage } from "@/utils/asyncStorage";
+
 // Components
 import FadeInText from "@/components/fadeInText";
 import MoodCalendar from "@/components/moodCalender";
@@ -40,6 +49,18 @@ import WaterWidget from "@/components/widgets/WaterWidget";
 import MoodWidget from "@/components/widgets/MoodWidget";
 import { useEffect } from "react";
 import { useIsFocused } from "@react-navigation/native";
+import MindfullnessWidget from "@/components/widgets/Mindfullness";
+const STORAGE_KEY = "@enabledWidgets";
+import { markQuizComplete } from "@/utils/asyncStorage";
+const dashboardSections = [
+  { key: "greeting" },
+  { key: "quote" },
+  { key: "logMood" },
+  { key: "widgets" },
+  { key: "quiz" },
+  { key: "recommended" },
+  { key: "actions" },
+];
 
 export default function Dashboard() {
   const router = useRouter();
@@ -48,6 +69,8 @@ export default function Dashboard() {
   const [authReady, setAuthReady] = useState(false);
   const opacity = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0.5)).current;
+  const [enabledWidgets, setEnabledWidgetsState] = useState<string[]>([]);
+
   const slideAnim = useRef(new Animated.Value(100)).current; // starts 100px down
   const [hasCompletedScreening, setHasCompletedScreening] =
     useState<boolean>(false);
@@ -66,53 +89,51 @@ export default function Dashboard() {
       useNativeDriver: true,
     }).start();
   }, []);
+  const handleAddWidget = async (widgetId: string) => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    await addWidget(uid, widgetId);
+    setWidgetChangeTrigger((prev) => prev + 1); // 🔥 trigger re-render
+  };
+
+  useEffect(() => {
+    const checkProgress = async () => {
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+
+      const onboarded = await isOnboardingComplete(); // still fine to use AsyncStorage here
+      const quizDone = await isQuizCompletedInFirestore(uid); // now checking Firestore only
+
+      if (!onboarded) router.replace("/(auth)/OnBoarding");
+      else if (!quizDone) router.replace("/quizzes/basic");
+    };
+
+    checkProgress();
+  }, []);
+
   useEffect(() => {
     const checkScreening = async () => {
-      const completed = await isScreeningQuizComplete();
+      const completed = await isScreeningQuizComplete(
+        auth.currentUser?.uid || ""
+      );
       setHasCompletedScreening(completed);
     };
     checkScreening();
   }, []);
-  const [enabledWidgets, setEnabledWidgets] = useState<string[]>([]);
+  // const [enabledWidgets, setEnabledWidgets] = useState<string[]>([]);
   const [widgetChangeTrigger, setWidgetChangeTrigger] = useState(0);
 
-  const removeWidget = async (widgetId: string) => {
-    const updated = enabledWidgets.filter((id) => id !== widgetId);
-    setEnabledWidgets(updated);
-    await AsyncStorage.setItem("@enabledWidgets", JSON.stringify(updated));
-    setWidgetChangeTrigger(prev => prev + 1); // 🔁 trigger refresh
-  };
-  
-  const STORAGE_KEY = "@enabledWidgets";
-  const handleAddWidget = async (widgetId: string) => {
-    const updatedWidgets = [...enabledWidgets, widgetId.toLowerCase()];
-    setEnabledWidgets(updatedWidgets);
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedWidgets));
-    setWidgetChangeTrigger(prev => prev + 1); // ✅ force refresh for RecommendedWidgets
-  };
-  
   useFocusEffect(
     useCallback(() => {
       const loadWidgets = async () => {
-        const stored = await AsyncStorage.getItem("@enabledWidgets");
-        if (stored) {
-          setEnabledWidgets(JSON.parse(stored));
-        }
+        const uid = auth.currentUser?.uid;
+        if (!uid) return;
+        const stored = await getEnabledWidgets(uid);
+        setEnabledWidgetsState(stored);
       };
-
       loadWidgets();
-    }, [])
+    }, [widgetChangeTrigger])
   );
-
-  useEffect(() => {
-    const checkProgress = async () => {
-      const onboarded = await isOnboardingComplete();
-      const quizDone = await isQuizComplete();
-      if (!onboarded) router.replace("/(auth)/OnBoarding");
-      else if (!quizDone) router.replace("/quizzes/basic");
-    };
-    checkProgress();
-  }, []);
 
   useEffect(() => {
     Animated.parallel([
@@ -131,16 +152,14 @@ export default function Dashboard() {
 
   const handleNavigate = (route: Parameters<typeof router.push>[0]): void =>
     router.push(route);
+  const removeWidget = async (uid: string, widgetId: string) => {
+    if (!uid) return;
+    await removeWidgetFromStorage(uid, widgetId);
+    setWidgetChangeTrigger((prev) => prev + 1);
+  };
+  console.log("🧠 userPreferences from context:", userPreferences);
 
-  if (
-    loading ||
-    !auth.currentUser ||
-    !userPreferences?.name ||
-    !authReady ||
-    loading ||
-    !auth.currentUser ||
-    !userPreferences.hasOwnProperty("moodCheckIn")
-  ) {
+  if (loading || !userPreferences?.name || !authReady || !auth.currentUser) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={lightTheme.primary} />
@@ -186,87 +205,126 @@ export default function Dashboard() {
           </View>
         }
       />
+      <FlatList
+        data={dashboardSections}
+        style={styles.container}
+        keyExtractor={(item) => item.key}
+        contentContainerStyle={{ padding: 20, paddingBottom: 50 }}
+        renderItem={({ item }) => {
+          switch (item.key) {
+            case "greeting":
+              return (
+                <Text style={styles.title}>
+                  Hello, {userPreferences.name} 👋
+                </Text>
+              );
 
-      <SafeAreaView style={styles.container}>
-        <FlatList
-          style={styles.cont}
-          data={[{ key: "dashboard" }]}
-          renderItem={() => (
-            <View>
-              <Text style={styles.title}>Hello, {userPreferences.name} 👋</Text>
+            case "quote":
+              return (
+                <Animated.View
+                  style={{ transform: [{ translateY: slideAnim }] }}
+                >
+                  <View style={styles.card}>
+                    <Text style={styles.sectionTitle}>Today's Quote</Text>
+                    <Text style={styles.quote}>
+                      “Your body is your home — treat it gently.”
+                    </Text>
+                  </View>
+                </Animated.View>
+              );
 
-              <Animated.View style={{ transform: [{ translateY: slideAnim }] }}>
-                <View style={styles.card}>
-                  <Text style={styles.sectionTitle}>Today's Quote</Text>
-                  <Text style={styles.quote}>
-                    “Your body is your home — treat it gently.”
-                  </Text>
-                </View>
-              </Animated.View>
-
-              {userPreferences.moodCheckIn && (
+            case "logMood":
+              return userPreferences.moodCheckIn ? (
                 <LogMoodButton
                   onPress={() => handleNavigate("/mood")}
                   isLogged={hasLoggedToday}
                 />
-              )}
-              <ScrollView contentContainerStyle={styles.widgets}>
+              ) : null;
+
+            case "widgets":
+              return (
                 <View style={styles.gridContainer}>
                   {enabledWidgets.includes("water") && (
-                    <WaterWidget onRemove={() => removeWidget("water")} />
-                  )}
-                  {enabledWidgets.includes("fitness") && (
-                    <FitnessWidget onRemove={() => removeWidget("fitness")} />
-                  )}
-
-                  {enabledWidgets.includes("nutrition") && (
-                    <NutritionWidget
-                      onRemove={() => removeWidget("nutrition")}
+                    <WaterWidget
+                      onRemove={() =>
+                        removeWidget(auth.currentUser?.uid || "", "water")
+                      }
                     />
                   )}
-
-                  {enabledWidgets.includes("journal") && (
-                    <JournalWidget onRemove={() => removeWidget("journal")} />
+                  {enabledWidgets.includes("fitness") && (
+                    <FitnessWidget
+                      onRemove={() =>
+                        removeWidget(auth.currentUser?.uid || "", "fitness")
+                      }
+                    />
                   )}
-
+                  {enabledWidgets.includes("nutrition") && (
+                    <NutritionWidget
+                      onRemove={() =>
+                        removeWidget(auth.currentUser?.uid || "", "nutrition")
+                      }
+                    />
+                  )}
+                  {enabledWidgets.includes("mindfulness") && ( // 🔥 fixed spelling
+                    <MindfullnessWidget
+                      onRemove={() =>
+                        removeWidget(auth.currentUser?.uid || "", "mindfulness")
+                      }
+                    />
+                  )}
+                  {enabledWidgets.includes("journal") && (
+                    <JournalWidget
+                      onRemove={() =>
+                        removeWidget(auth.currentUser?.uid || "", "journal")
+                      }
+                    />
+                  )}
                   {enabledWidgets.includes("mood") && (
-                    <MoodWidget onRemove={() => removeWidget("water")} />
+                    <MoodWidget
+                      onRemove={() =>
+                        removeWidget(auth.currentUser?.uid || "", "mood")
+                      }
+                    />
                   )}
                 </View>
-              </ScrollView>
-              <Divider
-                style={{
-                  width: "200%",
-                  height: 1.3,
-                  backgroundColor: "#ccc",
-                  alignSelf: "center",
-                }}
-              />
-              {!hasCompletedScreening && (
-                <TakeQuizButton
-                  onPress={() => handleNavigate("/quizzes/screening")}
-                />
-              )}
-              <Divider
-                style={{
-                  width: "200%",
-                  height: 1.3,
-                  backgroundColor: "#ccc",
-                  alignSelf: "center",
-                }}
-              />
+              );
 
-              <MoodCalendar />
-              <RecommendedWidgetsBanner onAddWidget={handleAddWidget} triggerRefresh={widgetChangeTrigger}/>
-              <DeleteButton />
-              <LogoutButton />
-              {/* <Button title="Reset Onboarding" onPress={() => handleNavigate("/utils/resetOnboarding")} /> */}
-            </View>
-          )}
-          keyExtractor={(item) => item.key}
-          contentContainerStyle={{ paddingBottom: 30 }}
-        />
-      </SafeAreaView>
+            case "quiz":
+              return !hasCompletedScreening ? (
+                <>
+                  <Divider style={styles.divider} />
+                  <TakeQuizButton
+                    onPress={() => handleNavigate("/quizzes/screening")}
+                  />
+                  <Divider style={styles.divider} />
+                </>
+              ) : null;
+
+            case "recommended":
+              return (
+                <RecommendedWidgetsBanner
+                  onAddWidget={handleAddWidget}
+                  triggerRefresh={widgetChangeTrigger}
+                />
+              );
+
+            case "actions":
+              return (
+                <>
+                  <DeleteButton />
+                  <LogoutButton />
+                  <Button
+                    onPress={resetAllAsyncStorage}
+                    title="Reset Async Storage"
+                  />
+                </>
+              );
+
+            default:
+              return null;
+          }
+        }}
+      />
     </>
   );
 }
@@ -294,6 +352,7 @@ const styles = StyleSheet.create({
     // textAlign: "center",
     fontFamily: "Patrickhand-regular",
     marginBottom: 20,
+    margin: 20,
   },
   widgets: {
     paddingVertical: 5,
@@ -322,7 +381,8 @@ const styles = StyleSheet.create({
     marginBottom: "auto",
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 24,
+    fontFamily: "Patrickhand-regular",
     fontWeight: "600",
     marginBottom: 8,
   },
@@ -355,5 +415,12 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  divider: {
+    width: "100%",
+    height: 1.3,
+    backgroundColor: "#ccc",
+    alignSelf: "center",
+    marginVertical: 20,
   },
 });

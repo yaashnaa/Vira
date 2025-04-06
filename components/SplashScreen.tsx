@@ -1,10 +1,13 @@
 import React, { useEffect, useRef } from "react";
-import { View, StyleSheet, Dimensions } from "react-native";
+import { View, StyleSheet, Dimensions, LogBox } from "react-native";
 import { Video, ResizeMode } from "expo-av";
 import * as SplashScreen from "expo-splash-screen";
 
 const { width } = Dimensions.get("window");
-
+LogBox.ignoreLogs([
+  "Support for defaultProps will be removed from function components",
+  "Text strings must be rendered within a <Text> component."
+]);
 interface SplashScreenProps {
   onFinish: () => void;
 }

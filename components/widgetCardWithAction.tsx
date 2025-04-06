@@ -38,8 +38,8 @@ const styles = StyleSheet.create({
   },
   icon: {
     position: "absolute",
-    top: 6,
-    right: 6,
+    top: 24,
+    right: 25,
     zIndex: 1,
   },
 });

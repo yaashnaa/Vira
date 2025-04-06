@@ -1,36 +1,52 @@
-import React from 'react';
-import { useRouter, Link } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
 import WidgetCard from "../widgetCard";
 import { Icon } from "@rneui/themed";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View, Text } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface WaterWidgetProps {
   onRemove?: () => void;
 }
 
 const WaterWidget: React.FC<WaterWidgetProps> = ({ onRemove }) => {
- 
-    const router = useRouter();
-    const handlePress = () => {
-         router.replace("/waterTracker");
+  const router = useRouter();
+  const [waterDrank, setWaterDrank] = useState(0);
+  const [waterGoal, setWaterGoal] = useState(3000);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const storedDrank = await AsyncStorage.getItem("@amount");
+      const storedGoal = await AsyncStorage.getItem("@goal");
+
+      if (storedDrank) setWaterDrank(Number(storedDrank));
+      if (storedGoal) setWaterGoal(Number(storedGoal));
     };
 
-    return (
-      <View style={styles.container}>
+    fetchData();
+  }, []);
+
+  const handlePress = () => {
+    router.replace("/waterTracker");
+  };
+
+  return (
+    <View style={styles.container}>
       {onRemove && (
         <Pressable onPress={onRemove} style={styles.removeIcon}>
           <Icon name="minus-circle" type="feather" color="#c13e6a" size={20} />
         </Pressable>
       )}
-        <WidgetCard
-        title="Water tracker"
-        imageSource={require('../../assets/images/widgets/water.png')}
+      <WidgetCard
+        title="Water Tracker"
+        subtitle={`${waterDrank} / ${waterGoal} mL`}
+        imageSource={require("../../assets/images/widgets/water.png")}
         onPress={handlePress}
-    
       />
-      </View>
-    );
+    </View>
+  );
 };
+
 const styles = StyleSheet.create({
   container: {
     position: "relative",
@@ -42,6 +58,5 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
 });
-
 
 export default WaterWidget;

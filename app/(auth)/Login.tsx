@@ -47,7 +47,6 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-   
       <Image
         style={styles.image}
         source={require("../../assets/images/Vira.png")}
@@ -104,21 +103,21 @@ export default function LoginScreen() {
               <TouchableOpacity>
                 <Text style={styles.forgot_button}>Forgot Password?</Text>
               </TouchableOpacity>
-
-              <Button
-                mode="contained-tonal"
-                buttonColor="#86508f"
-                textColor="#fefefe"
-                onPress={handleLogin}
-              >
-                <Text style={styles.loginText}>LOGIN</Text>
-              </Button>
-
-
             </View>
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
+      <View style={styles.button}>
+        <Button
+          mode="contained-tonal"
+          buttonColor="#86508f"
+          textColor="#fefefe"
+          onPress={handleLogin}
+        >
+          <Text style={styles.loginText}>LOGIN</Text>
+        </Button>
+      </View>
+
       <View style={styles.link}>
         <TouchableOpacity onPress={() => router.push("/(auth)/signup")}>
           <Text style={styles.signupText}>Don't have an account? Sign up</Text>
@@ -139,9 +138,12 @@ const styles = StyleSheet.create({
     margin: 0,
     color: lightTheme.accent,
   },
-  link:{
+  link: {
     bottom: 65,
     position: "absolute",
+  },
+  button:{
+    bottom:120
   },
   insideCont: {
     display: "flex",
@@ -212,7 +214,7 @@ const styles = StyleSheet.create({
     // backgroundColor: lightTheme.accent, // Use secondary color for the button
   },
   loginText: {
-    color: "#eae6ed",
+    color: "#f5f0f9",
     fontWeight: "bold",
   },
   signupText: {

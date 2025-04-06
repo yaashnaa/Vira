@@ -13,9 +13,9 @@ import { Button } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 import { useUserPreferences } from "../../context/userPreferences";
 import { useRouter } from "expo-router";
-import { storePreferencesLocally } from "../../utils/asyncStorage"; // ← Add this import
 import { auth } from "../../config/firebaseConfig"; // ← Required for currentUser
 import { markQuizComplete } from "@/utils/asyncStorage";
+import { markQuizCompletedInFirestore } from "../../utils/firestore";
 export default function BasicQuiz() {
   const { updatePreferences, userPreferences } = useUserPreferences();
   const [step, setStep] = useState(0);
@@ -91,7 +91,17 @@ export default function BasicQuiz() {
   };
   const totalSteps = 2;
   const progress = (step + 1) / totalSteps;
-
+  const resetForm = () => {
+    setName("");
+    setAgeGroup("");
+    setactivityLevel("");
+    setMedicalConditions("");
+    setCustomMedicalConditions("");
+    setMentalDisorder([]);
+    setCustomDisorder("");
+    setPrimaryGoals([]);
+  };
+  
   const handleSubmitForm = async () => {
     if (primaryGoals.length === 0) {
       setGoalError("Please select at least one goal.");
@@ -119,31 +129,35 @@ export default function BasicQuiz() {
 
     updatePreferences(newPrefs);
 
-    // ✅ Store to AsyncStorage
-    await storePreferencesLocally("preferencesKey", {
-      ...userPreferences,
-      ...newPrefs,
-    });
+    console.log("🔁 Updating preferences in context:", newPrefs);
+
     const currentUser = auth.currentUser;
     if (currentUser) {
       const { saveUserPreferences } = await import("../../utils/firestore");
+    
       await saveUserPreferences(currentUser.uid, {
         ...userPreferences,
         ...newPrefs,
       });
+    
+      await markQuizCompletedInFirestore(currentUser.uid);
+    
+      console.log("✅ Quiz complete for:", currentUser.uid);
+      console.log("✅ Firestore quiz completion marked");
+      router.replace("/dashboard"); // safer than push to avoid back nav
+    } else {
+      console.warn("⚠️ No current user found during quiz submit");
     }
-    markQuizComplete();
-    console.log(name);
-    // Navigate to next quiz or dashboard
-    router.push("/dashboard");
-  };
+  };    
   const renderStep = () => {
     switch (step) {
       case 0:
         return (
           <>
+
             <SafeAreaView>
-              <View style={{ marginBottom: 20 }}>
+              
+              <View style={{ marginBottom: 20, marginTop:20 }}>
                 <ProgressBar
                   progress={(step + 1) / totalSteps}
                   color="#A084DC"
@@ -155,7 +169,7 @@ export default function BasicQuiz() {
                   Step {step + 1} of {totalSteps}
                 </Text>
               </View>
-              <Text style={styles.sectionTitle}>Health Quiz</Text>
+              <Text style={styles.sectionTitle}>Let's get to know you✨</Text>
               <Text style={styles.question}>
                 What’s your name or preferred display name?
               </Text>
@@ -286,6 +300,7 @@ export default function BasicQuiz() {
                   mode="contained"
                   onPress={handleNext}
                   textColor="#390a84"
+                  style={{ marginRight: 10, left: 250 }}
                   theme={{ colors: { primary: "#C3B1E1" } }}
                 >
                   Next
@@ -355,6 +370,7 @@ export default function BasicQuiz() {
                 mode="contained"
                 onPress={handleBack}
                 textColor="#390a84"
+                style={{ marginRight: 10 }}
                 theme={{ colors: { primary: "#C3B1E1" } }}
               >
                 Back

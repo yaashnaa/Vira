@@ -8,7 +8,8 @@ import {
   Pressable,
   ScrollView,
   SafeAreaView,
-  Alert, Dimensions
+  Alert,
+  Dimensions,
 } from "react-native";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -17,6 +18,7 @@ import dayjs from "dayjs";
 import { useUserPreferences } from "@/context/userPreferences";
 import { getMealInsights } from "@/utils/getMealInsights";
 import { Button } from "react-native-paper";
+import { useMealLog } from "@/context/mealLogContext";
 
 interface Meal {
   id: string;
@@ -54,7 +56,7 @@ const ViewLoggedMeals: React.FC = () => {
   const [expandedMealId, setExpandedMealId] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [showPrevious, setShowPrevious] = useState(false);
-
+  const { triggerRefresh } = useMealLog();
   const toggleMealDetails = (id: string) => {
     setExpandedMealId(expandedMealId === id ? null : id);
   };
@@ -67,6 +69,7 @@ const ViewLoggedMeals: React.FC = () => {
       await deleteDoc(doc(db, "users", uid, "meals", mealId));
       setMeals((prev) => prev.filter((meal) => meal.id !== mealId));
       setPreviousMeals((prev) => prev.filter((meal) => meal.id !== mealId));
+      triggerRefresh(); // 🟣 trigger re-fetch in overview
       Alert.alert("Meal deleted successfully");
     } catch (err) {
       console.error("Failed to delete meal:", err);
@@ -131,10 +134,7 @@ const ViewLoggedMeals: React.FC = () => {
                       <Text style={styles.toggleText}>
                         {expandedMealId === meal.id ? "-" : "+"}
                       </Text>
-                      <Button
-                        onPress={() => deleteMeal(meal.id)}
-                     
-                      >
+                      <Button onPress={() => deleteMeal(meal.id)}>
                         <AntDesign name="delete" size={20} color="black" />
                       </Button>
                     </View>
@@ -154,13 +154,6 @@ const ViewLoggedMeals: React.FC = () => {
                         <Text>Calories: {meal.calories}</Text>
                       )}
                       <Text>Date: {meal.date}</Text>
-                      <Button
-                        mode="outlined"
-                        onPress={() => deleteMeal(meal.id)}
-                        style={{ marginTop: 10 }}
-                      >
-                        <AntDesign name="delete" size={24} color="black" />
-                      </Button>
                     </View>
                   )}
                 </View>
@@ -179,7 +172,13 @@ const ViewLoggedMeals: React.FC = () => {
                       onPress={() => toggleMealDetails(meal.id)}
                       style={styles.mealHeader}
                     >
-                      <Text style={styles.mealName}>{meal.name}</Text>
+                      <View>
+                        <Text style={styles.mealName}>{meal.name}</Text>
+                        <Text style={styles.dateText}>
+                          Logged on {meal.date}
+                        </Text>
+                      </View>
+
                       <Text style={styles.toggleText}>
                         {expandedMealId === meal.id ? "-" : "+"}
                         <Button
@@ -214,20 +213,20 @@ const ViewLoggedMeals: React.FC = () => {
     </SafeAreaView>
   );
 };
-const screenWidth= Dimensions.get('window')
+const screenWidth = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   wrapper: {
     padding: 16,
     alignItems: "center",
   },
-  controlButtons:{
+  controlButtons: {
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 0,
-    
+
     // margin: "auto",
     // gap: 10,
   },
@@ -265,7 +264,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     // padding: 12,
-    paddingLeft:10,
+    paddingLeft: 10,
     width: "100%",
     alignItems: "center",
     backgroundColor: "#f6dfdb",
@@ -298,6 +297,12 @@ const styles = StyleSheet.create({
     color: "#390a84",
     fontSize: 16,
   },
+  dateText: {
+    fontSize: 12,
+    color: "#666",
+    fontStyle: "italic",
+  },
+  
 });
 
 export default ViewLoggedMeals;

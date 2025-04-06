@@ -52,7 +52,7 @@ export default function SignupScreen() {
   };
   return (
     <View style={styles.container}>
-      {/* Logo Image */}
+
       <Image
         style={styles.image}
         source={require("../../assets/images/Vira.png")}
@@ -89,7 +89,7 @@ export default function SignupScreen() {
                   />
                 </View>
 
-                {/* Password Input */}
+      
                 <View style={styles.inputView}>
                   <MaterialIcons
                     name="password"
@@ -105,7 +105,7 @@ export default function SignupScreen() {
                     onChangeText={(text) => setPassword(text)}
                   />
                 </View>
-                {/* Confirm Password Input */}
+        
                 <View style={styles.inputView}>
                   <MaterialIcons
                   name="password"

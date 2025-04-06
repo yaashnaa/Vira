@@ -11,7 +11,8 @@ import { useRouter } from "expo-router";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Header as HeaderRNE, HeaderProps, Icon } from "@rneui/themed";
 const STORAGE_KEY = "@enabledWidgets";
-
+import { auth } from "../config/firebaseConfig";
+import { getEnabledWidgets, setEnabledWidgets as saveEnabledWidgets } from "@/utils/widgetStorage";
 const availableWidgets = [
   { id: "mood", label: "Mood Tracker" },
   { id: "nutrition", label: "Nutrition" },
@@ -27,13 +28,20 @@ export default function ManageWidgetsScreen() {
 
   useEffect(() => {
     const fetchWidgets = async () => {
-      const stored = await AsyncStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setEnabledWidgets(JSON.parse(stored));
-      }
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+      const stored = await getEnabledWidgets(uid);
+      setEnabledWidgets(stored);
     };
     fetchWidgets();
   }, []);
+  
+  const saveChanges = async () => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+    await saveEnabledWidgets(uid, enabledWidgets);
+    router.replace("/dashboard");
+  };
 
   const toggleWidget = (widgetId: string) => {
     setEnabledWidgets((prev) =>
@@ -43,15 +51,6 @@ export default function ManageWidgetsScreen() {
     );
   };
 
-  const saveChanges = async () => {
-    try {
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(enabledWidgets));
-      console.log("🧩 Enabled Widgets Saved:", enabledWidgets);
-      router.replace("/dashboard");
-    } catch (e) {
-      console.error("Failed to save widgets:", e);
-    }
-  };
   const handleBackPress = () => {
     router.replace("/dashboard");
   };

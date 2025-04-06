@@ -1,8 +1,9 @@
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, addDoc, collection, Timestamp, serverTimestamp, getDocs} from "firebase/firestore";
 import { db } from "../config/firebaseConfig";
 import { UserPreferences } from "../context/userPreferences";
 import dayjs from "dayjs";
 import { auth } from "../config/firebaseConfig";
+
 // ✅ Centralized user data under /users/{userId}
 export const saveUserPreferences = async (userId: string, preferences: UserPreferences) => {
   try {
@@ -11,6 +12,13 @@ export const saveUserPreferences = async (userId: string, preferences: UserPrefe
   } catch (error) {
     console.error("🔥 Error saving user preferences to Firestore: ", error);
   }
+};
+export const logMealToFirestore = async (uid: string, mealData: any) => {
+  const mealDocRef = doc(collection(db, "users", uid, "meals"));
+  await setDoc(mealDocRef, {
+    ...mealData,
+    timestamp: serverTimestamp(),
+  });
 };
 
 // ✅ Store mood logs under /users/{userId}/moods/{date}
@@ -28,6 +36,26 @@ export const saveMoodLog = async (userId: string, value: string) => {
   }
 };
 
+export const markQuizCompletedInFirestore = async (uid: string) => {
+  try {
+    await setDoc(doc(db, "users", uid), { quizCompleted: true }, { merge: true });
+  } catch (e) {
+    console.error("Error marking quiz as completed in Firestore:", e);
+  }
+};
+
+export const isQuizCompletedInFirestore = async (uid: string): Promise<boolean> => {
+  try {
+    const docRef = doc(db, "users", uid);
+    const snap = await getDoc(docRef);
+    return snap.exists() && snap.data().quizCompleted === true;
+  } catch (e) {
+    console.error("Error checking quiz completion in Firestore:", e);
+    return false;
+  }
+};
+
+
 export const ensureUserDocumentExists = async () => {
   const uid = auth.currentUser?.uid;
   if (!uid) return;
@@ -43,5 +71,37 @@ export const ensureUserDocumentExists = async () => {
     console.log("✅ Created new user document for UID:", uid);
   } else {
     console.log("ℹ️ User document already exists for UID:", uid);
+  }
+};
+export const saveJournalEntry = async (userId: string, entry: {
+  title: string;
+  body: string;
+  tags: string[];
+  sleepDuration: string;
+  bedtime: string;
+  wakeTime: string;
+  quality: string;
+}) => {
+  try {
+    await addDoc(collection(db, "users", userId, "journalEntries"), {
+      ...entry,
+      timestamp: Timestamp.now(),
+    });
+    console.log("✅ Journal entry saved to Firestore!");
+  } catch (error) {
+    console.error("🔥 Error saving journal entry:", error);
+  }
+};
+export const fetchMealLogs = async (userId: string) => {
+  try {
+    const snapshot = await getDocs(collection(db, "users", userId, "meals"));
+    const meals = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    return meals;
+  } catch (error) {
+    console.error("🔥 Error fetching meal logs: ", error);
+    return [];
   }
 };
