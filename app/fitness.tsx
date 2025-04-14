@@ -1,5 +1,7 @@
 // Cleaned-up FitnessScreen with soft and encouraging tone, truncated results, and "Read More" modal
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+
+
 import {
   View,
   Text,
@@ -17,12 +19,14 @@ import { Button, Card, Modal, Portal, Provider } from "react-native-paper";
 import { useMoodContext } from "@/context/moodContext";
 import { useUserPreferences } from "@/context/userPreferences";
 import LogExercise from "@/app/logExercise";
+import TodaysMovementCard from "@/components/Exercise/todaysMovement";
 // import FitnessScreen from "./findExercises";
 import {
   fetchExerciseData,
   ExerciseProps,
 } from "@/utils/api/fetchExerciseData";
 import { useRouter } from "expo-router";
+
 
 export default function FitnessScreen() {
   const { userPreferences } = useUserPreferences();
@@ -35,6 +39,7 @@ export default function FitnessScreen() {
   const [difficulty, setDifficulty] = useState("");
   const [type, setType] = useState("");
   const [reasonText, setReasonText] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(true);
   const [selectedExercise, setSelectedExercise] =
     useState<ExerciseProps | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -43,32 +48,39 @@ export default function FitnessScreen() {
     const health = userPreferences?.physicalHealth?.toLowerCase();
     const activity = userPreferences?.activityLevel?.toLowerCase();
     const goal = userPreferences?.primaryGoals?.[0]?.toLowerCase() || "";
-
+    console.log(mood)
     if (mood !== null) {
       if (mood >= 75) {
-        setType("strength");
-        setDifficulty("expert");
+        setType("stretching");
+        setDifficulty("beginner");
         setReasonText(
-          "You're indicated you're feeling great today! Here's a strong and empowering movement to channel that positive energy. 💪"
+          "You indicated you’re really not feeling well today. Here’s a calming stretch to help you reconnect gently. 🧘‍♀️"
         );
+       
       } else if (mood >= 50) {
+        setType("cardio");
+        setDifficulty("beginner");
+        setReasonText(
+          "You indicated you're feeling a bit low. Try this gentle cardio to shake off some of that heaviness and reset. 💜"
+        );
         setType("strength");
         setDifficulty("intermediate");
         setReasonText(
           "You indicated you're feeling okay today. Here's a steady movement to help lift your mood and build consistency. 🌿"
         );
       } else if (mood >= 25) {
-        setType("cardio");
-        setDifficulty("beginner");
+        setType("strength");
+        setDifficulty("intermediate");
         setReasonText(
-          "You indicated you're feeling a bit low. Try this gentle cardio to shake off some of that heaviness and reset. 💜"
+          "You indicated you're feeling okay today. Here's a steady movement to help lift your mood and build consistency. 🌿"
         );
       } else {
-        setType("stretching");
-        setDifficulty("beginner");
+        setType("strength");
+        setDifficulty("expert");
         setReasonText(
-          "You indicated you’re really not feeling well today. Here’s a calming stretch to help you reconnect gently. 🧘‍♀️"
+          "You're indicated you're feeling great today! Here's a strong and empowering movement to channel that positive energy. 💪"
         );
+  
       }
     }
 
@@ -107,6 +119,8 @@ export default function FitnessScreen() {
   const handleBackPress = () => {
     router.replace("/dashboard");
   };
+  const handleNavigate = (route: Parameters<typeof router.push>[0]): void =>
+    router.push(route);
 
   return (
     <>
@@ -136,6 +150,13 @@ export default function FitnessScreen() {
               fontFamily: "PatrickHand-Regular",
             },
           }}
+          rightComponent={
+            <View style={styles.headerRight}>
+              <TouchableOpacity onPress={() => handleNavigate("/settings")}>
+                <Icon name="settings" type="feather" color="#150b01" />
+              </TouchableOpacity>
+            </View>
+          }
         />
 
         <ScrollView contentContainerStyle={styles.container}>
@@ -153,7 +174,7 @@ export default function FitnessScreen() {
           >
             {loading
               ? "Gathering mindful moves..."
-              : "Show Me Today's Movement"}
+              : "Show Me Today's suggestions"}
           </Button>
 
           {loading && (
@@ -162,58 +183,165 @@ export default function FitnessScreen() {
 
           {exercises.length > 0 && (
             <>
-              {reasonText ? (
-                <Text style={styles.reasonText}>{reasonText}</Text>
-              ) : null}
-              <FlatList
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                data={exercises.slice(0, 2)}
-                keyExtractor={(_, index) => index.toString()}
-                contentContainerStyle={styles.resultsContainer}
-                renderItem={({ item }) => (
-                  <Card style={styles.card}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setSelectedExercise(item);
-                        setModalVisible(true);
-                      }}
-                    >
-                      <Card.Title
-                        title={item.name}
-                        subtitle={item.type}
-                        titleStyle={{
-                          color: "#271949",
-                          fontFamily: "PatrickHand-Regular",
-                          fontSize: 24,
-                        }}
-                        subtitleStyle={{
-                          color: "#7e5a9b",
-                          fontFamily: "Main-font",
-                          textTransform: "capitalize",
-                        }}
-                      />
-                      <Card.Content>
-                        <Text style={styles.label}>Target Area:</Text>
-                        <Text>{item.muscle}</Text>
-                        <Text style={styles.label}>Intensity:</Text>
-                        <Text>{item.difficulty}</Text>
-                        <Text style={styles.label}>Mindful Steps:</Text>
-                        <Text>
-                          {item.instructions.length > 100
-                            ? `${item.instructions.slice(0, 100)}...`
-                            : item.instructions}
-                        </Text>
-                        {item.instructions.length > 100 && (
-                          <Text style={styles.readMore}>Tap to read more</Text>
-                        )}
-                      </Card.Content>
-                    </TouchableOpacity>
-                  </Card>
-                )}
-              />
+              <TouchableOpacity
+                onPress={() => setShowSuggestions(!showSuggestions)}
+              >
+                <Text style={styles.toggleHeader}>
+                  {showSuggestions
+                    ? "Hide Suggestions ▲"
+                    : "Show Suggestions ▼"}
+                </Text>
+              </TouchableOpacity>
+
+              {showSuggestions && (
+                <>
+                  {reasonText ? (
+                    <Text style={styles.reasonText}>{reasonText}</Text>
+                  ) : null}
+                  <FlatList
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    data={exercises.slice(0, 2)}
+                    style={{ backgroundColor: "#F8F9FA" }}
+                    keyExtractor={(_, index) => index.toString()}
+                    contentContainerStyle={styles.resultsContainer}
+                    renderItem={({ item }) => (
+                      <Card style={styles.card} mode="outlined">
+                        <TouchableOpacity
+                          onPress={() => {
+                            setSelectedExercise(item);
+                            setModalVisible(true);
+                          }}
+                        >
+                          <Card.Title
+                            title={item.name}
+                            subtitle={item.type}
+                            titleStyle={{
+                              color: "#271949",
+                              fontFamily: "PatrickHand-Regular",
+                              fontSize: 22,
+                            }}
+                            subtitleStyle={{
+                              color: "#7e5a9b",
+                              fontFamily: "Main-font",
+                              textTransform: "capitalize",
+                            }}
+                          />
+                          <Card.Content>
+                            <Text style={styles.label}>Target Area:</Text>
+                            <Text>{item.muscle}</Text>
+                            <Text style={styles.label}>Intensity:</Text>
+                            <Text>{item.difficulty}</Text>
+                            <Text style={styles.label}>Mindful Steps:</Text>
+                            <Text style={{ fontSize: 14 }}>
+                              {item.instructions.length > 100
+                                ? `${item.instructions.slice(0, 100)}...`
+                                : item.instructions}
+                            </Text>
+                            {item.instructions.length > 100 && (
+                              <Text style={styles.readMore}>
+                                Tap to read more
+                              </Text>
+                            )}
+                          </Card.Content>
+                        </TouchableOpacity>
+                      </Card>
+                    )}
+                  />
+                </>
+              )}
             </>
           )}
+          <Button
+            icon={"dumbbell"}
+            onPress={() => router.replace("/exerciseHistoryScreen")}
+            textColor="#230d00"
+          >
+            {" "}
+            View exercise history
+          </Button>
+          <TodaysMovementCard />
+          <View style={styles.cardsContainer}>
+            <Card style={styles.exerciseCard} mode="elevated">
+              <Card.Content
+                style={{
+                  alignItems: "center",
+                  display: "flex",
+                  flexDirection: "row", // 🔥 this is the key change
+                  justifyContent: "center",
+                }}
+              >
+                <LottieView
+                  source={require("../assets/animations/log1.json")}
+                  autoPlay
+                  loop
+                  style={{ width: 150, height: 200, marginLeft: 50 }}
+                />
+                <View
+                  style={{
+                    marginLeft: 10,
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <Text style={styles.exerciseText}>Log your movement</Text>
+                  <Button
+                    // mode="elevated"
+                    labelStyle={{ fontSize: 14 }}
+                    style={[
+                      { width: 150, padding: 0, height: 40 },
+                      styles.button,
+                    ]}
+                    textColor="#271949"
+                    compact={true}
+                    onPress={() => router.push("/logExercise")}
+                  >
+                    Start Logging
+                  </Button>
+                </View>
+              </Card.Content>
+            </Card>
+
+            <Card style={styles.exerciseCard} mode="elevated">
+              <Card.Content
+                style={{
+                  alignItems: "center",
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  margin: "auto",
+                }}
+              >
+                <LottieView
+                  source={require("../assets/animations/find1.json")}
+                  autoPlay
+                  loop
+                  style={{ width: 150, height: 200, marginLeft: 10 }}
+                />
+                <View
+                  style={{
+                    marginLeft: 10,
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <Text style={styles.exerciseText}>
+                    Want to explore more mindful movement suggestions?
+                  </Text>
+                  <Button
+                    mode="elevated"
+                    compact={true}
+                    labelStyle={{ fontSize: 14 }}
+                    textColor="#271949"
+                    style={[{ width: 150 }, styles.button]}
+                    onPress={() => router.push("/findExercises")}
+                  >
+                    Explore More
+                  </Button>
+                </View>
+              </Card.Content>
+            </Card>
+          </View>
         </ScrollView>
 
         <Portal>
@@ -223,7 +351,7 @@ export default function FitnessScreen() {
             contentContainerStyle={styles.modal}
           >
             {selectedExercise && (
-              <View>
+              <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
                 <Text style={styles.sectionTitle}>{selectedExercise.name}</Text>
                 <Text style={styles.label}>Target Area:</Text>
                 <Text>{selectedExercise.muscle}</Text>
@@ -237,90 +365,11 @@ export default function FitnessScreen() {
                 >
                   Close
                 </Button>
-              </View>
+              </ScrollView>
             )}
           </Modal>
         </Portal>
       </Provider>
-      {/* <View style={styles.cardsContainer}>
-        <Card style={styles.exerciseCard} mode="elevated">
-          <Card.Content
-            style={{
-              alignItems: "center",
-              display: "flex",
-              flexDirection: "row", // 🔥 this is the key change
-              justifyContent: "center",
-            }}
-          >
-            <LottieView
-              source={require("../assets/animations/log1.json")}
-              autoPlay
-              loop
-              style={{ width: 150, height: 200, marginLeft: 50 }}
-            />
-            <View
-              style={{
-                marginLeft: 10,
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <Text style={styles.exerciseText}>Log your movement</Text>
-              <Button
-                // mode="elevated"
-                labelStyle={{ fontSize: 14 }}
-                style={[{ width: 150, padding:0, height:40 }, styles.button]}
-                textColor="#271949"
-                compact={true}
-                onPress={() => router.push("/logExercise")}
-              >
-                Start Logging
-              </Button>
-            </View>
-          </Card.Content>
-        </Card>
-
-        <Card style={styles.exerciseCard} mode="elevated">
-          <Card.Content
-            style={{
-              alignItems: "center",
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "center",
-              margin: "auto",
-            }}
-          >
-            <LottieView
-              source={require("../assets/animations/find1.json")}
-              autoPlay
-              loop
-              style={{ width: 150, height: 200, marginLeft: 10 }}
-            />
-            <View
-              style={{
-                marginLeft: 10,
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <Text style={styles.exerciseText}>
-                Want to explore more mindful movement suggestions?
-              </Text>
-              <Button
-                mode="elevated"
-                compact={true}
-
-                labelStyle={{ fontSize: 14 }}
-                textColor="#271949"
-                style={[{ width: 150 }, styles.button]}
-                onPress={() => router.push("/findExercises")}
-              >
-                Explore More 
-              </Button>
-            </View>
-          </Card.Content>
-        </Card>
-      </View> */}
     </>
   );
 }
@@ -338,7 +387,7 @@ const styles = StyleSheet.create({
     height: 200,
     width: width * 0.9,
     borderRadius: 16,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#F8F9FA",
     elevation: 3,
   },
 
@@ -370,7 +419,7 @@ const styles = StyleSheet.create({
   },
   cardsContainer: {
     display: "flex",
-    bottom: 120,
+    // bottom: 120,
     flexDirection: "column",
     justifyContent: "space-around",
     alignItems: "center",
@@ -386,19 +435,21 @@ const styles = StyleSheet.create({
   },
   resultsContainer: {
     paddingVertical: 10,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#F8F9FA",
   },
   card: {
     marginRight: 16,
+    // marginTop: 10,
     width: 300,
     borderRadius: 12,
     color: "black",
     backgroundColor: "#ffffff",
   },
   label: {
-    fontWeight: "600",
+    fontWeight: "bold",
+
     marginTop: 8,
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: "Comfortaa-Regular",
     color: "black",
   },
@@ -407,6 +458,7 @@ const styles = StyleSheet.create({
     padding: 20,
     margin: 20,
     borderRadius: 12,
+    height: height * 0.7,
   },
   readMore: {
     color: "#6d4c8d",
@@ -416,10 +468,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   reasonText: {
-    fontSize: 16,
+    fontSize: 15,
     fontStyle: "italic",
-    marginVertical: 10,
+    // marginVertical: 10,
     color: "#6d4c8d",
+    fontFamily: "Main-font",
+  },
+  headerRight: {
+    display: "flex",
+    flexDirection: "row",
+    marginTop: 5,
+  },
+  toggleHeader: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#5b429d",
+    marginVertical: 10,
+    textAlign: "center",
     fontFamily: "Comfortaa-Regular",
   },
 });

@@ -94,7 +94,7 @@ const ViewLoggedMeals: React.FC = () => {
           const docDate = dayjs(data.timestamp?.toDate()).format("YYYY-MM-DD");
           const meal = {
             id: doc.id,
-            name: data.description || "Meal",
+            name: data.description,
             calories: data.nutrition?.calories || 0,
             date: docDate,
             nutrition: data.nutrition || {},
@@ -105,7 +105,11 @@ const ViewLoggedMeals: React.FC = () => {
             prevList.push(meal);
           }
         });
-
+        const cleanTodayList = todayList.filter((meal) => meal && meal.name);
+        const cleanPrevList = prevList.filter((meal) => meal && meal.name);
+        
+        setMeals(cleanTodayList);
+        setPreviousMeals(cleanPrevList);
         setMeals(todayList);
         setPreviousMeals(prevList);
       } catch (err) {
@@ -123,7 +127,9 @@ const ViewLoggedMeals: React.FC = () => {
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Today's Logged Meals</Text>
             <ScrollView>
+
               {meals.map((meal) => (
+                
                 <View key={meal.id} style={styles.mealContainer}>
                   <TouchableOpacity
                     onPress={() => toggleMealDetails(meal.id)}

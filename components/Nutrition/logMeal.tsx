@@ -23,7 +23,14 @@ import { fetchNutritionData } from "@/utils/api/fetchNutritionData";
 import { auth, db } from "@/config/firebaseConfig";
 import { collection, doc, setDoc, serverTimestamp } from "firebase/firestore";
 
-const mealOptions = ["Breakfast", "Lunch", "Dinner", "Snack"];
+const mealOptions = [
+  "Breakfast",
+  "Lunch",
+  "Dinner",
+  "Snack",
+  "Prefer not to specify",
+];
+
 const moodOptions = [
   {
     label: "Uncomfortable",
@@ -53,7 +60,7 @@ interface LogMealCardModalProps {
 
 export default function LogMealCardModal({ onLog }: LogMealCardModalProps) {
   const [selectedSegment, setSelectedSegment] = useState("log");
-
+  const [mealTypeError, setMealTypeError] = useState(false);
   const [mealDescription, setMealDescription] = useState("");
   const [mealType, setMealType] = useState("Breakfast");
   const [satisfaction, setSatisfaction] = useState(3);
@@ -81,20 +88,38 @@ export default function LogMealCardModal({ onLog }: LogMealCardModalProps) {
       setDescriptionError(true);
       return;
     }
+    if (!mealType || !mealOptions.includes(mealType)) {
+      setMealTypeError(true);
+      return;
+    }
+
     setDescriptionError(false);
+    setMealTypeError(false);
     setLoading(true);
+
     try {
       const uid = auth.currentUser?.uid;
       if (!uid) throw new Error("No user logged in");
 
       const nutrition = await fetchNutritionData(mealDescription);
-      const imageUrl = imageUri ? await uploadImageAsync(imageUri, uid) : null;
 
-      // Extract macros and calories from API response
-      const calories = nutrition?.calories ?? 0;
-      const protein = nutrition?.protein ?? 0;
-      const carbs = nutrition?.carbs ?? 0;
-      const fat = nutrition?.fat ?? 0;
+      // 🛑 Validate API response
+      const hasValidData =
+        nutrition &&
+        (nutrition.calories ||
+          nutrition.protein ||
+          nutrition.carbs ||
+          nutrition.fat);
+
+      if (!hasValidData) {
+        alert(
+          "We couldn’t recognize that food. Please try a more specific or real meal description."
+        );
+        setLoading(false);
+        return;
+      }
+
+      const imageUrl = imageUri ? await uploadImageAsync(imageUri, uid) : null;
 
       await logMealToFirestore(uid, {
         description: mealDescription,
@@ -103,21 +128,18 @@ export default function LogMealCardModal({ onLog }: LogMealCardModalProps) {
         satisfaction,
         imageUrl,
         nutrition,
-        calories,
-        protein,
-        carbs,
-        fat,
+        calories: nutrition.calories ?? 0,
+        protein: nutrition.protein ?? 0,
+        carbs: nutrition.carbs ?? 0,
+        fat: nutrition.fat ?? 0,
       });
-      
 
       onLog({ nutrition, mood, name: mealDescription });
-      console.log("✅ Meal saved to Firestore with macros & calories");
       alert("Meal logged successfully!");
-
       resetForm();
     } catch (err) {
-      console.error("Image upload failed (debug):", JSON.stringify(err));
-      alert("Failed to log the meal.");
+      console.error("❌ Error logging meal:", err);
+      alert("Something went wrong while logging your meal. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -142,10 +164,13 @@ export default function LogMealCardModal({ onLog }: LogMealCardModalProps) {
           setMealDescription(text);
           if (text.trim()) setDescriptionError(false);
         }}
-        placeholder="Describe your meal..."
+        placeholder="Log your meal (e.g., '1 cup pasta with tomato sauce')"
       />
       {descriptionError && (
         <Text style={styles.errorText}>Please describe your meal.</Text>
+      )}
+      {mealTypeError && (
+        <Text style={styles.errorText}>Food not found, try again. </Text>
       )}
 
       <View style={styles.section}>

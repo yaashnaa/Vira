@@ -123,7 +123,7 @@ function NutritionSearchModal() {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    backgroundColor: "#fff",
+    backgroundColor: "#F8F9FA",
   },
   searchContainer: {
     marginBottom: 16,

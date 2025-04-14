@@ -10,16 +10,20 @@ import {
   SafeAreaView,
 } from "react-native";
 import { doc, setDoc } from "firebase/firestore";
+import { isScreeningQuizCompleted } from "@/utils/firestore";
 import { db } from "@/config/firebaseConfig";
 import { auth } from "@/config/firebaseConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { isScreeningQuizComplete } from "@/utils/asyncStorage";
+import {
+  isScreeningQuizComplete,
+  markQuizComplete,
+} from "@/utils/asyncStorage";
 import { Button, ProgressBar } from "react-native-paper";
 import { useUserPreferences } from "../../context/userPreferences";
 import { useRouter } from "expo-router";
 import BasicQuiz from "./basic";
 import { lightTheme } from "@/config/theme";
-import AntDesign from '@expo/vector-icons/AntDesign';
+import AntDesign from "@expo/vector-icons/AntDesign";
 export default function QuizScreen() {
   const [step, setStep] = useState(0);
   const router = useRouter();
@@ -36,7 +40,7 @@ export default function QuizScreen() {
   const [mentalHealthResouces, setMentalHealthResouces] = useState(""); // string
   const [customMedicalConditions, setCustomMedicalConditions] = useState("");
   const [customDisorder, setCustomDisorder] = useState("");
-  const [hideTriggers, setHideTriggers] = useState("");
+
   const [approach, setApproach] = useState("");
   const [caloriePreference, setCaloriePreference] = useState("");
   const [macroPreference, setMacroPreference] = useState("");
@@ -80,9 +84,7 @@ export default function QuizScreen() {
       mentalHealthResouces === "Yes, please show me available resources." ||
       mentalHealthResouces === "Not sure, remind me later.";
 
-    const hideTriggersBool =
-      hideTriggers === "Yes, please hide numeric data when possible.";
-
+  
     const updated = {
       dietaryPreferences: finalDietaryPreferences,
       physicalHealth: physicalHealth ?? "",
@@ -93,24 +95,30 @@ export default function QuizScreen() {
       macroViewing: macroViewingBool,
       caloriePreference: caloriePreference ?? "",
       macroPreference: macroPreference ?? "",
-
       customMedicalConditions: customMedicalConditions ?? "",
       customMentalHealthConditions: customDisorder ?? "",
-      foodAnxietyLevel: foodAnxietyLevel ?? "",
-      anxiousFood: foodAnxietyLevel,
+      foodAnxietyLevel: foodAnxietyLevel || "Prefer not to say",
 
+      anxiousFood: foodAnxietyLevel,
       mentalHealthSupport: mentalHealthResouces ?? "",
-      triggerWarnings: hideTriggers ?? "",
       remindersFrequency,
       moodCheckIn: moodCheckIn ?? "", // user selection string
       moodcCheckInBool: ["Yes, definitely.", "Maybe, but not sure."].includes(
         moodCheckIn
-      ), // derived boolean
+      ), 
       approach: approach ?? "",
     };
-
+    const currentUser = auth.currentUser;
     updatePreferences(updated);
-    await AsyncStorage.setItem("@screening_quiz_complete", "true");
+    if (currentUser) {
+      await setDoc(doc(db, "users", currentUser.uid), {
+        screeningQuizCompleted: true,
+      }, { merge: true });
+      
+      console.log("✅ Quiz complete for:", currentUser.uid);
+    } else {
+      console.error("No current user found.");
+    }
     console.log("User Preferences Submitted!");
     router.replace("/dashboard");
   };
@@ -364,32 +372,7 @@ export default function QuizScreen() {
                   </View>
                 </View>
 
-                <View>
-                  <Text style={styles.question}>
-                    Would you like us to adjust the app to minimize triggers
-                    (for example, hiding calorie counts, providing gentle
-                    prompts instead of strict daily targets)?
-                  </Text>
-                  <View style={styles.optionContainer}>
-                    {[
-                      "Yes, please hide numeric data when possible.",
-                      " I’m okay with seeing all data.",
-                      "I’m not sure, let me decide later.",
-                    ].map((option) => (
-                      <TouchableOpacity
-                        key={option}
-                        style={[
-                          styles.optionButton,
-                          hideTriggers === option && styles.selectedOption,
-                        ]}
-                        onPress={() => setHideTriggers(option)}
-                      >
-                        <Text>{option}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </View>
-
+        
                 <View style={styles.navigationButtons}>
                   <Button
                     onPress={handleBack}
@@ -571,7 +554,6 @@ export default function QuizScreen() {
               <Text style={styles.sectionTitle}>Review & Submit</Text>
               <Text>Review your responses and submit your quiz.</Text>
 
-
               <View style={styles.disclaimerContainer}>
                 <Text style={styles.disclaimerText}>
                   Data Use: “By continuing, you agree that the app can store
@@ -602,7 +584,6 @@ export default function QuizScreen() {
                 </View>
               </View>
 
-
               <View style={styles.disclaimerContainer}>
                 <Text style={styles.disclaimerText}>
                   Disclaimer: “This app does not replace professional medical or
@@ -630,14 +611,12 @@ export default function QuizScreen() {
                     ]}
                     onPress={handleResourceNo}
                   >
-                    
                     <Text style={styles.buttonText}>No</Text>
                   </TouchableOpacity>
                 </View>
               </View>
 
               <View style={styles.navigationButtons}>
-                
                 <Button
                   mode="contained"
                   textColor="#390a84"
@@ -648,24 +627,30 @@ export default function QuizScreen() {
                   Back
                 </Button>
 
-              <Button
-                mode="contained"
-                textColor="#1f0746"
-                style={{width:"35%", display:"flex", alignItems:"center", justifyContent:"center"}}
-                icon="check"
-                theme={{ colors: { primary: "#C3B1E1" } }}
-                onPress={() => {
-                  // Only submit if data consent is given; otherwise, do nothing or exit.
-                  if (dataConsent) {
-                    handleFinalSubmit();
-                  } else {
-                    alert("You must agree to the data use policy to continue.");
-                  }
-                }}
-              >
-
-                Submit
-              </Button>
+                <Button
+                  mode="contained"
+                  textColor="#1f0746"
+                  style={{
+                    width: "35%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                  icon="check"
+                  theme={{ colors: { primary: "#C3B1E1" } }}
+                  onPress={() => {
+                    // Only submit if data consent is given; otherwise, do nothing or exit.
+                    if (dataConsent) {
+                      handleFinalSubmit();
+                    } else {
+                      alert(
+                        "You must agree to the data use policy to continue."
+                      );
+                    }
+                  }}
+                >
+                  Submit
+                </Button>
               </View>
             </SafeAreaView>
           </>

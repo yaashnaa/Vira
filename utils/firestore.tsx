@@ -4,15 +4,15 @@ import { UserPreferences } from "../context/userPreferences";
 import dayjs from "dayjs";
 import { auth } from "../config/firebaseConfig";
 
-// ✅ Centralized user data under /users/{userId}
 export const saveUserPreferences = async (userId: string, preferences: UserPreferences) => {
   try {
-    await setDoc(doc(db, "users", userId), { preferences }, { merge: true });
+    await setDoc(doc(db, "users", userId, "preferences", "main"), preferences, { merge: true });
     console.log("✅ User preferences saved to Firestore successfully!");
   } catch (error) {
     console.error("🔥 Error saving user preferences to Firestore: ", error);
   }
 };
+
 export const logMealToFirestore = async (uid: string, mealData: any) => {
   const mealDocRef = doc(collection(db, "users", uid, "meals"));
   await setDoc(mealDocRef, {
@@ -51,6 +51,29 @@ export const isQuizCompletedInFirestore = async (uid: string): Promise<boolean> 
     return snap.exists() && snap.data().quizCompleted === true;
   } catch (e) {
     console.error("Error checking quiz completion in Firestore:", e);
+    return false;
+  }
+};
+export const markScreeningQuizCompleted = async (uid: string) => {
+  try {
+    await setDoc(
+      doc(db, "users", uid),
+      { screeningQuizCompleted: true },
+      { merge: true }
+    );
+    console.log("✅ Screening quiz marked as completed in Firestore");
+  } catch (e) {
+    console.error("❌ Error marking screening quiz as completed:", e);
+  }
+};
+
+export const isScreeningQuizCompleted = async (uid: string): Promise<boolean> => {
+  try {
+    const docRef = doc(db, "users", uid);
+    const snap = await getDoc(docRef);
+    return snap.exists() && snap.data().screeningQuizCompleted === true;
+  } catch (e) {
+    console.error("Error checking screening quiz completion:", e);
     return false;
   }
 };
@@ -103,5 +126,17 @@ export const fetchMealLogs = async (userId: string) => {
   } catch (error) {
     console.error("🔥 Error fetching meal logs: ", error);
     return [];
+  }
+};
+
+
+export const fetchUserPreferences = async (uid: string) => {
+  try {
+    const docRef = doc(db, "users", uid, "preferences", "main");
+    const snapshot = await getDoc(docRef);
+    return snapshot.exists() ? snapshot.data() : null;
+  } catch (error) {
+    console.error("Error fetching user preferences:", error);
+    return null;
   }
 };

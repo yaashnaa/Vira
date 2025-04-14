@@ -127,15 +127,17 @@ export default function BasicQuiz() {
       primaryGoals: primaryGoals,
     };
 
-    updatePreferences(newPrefs);
+    updatePreferences({
+      ...newPrefs,  
+    });
 
     console.log("🔁 Updating preferences in context:", newPrefs);
-
     const currentUser = auth.currentUser;
     if (currentUser) {
       const { saveUserPreferences } = await import("../../utils/firestore");
     
       await saveUserPreferences(currentUser.uid, {
+
         ...userPreferences,
         ...newPrefs,
       });
@@ -144,7 +146,7 @@ export default function BasicQuiz() {
     
       console.log("✅ Quiz complete for:", currentUser.uid);
       console.log("✅ Firestore quiz completion marked");
-      router.replace("/dashboard"); // safer than push to avoid back nav
+      router.replace("/dashboard"); 
     } else {
       console.warn("⚠️ No current user found during quiz submit");
     }

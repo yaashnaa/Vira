@@ -24,22 +24,34 @@ import { Button } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { loginUser } from "../../utils/auth"; // Firebase authentication function
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { fetchUserPreferences } from "@/utils/firestore";
+import { useUserPreferences } from "@/context/userPreferences"; // Custom hook for user preferences
 import { ensureUserDocumentExists } from "../../utils/firestore"; // Function to ensure user document exists
 export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const { updatePreferences, updatePreferencesFromFirestore } =
+    useUserPreferences();
+
   const handleLogin = async () => {
     try {
-      await loginUser(email, password);
+      await loginUser(email, password); // 🔐 logs in with Firebase Auth
+
       const currentUser = auth.currentUser;
-      if (currentUser) {
-        await AsyncStorage.setItem("@currentUserId", currentUser.uid);
+      if (!currentUser) {
+        Alert.alert("Error", "User not found.");
+        return;
       }
-      await ensureUserDocumentExists();
-      // Alert.alert("Login Successful!");
-      router.replace("/dashboard"); // Redirect to Home Screen
+
+      await ensureUserDocumentExists(); // ✅ no need to pass UID
+      const prefs = await fetchUserPreferences(currentUser.uid);
+      if (prefs) {
+        updatePreferences(prefs); // ✅ updates context from Firestore only
+      }
+
+      router.replace("/dashboard"); // ✅ route to dashboard
     } catch (error) {
       Alert.alert("Login Failed", (error as Error).message);
     }
@@ -142,8 +154,8 @@ const styles = StyleSheet.create({
     bottom: 65,
     position: "absolute",
   },
-  button:{
-    bottom:120
+  button: {
+    bottom: 120,
   },
   insideCont: {
     display: "flex",

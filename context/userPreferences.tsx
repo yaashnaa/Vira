@@ -6,17 +6,13 @@ import React, {
   useEffect,
 } from "react";
 import { auth } from "../config/firebaseConfig";
-import {
-  onAuthStateChanged, 
-  getAuth,
-} from "firebase/auth";
+import { onAuthStateChanged, getAuth } from "firebase/auth";
 import { migrateNameToPreferences } from "@/utils/migrateNameToPreferences";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { saveUserPreferences } from "../utils/firestore";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../config/firebaseConfig";
-
 
 export interface UserPreferences {
   name: string;
@@ -66,7 +62,7 @@ export const DEFAULT_PREFS: UserPreferences = {
   anxiousFood: "",
   primaryGoals: [],
   moodCheckIn: "",
-  caloriePreference:"",
+  caloriePreference: "",
   macroPreference: "",
   moodcCheckInBool: true,
   mentalHealthSupport: "",
@@ -77,12 +73,13 @@ export const DEFAULT_PREFS: UserPreferences = {
   customDietaryPreferences: [],
 };
 
-
 interface UserPreferencesContextProps {
   userPreferences: UserPreferences;
-  updatePreferences: (newPreferences: Partial<UserPreferences>) => void;
+  updatePreferences: (newPrefs: Partial<UserPreferences>) => void;
+  updatePreferencesFromFirestore: () => Promise<void>;
   loading: boolean;
 }
+
 
 const UserPreferencesContext = createContext<
   UserPreferencesContextProps | undefined
@@ -93,16 +90,40 @@ export const UserPreferencesProvider = ({
 }: {
   children: ReactNode;
 }) => {
+  // context/userPreferences.tsx
+
+  const updatePreferencesFromFirestore = async () => {
+    const uid = auth.currentUser?.uid;
+    if (!uid) return;
+
+    try {
+      const docRef = doc(db, "users", uid, "preferences", "main");
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setUserPreferences({ ...DEFAULT_PREFS, ...(data as UserPreferences) });
+        console.log("🔄 User preferences updated from Firestore");
+      } else {
+        console.warn("⚠️ Preferences document does not exist for user:", uid);
+      }
+    } catch (error) {
+      console.error("🔥 Error fetching preferences from Firestore:", error);
+    }
+  };
+
   const loadUserPreferences = async (
     userId: string
   ): Promise<UserPreferences | null> => {
     try {
       const docRef = doc(db, "users", userId, "preferences", "main"); // ✅ correct path
 
-
       const snapshot = await getDoc(docRef);
       if (snapshot.exists()) {
-        console.log("Fetched user preferences from Firestore:", snapshot.data());
+        console.log(
+          "Fetched user preferences from Firestore:",
+          snapshot.data()
+        );
         return snapshot.data() as UserPreferences;
       }
       return null;
@@ -111,14 +132,14 @@ export const UserPreferencesProvider = ({
       return null;
     }
   };
-  
+
   const [userId, setUserId] = useState<string | null>(null);
 
-  const [hasLoaded, setHasLoaded] = useState(false); 
-  const [loading, setLoading] = useState(true); 
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const [userPreferences, setUserPreferences] = useState<UserPreferences>(DEFAULT_PREFS);
-
+  const [userPreferences, setUserPreferences] =
+    useState<UserPreferences>(DEFAULT_PREFS);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -128,37 +149,40 @@ export const UserPreferencesProvider = ({
         const prefs = await loadUserPreferences(user.uid);
         if (prefs) {
           setUserPreferences({ ...DEFAULT_PREFS, ...prefs });
-          setHasLoaded(true); 
+          setHasLoaded(true);
           console.log("Loaded user preferences from Firestore:", prefs);
         } else {
-          setHasLoaded(true)
+          setHasLoaded(true);
           console.log("No saved preferences found. Using defaults.");
         }
       }
       setLoading(false); // ✅ done loading
     });
-  
+
     return unsubscribe;
   }, []);
-  
-  
+
   const updatePreferences = (newPreferences: Partial<UserPreferences>) => {
     setUserPreferences((prev) => {
       const updated = { ...prev, ...newPreferences };
-  
+
       if (userId) {
-        saveUserPreferences(userId, updated);     // ✅ only save the merged version
+        saveUserPreferences(userId, updated); // ✅ only save the merged version
       }
-  
+
       return updated;
     });
   };
-  
-  
 
   return (
-    <UserPreferencesContext.Provider value={{ userPreferences, updatePreferences, loading }}>
-
+    <UserPreferencesContext.Provider
+      value={{
+        userPreferences,
+        updatePreferences,
+        loading,
+        updatePreferencesFromFirestore,
+      }}
+    >
       {children}
     </UserPreferencesContext.Provider>
   );
@@ -173,5 +197,3 @@ export const useUserPreferences = () => {
   }
   return context;
 };
-
-

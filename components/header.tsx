@@ -1,55 +1,57 @@
-import React from 'react';
-import styled from 'styled-components/native';
-import { Text } from 'react-native';
-import { lightTheme } from "@/config/theme";
-
-interface HeaderProps {
-    title: string;
-  }
-  
-
-const HeaderContainer = styled.View`
-  position: relative;
-  width: 200px;
-  align-self: center;
-  border: 2px solid #222;
-  padding: 5px 11px 3px 11px;
-  margin: auto;
-`;
-
-const HeaderText = styled.Text`
-  font-size: 32px;
-  /* font-weight: 700; */
-  text-transform: uppercase;
-  text-align: center;
-`;
-
-const Circle = styled.View`
-  position: absolute;
-  background-color: #adb5d3;
-  height: 10px;
-  width: 10px;
-  border-radius: 3.5px; /* half of 7px for a perfect circle */
-  bottom: 15px;
-`;
-
-const LeftCircle = styled(Circle)`
-  left: -20px;
-`;
-
-const RightCircle = styled(Circle)`
-  right: -20px;
-`;
-
-
-const Header: React.FC<HeaderProps> = ({ title }) => {
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  ActivityIndicator,
+  FlatList,
+} from "react-native";
+import { Header as HeaderRNE, Icon } from "@rneui/themed";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { useRouter } from "expo-router";
+export default function Header() {
+  const router = useRouter();
+  const handleNavigate = (route: Parameters<typeof router.push>[0]): void =>
+    router.push(route);
   return (
-    <HeaderContainer>
-      <HeaderText>{title} </HeaderText>
-      <LeftCircle />
-      <RightCircle />
-    </HeaderContainer>
+    <>
+      <HeaderRNE
+        containerStyle={{
+          backgroundColor: "#f8edeb",
+          borderBottomWidth: 0,
+          paddingTop: 10,
+        }}
+        leftComponent={
+          <TouchableOpacity onPress={() => handleNavigate("/dashboard")}>
+            <Icon name="arrow-back" size={25} type="ionicon" color="#271949" />
+          </TouchableOpacity>
+        }
+        centerComponent={{
+          text: "FIND EXERCISES",
+          style: {
+            color: "#271949",
+            fontSize: 20,
+            fontWeight: "bold",
+            fontFamily: "PatrickHand-Regular",
+          },
+        }}
+        rightComponent={
+          <View style={styles.headerRight}>
+            <TouchableOpacity onPress={() => handleNavigate("/settings")}>
+              <Icon name="settings" type="feather" color="#150b01" />
+            </TouchableOpacity>
+          </View>
+        }
+      />
+    </>
   );
-};
+}
 
-export default Header;
+const styles = StyleSheet.create({
+  headerRight: {
+    display: "flex",
+    flexDirection: "row",
+    marginTop: 5,
+  },
+});

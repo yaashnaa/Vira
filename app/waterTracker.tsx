@@ -125,6 +125,8 @@ export default function WaterTrackerScreen() {
     "💡 Tip: Keep a bottle near you at all times.",
     "💡 Tip: Drink a glass before every meal!",
   ];
+  const handleNavigate = (route: Parameters<typeof router.push>[0]): void =>
+    router.push(route);
   const randomTip =
     hydrationTips[Math.floor(Math.random() * hydrationTips.length)];
 
@@ -150,6 +152,13 @@ export default function WaterTrackerScreen() {
             fontFamily: "PatrickHand-Regular",
           },
         }}
+        rightComponent={
+                  <View style={styles.headerRight}>
+                    <TouchableOpacity onPress={() => handleNavigate("/settings")}>
+                      <Icon name="settings" type="feather" color="#150b01" />
+                    </TouchableOpacity>
+                  </View>
+                }
       />
 
       <SafeAreaView style={styles.container}>
@@ -318,5 +327,10 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     width: "90%",
     justifyContent: "space-between",
+  },
+  headerRight: {
+    display: "flex",
+    flexDirection: "row",
+    marginTop: 5,
   },
 });

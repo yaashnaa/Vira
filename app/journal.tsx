@@ -9,6 +9,11 @@ import {
   TouchableOpacity,
   FlatList,
   SafeAreaView,
+  Image,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Platform,
 } from "react-native";
 import { db, auth } from "@/config/firebaseConfig";
 import {
@@ -18,6 +23,9 @@ import {
   query,
   orderBy,
 } from "firebase/firestore";
+
+import CustomMoonRating from "../components/customMoonRating";
+import { Rating } from "@rneui/themed";
 import { Modal, Portal, Button, Provider, Card } from "react-native-paper";
 import { useRouter } from "expo-router";
 import JournalEntry from "@/components/Journal/journalEntry";
@@ -25,12 +33,26 @@ import { useUserPreferences } from "@/context/userPreferences";
 import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import { useMoodContext } from "@/context/moodContext";
 import dayjs from "dayjs";
+import SuggestionCard from "@/components/Journal/suggestionCard";
+
+const energyOptions = [
+  { label: "Exhausted", image: require("../assets/images/energyScale/1.png") },
+  { label: "Low Energy", image: require("../assets/images/energyScale/2.png") },
+  { label: "Okay", image: require("../assets/images/energyScale/3.png") },
+  { label: "Energized", image: require("../assets/images/energyScale/4.png") },
+  {
+    label: "Fully Charged",
+    image: require("../assets/images/energyScale/5.png"),
+  },
+];
 
 export default function JournalScreen() {
   const { userPreferences } = useUserPreferences();
+  const [sleepRating, setSleepRating] = useState(0);
+  const [checkInComplete, setCheckInComplete] = useState(false);
   const { mood } = useMoodContext();
   const today = dayjs().format("YYYY-MM-DD");
-  const router=  useRouter();
+  const router = useRouter();
   const [isNewEntryVisible, setIsNewEntryVisible] = useState(false);
   const [sleepQuality, setSleepQuality] = useState("");
   const [energyLevel, setEnergyLevel] = useState("");
@@ -58,13 +80,29 @@ export default function JournalScreen() {
         reflection,
         mood,
         date: today,
+        sleepRating,
         timestamp: new Date(),
       });
       setSleepQuality("");
       setEnergyLevel("");
       setReflection("");
       fetchEntries();
+      const todayEntry:
+        | {
+            id: string;
+            sleepQuality?: string;
+            energyLevel?: string;
+            reflection?: string;
+            mood?: string;
+            date?: string;
+            timestamp?: Date;
+          }
+        | undefined = entries.find((entry) => entry.date === today);
+      if (todayEntry) {
+        setCheckInComplete(true);
+      }
       Alert.alert("Success", "Check-in saved!");
+      setCheckInComplete(true);
     } catch (error) {
       console.error("Error saving check-in:", error);
       Alert.alert("Error", "Failed to save check-in.");
@@ -94,7 +132,7 @@ export default function JournalScreen() {
   const handleBackPress = () => {
     router.replace("/dashboard");
   };
-
+  const ratingProps = {};
   return (
     <>
       <HeaderRNE
@@ -109,7 +147,7 @@ export default function JournalScreen() {
           </TouchableOpacity>
         }
         centerComponent={{
-          text: "MOOD TRACKER",
+          text: "JOURNAL",
           style: {
             color: "#271949",
             fontSize: 20,
@@ -121,76 +159,105 @@ export default function JournalScreen() {
           <View style={styles.headerRight}>
             <TouchableOpacity
               style={{ marginLeft: 12 }}
-              onPress={handleBackPress}
+              onPress={() => router.replace("/settings")}
             >
               <Icon name="settings" size={25} type="feather" color="#271949" />
             </TouchableOpacity>
           </View>
         }
       />
+
       <Provider>
-        <ScrollView contentContainerStyle={styles.container}>
-          <Text style={styles.heading}>
-            Hi {userPreferences?.name || "there"} ✨
-          </Text>
-          <Text style={styles.subHeading}>Today's Check-In ({today})</Text>
+        <KeyboardAvoidingView>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.container}>
+              <Text style={styles.heading}>
+                Hi {userPreferences?.name || "there"} ✨
+              </Text>
+              <Text style={styles.subHeading}>Today's Check-In ({today})</Text>
 
-          <Card style={styles.card}>
-            <Card.Content>
-              <Text style={styles.label}>How did you sleep?</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. 7 hours, felt rested"
-                value={sleepQuality}
-                onChangeText={setSleepQuality}
-              />
+              {checkInComplete ? (
+                <SuggestionCard mood={mood} energyLevel={energyLevel} />
+              ) : (
+                <Card style={styles.card}>
+                  <Card.Content>
+                    <Text style={styles.label}>How did you sleep?</Text>
+                    <CustomMoonRating
+                      rating={sleepRating}
+                      onChange={setSleepRating}
+                    />
+                    <Text style={styles.energyLabel}>
+                      {sleepRating > 0 && `Sleep Rating: ${sleepRating} / 5`}
+                    </Text>
+                    <Text style={styles.label}>How's your energy today?</Text>
+                    <View style={styles.energyContainer}>
+                      {energyOptions.map((option, index) => (
+                        <TouchableOpacity
+                          key={index}
+                          onPress={() => setEnergyLevel(option.label)}
+                          style={[
+                            styles.energyOption,
+                            energyLevel === option.label &&
+                              styles.energySelected,
+                          ]}
+                        >
+                          <Image
+                            source={option.image}
+                            style={styles.energyImage}
+                          />
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                    {energyLevel && (
+                      <Text style={styles.energyLabel}>{energyLevel}</Text>
+                    )}
+                    <Text style={styles.label}>What's on your mind?</Text>
 
-              <Text style={styles.label}>How's your energy today?</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. Sluggish, Energetic"
-                value={energyLevel}
-                onChangeText={setEnergyLevel}
-              />
+                    <TextInput
+                      style={[styles.input, styles.journalBox]}
+                      placeholder="Free write your thoughts here..."
+                      value={reflection}
+                      onChangeText={setReflection}
+                      multiline
+                    />
 
-              <Text style={styles.label}>What's on your mind?</Text>
-              <TextInput
-                style={[styles.input, styles.journalBox]}
-                placeholder="Free write your thoughts here..."
-                value={reflection}
-                onChangeText={setReflection}
-                multiline
-              />
+                    <Button
+                      mode="contained-tonal"
+                      icon="check"
+                      textColor="#580b88"
+                      onPress={handleSaveCheckIn}
+                      style={styles.button}
+                    >
+                      Save Check-in
+                    </Button>
+                  </Card.Content>
+                </Card>
+              )}
 
-              <Button
-                mode="contained"
-                onPress={handleSaveCheckIn}
-                style={styles.button}
-              >
-                Save Check-in
-              </Button>
-            </Card.Content>
-          </Card>
-
-          <Text style={styles.heading}>Your Journal</Text>
-          <Button mode="contained" onPress={() => setIsNewEntryVisible(true)}>
-            New Entry
-          </Button>
-
-          <FlatList
-            data={entries}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <Card style={styles.entryCard}>
-                <Card.Content>
-                  <Text style={styles.entryTitle}>{item.date}</Text>
-                  <Text style={styles.entryBody}>{item.reflection}</Text>
-                </Card.Content>
-              </Card>
-            )}
-          />
-        </ScrollView>
-
+              <Text style={styles.heading}>Your Journal</Text>
+              <View style={styles.buttons}>
+                <Button
+                  mode="contained"
+                  onPress={() => setIsNewEntryVisible(true)}
+                  compact={true}
+                  icon={"plus"}
+                  style={styles.actionButton}
+                >
+                  New Entry
+                </Button>
+                <Button
+                  mode="contained"
+                  compact={true}
+                  icon={"link-variant"}
+                  onPress={() => router.replace("/previousJournalEntries")}
+                  style={styles.actionButton}
+                >
+                  View previous entries
+                </Button>
+              </View>
+            </View>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
         <Portal>
           <Modal
             visible={isNewEntryVisible}
@@ -211,7 +278,8 @@ export default function JournalScreen() {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: "#f8f6f4",
+    backgroundColor: "#ffffff",
+    height: "100%",
   },
   heading: {
     fontSize: 22,
@@ -219,11 +287,27 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     color: "#622f00",
   },
+  actionButton: {
+    padding: 5,
+
+    textAlign: "center",
+    justifyContent: "center",
+    alignItems: "center",
+    margin: "auto",
+  },
+  buttons: {
+    display: "flex",
+    flexDirection: "row",
+    width: "100%",
+    textAlign: "center",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   subHeading: {
     fontSize: 18,
     fontWeight: "500",
     marginBottom: 10,
-    color: "#c13e6a",
+    color: "#b488d0",
   },
   input: {
     backgroundColor: "#ffffff",
@@ -245,27 +329,34 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: "#f8f6f4",
     marginBottom: 24,
     borderRadius: 12,
-    padding: 12,
-    elevation: 3,
+    padding: 0,
+    // elevation: 3,
+    justifyContent: "center",
+    alignItems: "center",
   },
   button: {
     marginTop: 16,
-    backgroundColor: "#c13e6a",
+    justifyContent: "center",
+    alignItems: "center",
+    margin: "auto",
+    backgroundColor: "#f8f6f4",
+    width: "50%",
   },
   modal: {
     backgroundColor: "white",
     padding: 20,
     margin: 20,
     borderRadius: 10,
+    height: "105%",
   },
   entryCard: {
     backgroundColor: "#fff",
     marginVertical: 10,
     borderRadius: 10,
-    padding: 16,
+    padding: 12,
     elevation: 2,
   },
   entryTitle: {
@@ -277,9 +368,44 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#555",
   },
+  rating: {
+    paddingVertical: 10,
+  },
   headerRight: {
     display: "flex",
     flexDirection: "row",
     marginTop: 5,
+  },
+  energyContainer: {
+    flexDirection: "row",
+    // justifyContent: "space-between",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
+    marginBottom: 10,
+    margin: "auto",
+    padding: 0,
+  },
+  energyOption: {
+    alignItems: "center",
+    // padding: 6,
+    flex: 1,
+  },
+  energySelected: {
+    borderColor: "#b488d0",
+    borderWidth: 2,
+    borderRadius: 8,
+  },
+  energyLabel: {
+    fontSize: 16,
+    color: "#555",
+    marginBottom: 4,
+    textAlign: "center",
+    fontFamily: "Main-font",
+  },
+  energyImage: {
+    width: 55,
+    height: 55,
+    resizeMode: "contain",
   },
 });

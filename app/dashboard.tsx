@@ -17,7 +17,10 @@ import {
   getEnabledWidgets,
   addWidget,
 } from "@/utils/widgetStorage";
-import { isQuizCompletedInFirestore } from "@/utils/firestore";
+import {
+  isQuizCompletedInFirestore,
+  isScreeningQuizCompleted,
+} from "@/utils/firestore";
 import { useFocusEffect } from "expo-router";
 import { Header as HeaderRNE, HeaderProps, Icon } from "@rneui/themed";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -28,7 +31,6 @@ import { isOnboardingComplete, isQuizComplete } from "@/utils/asyncStorage";
 import { auth } from "@/config/firebaseConfig";
 import { lightTheme } from "@/config/theme";
 import { Animated } from "react-native";
-import { isScreeningQuizComplete } from "@/utils/asyncStorage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { resetAllAsyncStorage } from "@/utils/asyncStorage";
 
@@ -48,10 +50,8 @@ import JournalWidget from "@/components/widgets/JournalWidget";
 import WaterWidget from "@/components/widgets/WaterWidget";
 import MoodWidget from "@/components/widgets/MoodWidget";
 import { useEffect } from "react";
-import { useIsFocused } from "@react-navigation/native";
 import MindfullnessWidget from "@/components/widgets/Mindfullness";
 const STORAGE_KEY = "@enabledWidgets";
-import { markQuizComplete } from "@/utils/asyncStorage";
 const dashboardSections = [
   { key: "greeting" },
   { key: "quote" },
@@ -93,7 +93,7 @@ export default function Dashboard() {
     const uid = auth.currentUser?.uid;
     if (!uid) return;
     await addWidget(uid, widgetId);
-    setWidgetChangeTrigger((prev) => prev + 1); // 🔥 trigger re-render
+    setWidgetChangeTrigger((prev) => prev + 1); 
   };
 
   useEffect(() => {
@@ -103,7 +103,6 @@ export default function Dashboard() {
 
       const onboarded = await isOnboardingComplete(); // still fine to use AsyncStorage here
       const quizDone = await isQuizCompletedInFirestore(uid); // now checking Firestore only
-
       if (!onboarded) router.replace("/(auth)/OnBoarding");
       else if (!quizDone) router.replace("/quizzes/basic");
     };
@@ -113,13 +112,14 @@ export default function Dashboard() {
 
   useEffect(() => {
     const checkScreening = async () => {
-      const completed = await isScreeningQuizComplete(
-        auth.currentUser?.uid || ""
-      );
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+      const completed = await isScreeningQuizCompleted(uid);
       setHasCompletedScreening(completed);
     };
     checkScreening();
   }, []);
+  
   // const [enabledWidgets, setEnabledWidgets] = useState<string[]>([]);
   const [widgetChangeTrigger, setWidgetChangeTrigger] = useState(0);
 
@@ -158,7 +158,7 @@ export default function Dashboard() {
     setWidgetChangeTrigger((prev) => prev + 1);
   };
   console.log("🧠 userPreferences from context:", userPreferences);
-
+  
   if (loading || !userPreferences?.name || !authReady || !auth.currentUser) {
     return (
       <View style={styles.loadingContainer}>
@@ -239,7 +239,7 @@ export default function Dashboard() {
                   onPress={() => handleNavigate("/mood")}
                   isLogged={hasLoggedToday}
                 />
-              ) : null;
+              ) : null; 
 
             case "widgets":
               return (
@@ -288,7 +288,6 @@ export default function Dashboard() {
                   )}
                 </View>
               );
-
             case "quiz":
               return !hasCompletedScreening ? (
                 <>

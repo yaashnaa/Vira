@@ -6,11 +6,14 @@ import {
   TextInput,
   StyleSheet,
   Alert,
-  TouchableOpacity,
   Image,
+  SafeAreaView,
+  ScrollView,
 } from "react-native";
+import { useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
-
+import { Header as HeaderRNE, Icon } from "@rneui/themed";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import { Button, Card, RadioButton } from "react-native-paper";
 import { auth } from "@/config/firebaseConfig";
 import { saveExerciseLog } from "@/utils/saveExerciseLog";
@@ -49,6 +52,7 @@ export default function LogExercise() {
   const [moodAfter, setMoodAfter] = useState("Neutral");
   const [submitting, setSubmitting] = useState(false);
   const { userId } = useMoodContext();
+  const router = useRouter();
   const selectedMood =
     moodOptions.find((m) => m.label === moodAfter)?.value ?? 50;
   const handleSubmit = async () => {
@@ -66,7 +70,7 @@ export default function LogExercise() {
       });
 
       Alert.alert("Success", "Exercise and mood logged successfully!");
-      setExerciseText("");  
+      setExerciseText("");
       setMoodAfter("Neutral");
     } catch (err) {
       Alert.alert("Error", "Something went wrong while saving your log.");
@@ -75,57 +79,98 @@ export default function LogExercise() {
       setSubmitting(false);
     }
   };
+  const handleBackPress = () => {
+    router.replace("/fitness");
+  };
+
+  const handleNavigate = (route: Parameters<typeof router.push>[0]): void =>
+    router.push(route);
 
   return (
-    <Card style={styles.card}>
-      <Card.Title title="Log Movement" titleStyle={styles.title} />
-      <Card.Content>
-        <Text style={styles.label}>What kind of movement did you do?</Text>
-        <TextInput
-          placeholder="e.g. 30 minutes yoga, 15 minutes walking..."
-          value={exerciseText}
-          onChangeText={setExerciseText}
-          style={styles.input}
-          placeholderTextColor="#999"
-          multiline
-        />
-
-   
-        <View style={styles.section}>
-          <Text style={styles.label}>How did you feel after moving?</Text>
-          <View style={styles.ratingRow}>
-            {moodOptions.map((option, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => setMoodAfter(option.label)}
-                style={
-                  moodAfter === option.label
-                    ? styles.selectedMood
-                    : styles.moodOption
-                }
-              >
-                <Image source={option.image} style={styles.moodImage} />
-              </TouchableOpacity>
-            ))}
+    <>
+      <HeaderRNE
+        containerStyle={{
+          backgroundColor: "#f8edeb",
+          borderBottomWidth: 0,
+          paddingTop: 10,
+        }}
+        leftComponent={
+          <TouchableOpacity onPress={handleBackPress}>
+            <Icon name="arrow-back" size={25} type="ionicon" color="#271949" />
+          </TouchableOpacity>
+        }
+        centerComponent={{
+          text: "FIND EXERCISES",
+          style: {
+            color: "#271949",
+            fontSize: 20,
+            fontWeight: "bold",
+            fontFamily: "PatrickHand-Regular",
+          },
+        }}
+        rightComponent={
+          <View style={styles.headerRight}>
+            <TouchableOpacity onPress={() => handleNavigate("/settings")}>
+              <Icon name="settings" type="feather" color="#150b01" />
+            </TouchableOpacity>
           </View>
+        }
+      />
 
-          {moodAfter && (
-            <View style={styles.selectedMoodBox}>
-              <Text style={styles.selectedMoodText}>{moodAfter}</Text>
-            </View>
-          )}
-        </View>
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+          <Card style={styles.card}>
+            <Card.Title title="Log Movement" titleStyle={styles.title} />
+            <Card.Content>
+              <Text style={styles.label}>
+                What kind of movement did you do?
+              </Text>
+              <TextInput
+                placeholder="e.g. 30 minutes yoga, 15 minutes walking..."
+                value={exerciseText}
+                onChangeText={setExerciseText}
+                style={styles.input}
+                placeholderTextColor="#999"
+                multiline
+              />
 
-        <Button
-          mode="contained"
-          onPress={handleSubmit}
-          disabled={submitting}
-          style={styles.button}
-        >
-          {submitting ? "Saving..." : "Save Log"}
-        </Button>
-      </Card.Content>
-    </Card>
+              <View style={styles.section}>
+                <Text style={styles.label}>How did you feel after moving?</Text>
+                <View style={styles.ratingRow}>
+                  {moodOptions.map((option, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() => setMoodAfter(option.label)}
+                      style={
+                        moodAfter === option.label
+                          ? styles.selectedMood
+                          : styles.moodOption
+                      }
+                    >
+                      <Image source={option.image} style={styles.moodImage} />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                {moodAfter && (
+                  <View style={styles.selectedMoodBox}>
+                    <Text style={styles.selectedMoodText}>{moodAfter}</Text>
+                  </View>
+                )}
+              </View>
+
+              <Button
+                mode="contained"
+                onPress={handleSubmit}
+                disabled={submitting}
+                style={styles.button}
+              >
+                {submitting ? "Saving..." : "Save Log"}
+              </Button>
+            </Card.Content>
+          </Card>
+        </SafeAreaView>
+
+    </>
   );
 }
 
@@ -147,7 +192,11 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
-  
+  headerRight: {
+    display: "flex",
+    flexDirection: "row",
+    marginTop: 5,
+  },
   selectedMoodText: {
     fontSize: 16,
     fontWeight: "600",
@@ -155,7 +204,7 @@ const styles = StyleSheet.create({
     fontFamily: "Main-font",
     textAlign: "center",
   },
-  
+
   title: {
     fontSize: 20,
     color: "#0e0327",

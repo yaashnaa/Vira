@@ -49,7 +49,7 @@ export default function WelcomeScreen() {
 
   return (
     <View
-      style={[styles.container, { backgroundColor: lightTheme.background }]}
+      style={styles.container}
     >
       <Image
         source={require("../../assets/images/welcome.jpg")}
@@ -86,6 +86,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
+    backgroundColor: "#fff",
   },
   title: {
     fontSize: 42,

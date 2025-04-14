@@ -26,7 +26,7 @@ import EvilIcons from "@expo/vector-icons/EvilIcons";
 import Feather from "@expo/vector-icons/Feather";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import DailyOverviewNutrition from "@/components/Nutrition/dailyOverviewNutrition";
 import { useUserPreferences } from "@/context/userPreferences";
 import { useRouter } from "expo-router";
@@ -122,14 +122,14 @@ export default function NutritionScreen() {
           <View style={styles.headerRight}>
             <TouchableOpacity
               style={{ marginLeft: 12 }}
-              onPress={handleBackPress}
+              onPress={() => router.push("/settings")}
             >
               <Icon name="settings" size={25} type="feather" color="#231313" />
             </TouchableOpacity>
           </View>
         }
       />
-      <View style={styles.container}>
+      <ScrollView style={styles.container}>
         <Text style={styles.greeting}>
           Hello, {userPreferences?.name || "friend"} 🥗
         </Text>
@@ -147,11 +147,11 @@ export default function NutritionScreen() {
             />
           </View>
         )}
-
+        <SuggestMeals />
         <SegmentedButtons
           value={selectedSegment}
           onValueChange={setSelectedSegment}
-          buttons={[
+            buttons={[
             {
               value: "log",
               icon: "silverware-fork-knife", // ✅ string name
@@ -172,8 +172,8 @@ export default function NutritionScreen() {
             },
           ]}
         />
-        {selectedSegment === "log" && !userPreferences?.hideMealTracking && (
-          <LogMealCardModal onLog={handleLog} />
+        {selectedSegment  === "log" && !userPreferences?.hideMealTracking && (
+          <LogMealCardModal onLog={handleLog}  />
         )}
 
         {selectedSegment === "view" && !userPreferences?.hideMealTracking && (
@@ -181,7 +181,7 @@ export default function NutritionScreen() {
         )}
 
         {selectedSegment === "search" && <NutritionSearch />}
-      </View>
+      </ScrollView>
     </>
   );
 
@@ -199,11 +199,12 @@ export default function NutritionScreen() {
 }
 
 const screenWidth = Dimensions.get("window").width;
-
+const screenHeight = Dimensions.get("window").height; 
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: "#F8F9FA",
+    backgroundColor: "#ffffff",
+    height: screenHeight,
   },
   greeting: {
     fontSize: 26,

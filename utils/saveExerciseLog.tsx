@@ -1,5 +1,5 @@
 // utils/saveExerciseLog.ts
-import { collection, addDoc, Timestamp } from "firebase/firestore";
+import { collection, addDoc, Timestamp,orderBy, query, getDocs } from "firebase/firestore";
 import { db, auth } from "../config/firebaseConfig";
 import dayjs from "dayjs";
 
@@ -30,3 +30,18 @@ export const saveExerciseLog = async ({
     }
   };
   
+  export const fetchExerciseLogs = async (userId: string) => {
+    try {
+      const logsRef = collection(db, "users", userId, "exerciseLogs");
+      const q = query(logsRef, orderBy("timestamp", "desc"));
+      const snapshot = await getDocs(q);
+  
+      return snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+    } catch (error) {
+      console.error("🔥 Error fetching exercise logs:", error);
+      return [];
+    }
+  };

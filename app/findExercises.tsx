@@ -12,12 +12,18 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import { Button, Card, Chip } from "react-native-paper";
 import { useMoodContext } from "@/context/moodContext";
 import { useUserPreferences } from "@/context/userPreferences";
-import { fetchExerciseData, ExerciseProps } from "@/utils/api/fetchExerciseData";
+import {
+  fetchExerciseData,
+  ExerciseProps,
+} from "@/utils/api/fetchExerciseData";
 import { useRouter } from "expo-router";
+export const screenOptions = {
+  animation: "slide_from_right", // Other options: "fade", "none", etc.
+};
 export default function FitnessScreen() {
   const { userPreferences } = useUserPreferences();
   const { mood } = useMoodContext();
-const router = useRouter();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [exercises, setExercises] = useState<ExerciseProps[]>([]);
   const [muscle, setMuscle] = useState("");
@@ -114,129 +120,132 @@ const router = useRouter();
     router.replace("/fitness");
   };
 
+  const handleNavigate = (route: Parameters<typeof router.push>[0]): void =>
+    router.push(route);
   return (
     <>
-    <HeaderRNE
-          containerStyle={{
-            backgroundColor: "#f8edeb",
-            borderBottomWidth: 0,
-            paddingTop: 10,
-          }}
-          leftComponent={
-            <TouchableOpacity onPress={handleBackPress}>
-              <Icon
-                name="arrow-back"
-                size={25}
-                type="ionicon"
-                color="#271949"
-              />
+      <HeaderRNE
+        containerStyle={{
+          backgroundColor: "#f8edeb",
+          borderBottomWidth: 0,
+          paddingTop: 10,
+        }}
+        leftComponent={
+          <TouchableOpacity onPress={handleBackPress}>
+            <Icon name="arrow-back" size={25} type="ionicon" color="#271949" />
+          </TouchableOpacity>
+        }
+        centerComponent={{
+          text: "FIND EXERCISES",
+          style: {
+            color: "#271949",
+            fontSize: 20,
+            fontWeight: "bold",
+            fontFamily: "PatrickHand-Regular",
+          },
+        }}
+        rightComponent={
+          <View style={styles.headerRight}>
+            <TouchableOpacity onPress={() => handleNavigate("/settings")}>
+              <Icon name="settings" type="feather" color="#150b01" />
             </TouchableOpacity>
-          }
-          centerComponent={{
-            text: "FIND EXERCISES",
-            style: {
-              color: "#271949",
-              fontSize: 20,
-              fontWeight: "bold",
-              fontFamily: "PatrickHand-Regular",
-            },
-          }}
-        />
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.filterLabel}>Muscle Group</Text>
-      <View style={styles.chipContainer}>
-        {muscleOptions.map((item) => (
-          <Chip
-            key={item}
-            mode="outlined"
-            selected={muscle === item}
-            onPress={() => setMuscle(muscle === item ? "" : item)}
-            style={styles.chip}
-            textStyle={[styles.chipText, { textTransform: "capitalize" }]}
-            selectedColor="#000000"
-            showSelectedOverlay={true}
- 
-          >
-            {item}
-          </Chip>
-        ))}
-      </View>
-
-      <Text style={styles.filterLabel}>Type</Text>
-      <View style={styles.chipContainer}>
-        {typeOptions.map((item) => (
-          <Chip
-            key={item}
-            mode="outlined"
-            selected={type === item}
-            onPress={() => setType(type === item ? "" : item)}
-            style={styles.chip}
-            selectedColor="#000000"
-            showSelectedOverlay={true}
-            textStyle={[styles.chipText, { textTransform: "capitalize" }]}
-          >
-            {item}
-          </Chip>
-        ))}
-      </View>
-
-      <Text style={{ fontStyle: "italic", color: "#666", marginBottom: 10 }}>
-        Based on your physical health, we've suggested {difficulty} exercises.
-      </Text>
-
-      <Text style={styles.filterLabel}>Difficulty</Text>
-      <View style={styles.chipContainer}>
-        {difficultyOptions.map((item) => (
-          <Chip
-            key={item}
-            mode="outlined"
-            style={styles.chip}
-            selected={difficulty === item}
-            onPress={() => setDifficulty(difficulty === item ? "" : item)}
-            textStyle={[styles.chipText, { textTransform: "capitalize" }]}
-            selectedColor="#000000"
-            showSelectedOverlay={true}
-        
-          >
-            {item}
-          </Chip>
-        ))}
-      </View>
-
-      <Button
-        mode="contained"
-        onPress={fetchExercises}
-        style={styles.button}
-        disabled={loading}
-      >
-        {loading ? "Loading..." : "Search"}
-      </Button>
-
-      {loading && <ActivityIndicator size="large" style={{ marginTop: 20 }} />}
-
-      <FlatList
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        data={exercises}
-        keyExtractor={(_, index) => index.toString()}
-        contentContainerStyle={styles.resultsContainer}
-        renderItem={({ item }) => (
-          <Card style={styles.card}>
-            <Card.Title title={item.name} subtitle={item.type} />
-            <Card.Content>
-              <Text style={styles.label}>Muscle:</Text>
-              <Text>{item.muscle}</Text>
-              <Text style={styles.label}>Difficulty:</Text>
-              <Text>{item.difficulty}</Text>
-              <Text style={styles.label}>Instructions:</Text>
-              <Text>{item.instructions}</Text>
-            </Card.Content>
-          </Card>
-        )}
+          </View>
+        }
       />
-    </ScrollView>
-    </>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.filterLabel}>Muscle Group</Text>
+        <View style={styles.chipContainer}>
+          {muscleOptions.map((item) => (
+            <Chip
+              key={item}
+              mode="outlined"
+              selected={muscle === item}
+              onPress={() => setMuscle(muscle === item ? "" : item)}
+              style={styles.chip}
+              textStyle={[styles.chipText, { textTransform: "capitalize" }]}
+              selectedColor="#000000"
+              showSelectedOverlay={true}
+            >
+              {item}
+            </Chip>
+          ))}
+        </View>
 
+        <Text style={styles.filterLabel}>Type</Text>
+        <View style={styles.chipContainer}>
+          {typeOptions.map((item) => (
+            <Chip
+              key={item}
+              mode="outlined"
+              selected={type === item}
+              onPress={() => setType(type === item ? "" : item)}
+              style={styles.chip}
+              selectedColor="#000000"
+              showSelectedOverlay={true}
+              textStyle={[styles.chipText, { textTransform: "capitalize" }]}
+            >
+              {item}
+            </Chip>
+          ))}
+        </View>
+
+        <Text style={{ fontStyle: "italic", color: "#666", marginBottom: 10 }}>
+          Based on your physical health, we've suggested {difficulty} exercises.
+        </Text>
+
+        <Text style={styles.filterLabel}>Difficulty</Text>
+        <View style={styles.chipContainer}>
+          {difficultyOptions.map((item) => (
+            <Chip
+              key={item}
+              mode="outlined"
+              style={styles.chip}
+              selected={difficulty === item}
+              onPress={() => setDifficulty(difficulty === item ? "" : item)}
+              textStyle={[styles.chipText, { textTransform: "capitalize" }]}
+              selectedColor="#000000"
+              showSelectedOverlay={true}
+            >
+              {item}
+            </Chip>
+          ))}
+        </View>
+
+        <Button
+          mode="contained"
+          onPress={fetchExercises}
+          style={styles.button}
+          disabled={loading}
+        >
+          {loading ? "Loading..." : "Search"}
+        </Button>
+
+        {loading && (
+          <ActivityIndicator size="large" style={{ marginTop: 20 }} />
+        )}
+
+        <FlatList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={exercises}
+          keyExtractor={(_, index) => index.toString()}
+          contentContainerStyle={styles.resultsContainer}
+          renderItem={({ item }) => (
+            <Card style={styles.card}>
+              <Card.Title title={item.name} subtitle={item.type} />
+              <Card.Content>
+                <Text style={styles.label}>Muscle:</Text>
+                <Text>{item.muscle}</Text>
+                <Text style={styles.label}>Difficulty:</Text>
+                <Text>{item.difficulty}</Text>
+                <Text style={styles.label}>Instructions:</Text>
+                <Text>{item.instructions}</Text>
+              </Card.Content>
+            </Card>
+          )}
+        />
+      </ScrollView>
+    </>
   );
 }
 
@@ -286,5 +295,10 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginTop: 8,
     fontFamily: "Main-font",
+  },
+  headerRight: {
+    display: "flex",
+    flexDirection: "row",
+    marginTop: 5,
   },
 });

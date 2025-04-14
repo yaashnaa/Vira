@@ -19,7 +19,9 @@ import {
   Portal,
   Modal,
 } from "react-native-paper";
+
 import { EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
+import { isScreeningQuizCompleted } from "@/utils/firestore";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { resetOnboarding } from "@/utils/resetOnboarding";
@@ -30,16 +32,14 @@ import { db } from "../config/firebaseConfig"; // adjust path as needed
 import { getAuth } from "firebase/auth";
 import { signOut, deleteUser, sendPasswordResetEmail } from "firebase/auth";
 import MentalHealthCheckboxModal from "@/components/mentalHealthModal";
-import { storePreferencesLocally } from "../utils/asyncStorage"; // Adjust the path as necessary
 import BasicButton from "@/components/Buttons/basicButton";
 import { useUserPreferences } from "../context/userPreferences"; // Adjust the path as necessary
 import { useRouter } from "expo-router";
 import { auth } from "@/config/firebaseConfig";
-import { isScreeningQuizComplete } from "@/utils/asyncStorage";
 
 export default function Settings() {
   // Get current preferences and the updater function from the context.
-  const { userPreferences, updatePreferences } = useUserPreferences();
+  const { userPreferences, updatePreferences, updatePreferencesFromFirestore } = useUserPreferences();
   const router = useRouter();
 
   // Local state initialized from context
@@ -130,11 +130,16 @@ export default function Settings() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   useEffect(() => {
     const checkScreening = async () => {
-      const completed = await isScreeningQuizComplete();
-      setHasCompletedScreening(completed);
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+
+      const completed = await isScreeningQuizCompleted(uid);
+      setHasCompletedScreening(true);
     };
+
     checkScreening();
   }, []);
+
   useEffect(() => {
     // Update local state when context changes
     setName(userPreferences.name);
@@ -282,16 +287,11 @@ export default function Settings() {
           "main"
         );
         await setDoc(userDocRef, updated, { merge: true });
-
+        await updatePreferencesFromFirestore();
         console.log("Firestore updated for UID:", currentUser.uid);
 
-        await storePreferencesLocally(currentUser.uid, {
-          ...userPreferences,
-          ...updated,
-        });
         console.log("Preferences saved locally for UID:", currentUser.uid);
       }
-
       console.log("🎉 User Preferences Submitted & Stored!");
       router.replace("/dashboard");
     } catch (error) {
@@ -299,6 +299,7 @@ export default function Settings() {
       alert("Error saving preferences. Please try again.");
     }
   };
+
   const handleBackPress = () => {
     router.replace("/dashboard");
   };
@@ -859,7 +860,7 @@ export default function Settings() {
             </View>
           ) : (
             <Text style={{ fontStyle: "italic", marginBottom: 10 }}>
-              Complete the screening quiz to unlock dietary settings.
+              Complete the screening quiz to unlock advance settings.
             </Text>
           )}
 
@@ -892,7 +893,9 @@ export default function Settings() {
           <Button onPress={() => setConfirmDelete(true)}>Delete Account</Button>
           <Button onPress={handleLogout}>Logout</Button>
           <Button onPress={handleResetPassword}>Reset Password</Button>
-          <Button onPress={resetOnboarding} title="Reset" />
+          <Button onPress={resetOnboarding}>
+            Reset
+          </Button>
         </View>
       </SafeAreaView>
     </Provider>
@@ -907,6 +910,9 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 10,
+    color: "#000",
+    fontWeight: "600",
+    textAlign: "center",
   },
   confirmModal: {
     backgroundColor: "#fff",
@@ -966,11 +972,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 8,
-  },
-  buttonText: {
-    color: "#000",
-    fontWeight: "600",
-    textAlign: "center",
   },
   headerRight: {
     display: "flex",
