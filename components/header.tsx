@@ -1,57 +1,83 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  ActivityIndicator,
-  FlatList,
-} from "react-native";
+import React from "react";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { Header as HeaderRNE, Icon } from "@rneui/themed";
-import { TouchableOpacity } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
-export default function Header() {
+
+interface CustomHeaderProps {
+  title: string;
+  showSettings?: boolean;
+  backPath?: string;
+}
+
+export default function Header({
+  title,
+  showSettings = true,
+  backPath = "/dashboard",
+}: CustomHeaderProps) {
   const router = useRouter();
-  const handleNavigate = (route: Parameters<typeof router.push>[0]): void =>
-    router.push(route);
+
   return (
-    <>
-      <HeaderRNE
-        containerStyle={{
-          backgroundColor: "#f8edeb",
-          borderBottomWidth: 0,
-          paddingTop: 10,
-        }}
-        leftComponent={
-          <TouchableOpacity onPress={() => handleNavigate("/dashboard")}>
-            <Icon name="arrow-back" size={25} type="ionicon" color="#271949" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "FIND EXERCISES",
-          style: {
-            color: "#271949",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "PatrickHand-Regular",
-          },
-        }}
-        rightComponent={
-          <View style={styles.headerRight}>
-            <TouchableOpacity onPress={() => handleNavigate("/settings")}>
-              <Icon name="settings" type="feather" color="#150b01" />
+    <HeaderRNE
+      containerStyle={styles.container}
+      leftComponent={
+        <TouchableOpacity
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+          }}
+          onPress={() => router.replace(backPath as any)}
+        >
+          <Icon name="arrow-back" size={25} type="ionicon" color="#271949" />
+        </TouchableOpacity>
+      }
+      centerComponent={{
+        text: title,
+        style: styles.title,
+      }}
+      centerContainerStyle={{
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+      rightComponent={
+        showSettings ? (
+          <View>
+            <TouchableOpacity
+              style={{
+                marginLeft: 12,
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100%",
+              }}
+              onPress={() => router.replace("/settings")}
+            >
+              <Icon name="settings" size={25} type="feather" color="#271949" />
             </TouchableOpacity>
           </View>
-        }
-      />
-    </>
+        ) : undefined
+      }
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  headerRight: {
-    display: "flex",
+  container: {
+    backgroundColor: "#f8edeb",
+    borderBottomWidth: 0,
+    paddingBottom: 12,
+    paddingTop: 12,
+    height: 110,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    alignContent: "center",
     flexDirection: "row",
-    marginTop: 5,
+    margin: "auto",
+  },
+  title: {
+    color: "#271949",
+    fontSize: 24,
+    fontWeight: "bold",
+    fontFamily: "PatrickHand-Regular",
   },
 });

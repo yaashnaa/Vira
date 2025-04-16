@@ -1,51 +1,43 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, Dimensions } from "react-native";
 import { Card, Divider, Button } from "react-native-paper";
-import { useMoodContext } from "@/context/moodContext";
 import { useRouter } from "expo-router";
 
-interface LogMoodButtonProps {
-  onPress: () => void;
-  isLogged?: boolean;
+interface MoodSuggestionsCardProps {
+  latestCheckIn: Record<string, any> | null;
 }
 
-const moodMap: {
-  text: string;
-  emoji: string;
-  suggestion: string;
-  route: "/fitness" | "/journal" | "/mindfullness";
-  label: string;
-}[] = [
+const moodMap = [
   {
-    text: "are feeling on top of the world!",
+    moods: ["Feeling Great"],
     emoji: "😄",
     suggestion: "Try a high-energy workout to celebrate your vibe",
     route: "/fitness",
     label: "Go to Fitness",
   },
   {
-    text: "are feeling good.",
+    moods: ["Pretty Good"],
     emoji: "😊",
     suggestion: "🧘 Maintain that balance with a mindful stretch session",
     route: "/fitness",
     label: "Explore Movement",
   },
   {
-    text: "feel just okay.",
+    moods: ["Hanging in There"],
     emoji: "😐",
     suggestion: "🚶 Take a short walk or do a light activity to reset",
     route: "/fitness",
     label: "Gentle Workout",
   },
   {
-    text: "don’t feel that great.",
+    moods: ["Not My Best"],
     emoji: "😕",
     suggestion: "🫶 Try journaling a few thoughts to release the tension",
     route: "/journal",
     label: "Open Journal",
   },
   {
-    text: "are feeling really low.",
+    moods: ["Having a Tough Day"],
     emoji: "😢",
     suggestion: "🌿 Try a calming breathing exercise to ground yourself",
     route: "/mindfullness",
@@ -53,32 +45,24 @@ const moodMap: {
   },
 ];
 
-const getMoodInfo = (value: number | null) => {
-  if (value === null) return null;
-  const index = Math.min(Math.floor(value / 25), 4);
-  return moodMap[index];
-};
-
 const { width } = Dimensions.get("window");
 
-export default function LogMoodButton({
-  onPress,
-  isLogged = false,
-}: LogMoodButtonProps) {
-  const { mood } = useMoodContext();
+export default function MoodSuggestionsCard({ latestCheckIn }: MoodSuggestionsCardProps) {
   const router = useRouter();
-  const moodInfo = getMoodInfo(mood);
 
-  if (isLogged && moodInfo) {
+  const moodLabel = latestCheckIn?.mood;
+  const moodInfo = moodMap.find((m) => m.moods.includes(moodLabel));
+
+  if (latestCheckIn && moodInfo) {
     return (
       <View style={styles.recommendationBox}>
         <Text style={styles.recommendationText}>
-          You indicated you {moodInfo.text} 
+          You said you're {moodLabel.toLowerCase()} today {moodInfo.emoji}
         </Text>
         <Text style={styles.suggestion}>{moodInfo.suggestion}</Text>
         <Button
           mode="contained"
-          onPress={() => router.push(moodInfo.route)}
+          onPress={() => router.push(moodInfo.route as Parameters<typeof router.push>[0])}
           style={styles.actionButton}
           labelStyle={{ fontSize: 14, color: "#3d1c03" }}
         >
@@ -89,18 +73,15 @@ export default function LogMoodButton({
   }
 
   return (
-    <Card onPress={onPress} style={styles.card}>
+    <Card onPress={() => router.push("/checkInScreen")} style={styles.card}>
       <Card.Content style={styles.cardContent}>
         <Text style={styles.heading}>
-          Log your mood today for personalized suggestions ✨
+          Check in to get personalized suggestions ✨
         </Text>
         <Divider style={styles.divider} />
-        <Image
-          source={require("../../assets/images/mood/moodScale.png")}
-          style={styles.image}
-        />
+   
         <View style={styles.footer}>
-          <Text style={styles.text}>Tap to log your mood</Text>
+          <Text style={styles.text}>Tap to check in</Text>
         </View>
       </Card.Content>
     </Card>
@@ -135,7 +116,6 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     paddingHorizontal: 12,
     borderRadius: 8,
-    
   },
   card: {
     width: width * 0.9,
@@ -144,9 +124,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     alignSelf: "center",
     marginVertical: 10,
-  },
-  cardDisabled: {
-    backgroundColor: "rgba(0, 0, 0, 0.05)",
   },
   cardContent: {
     alignItems: "center",

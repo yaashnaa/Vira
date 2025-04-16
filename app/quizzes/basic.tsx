@@ -8,8 +8,8 @@ import {
   SafeAreaView,
   ScrollView,
 } from "react-native";
-import { ProgressBar } from "react-native-paper";
-import { Button } from "react-native-paper";
+import { Image } from "react-native";
+import { Button, ProgressBar } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 import { useUserPreferences } from "../../context/userPreferences";
 import { useRouter } from "expo-router";
@@ -36,24 +36,13 @@ export default function BasicQuiz() {
   const [mentalDisorder, setMentalDisorder] = useState<string[]>(
     userPreferences.mentalHealthConditions || []
   );
-  
+
   const [customDisorder, setCustomDisorder] = useState(
     userPreferences.customMentalHealthConditions || ""
   );
   const [customMedicalConditions, setCustomMedicalConditions] = useState(
     userPreferences.customMedicalConditions || ""
   );
-  
-  const handleSubmit = () => {
-    if (!name.trim()) {
-      setError("This field is required.");
-      return;
-    }
-
-    // Proceed with form submission
-    console.log("Submitted value:", name);
-    handleNext();
-  };
 
   let finalMedicalConditions: string[] = [];
   if (medicalConditions === "Yes" && customMedicalConditions.trim()) {
@@ -71,7 +60,7 @@ export default function BasicQuiz() {
   ) {
     finalMentalHealthConditions.push(mentalDisorder.join(", "));
   }
-  
+
   // If user typed a customDisorder:
   if (mentalDisorder.includes("Other") && customDisorder.trim()) {
     finalMentalHealthConditions.push(customDisorder.trim());
@@ -101,7 +90,7 @@ export default function BasicQuiz() {
     setCustomDisorder("");
     setPrimaryGoals([]);
   };
-  
+
   const handleSubmitForm = async () => {
     if (primaryGoals.length === 0) {
       setGoalError("Please select at least one goal.");
@@ -110,56 +99,65 @@ export default function BasicQuiz() {
       setGoalError("");
     }
 
-    // Parse the comma-separated input into an array
-    const medicalConditionsArray = medicalConditionsInput
-      .split(",")
-      .map((cond) => cond.trim())
-      .filter((cond) => cond !== "");
+    const finalMedicalConditionsArray: string[] =
+      medicalConditions === "Yes" && customMedicalConditions.trim()
+        ? [customMedicalConditions.trim()]
+        : medicalConditions === "No"
+          ? ["None"]
+          : ["Prefer not to say"];
+
+    const finalMentalHealthConditionsArray: string[] =
+      !mentalDisorder.includes("None of the above") &&
+      !mentalDisorder.includes("Prefer not to say") &&
+      mentalDisorder.length > 0
+        ? [mentalDisorder.join(", ")]
+        : ["Prefer not to say"];
+
+    if (mentalDisorder.includes("Other") && customDisorder.trim()) {
+      finalMentalHealthConditionsArray.push(customDisorder.trim());
+    }
 
     const newPrefs = {
-      name,
-      ageGroup,
-      activityLevel:activityLevel ?? "",
-      medicalConditions: finalMedicalConditions,
-      mentalHealthConditions: finalMentalHealthConditions,
-      customMentalHealthConditions: customDisorder,
-      customMedicalConditions: customMedicalConditions,
-      primaryGoals: primaryGoals,
+      name: name.trim() || "User",
+      ageGroup: ageGroup || "Prefer not to say",
+      activityLevel: activityLevel || "Prefer not to say",
+      medicalConditions: finalMedicalConditionsArray,
+      mentalHealthConditions: finalMentalHealthConditionsArray,
+      customMentalHealthConditions: customDisorder || "",
+      customMedicalConditions: customMedicalConditions || "",
+      primaryGoals:
+        primaryGoals.length > 0 ? primaryGoals : ["Improve mental well-being"],
     };
 
-    updatePreferences({
-      ...newPrefs,  
-    });
+    updatePreferences(newPrefs);
 
     console.log("🔁 Updating preferences in context:", newPrefs);
+
     const currentUser = auth.currentUser;
     if (currentUser) {
       const { saveUserPreferences } = await import("../../utils/firestore");
-    
-      await saveUserPreferences(currentUser.uid, {
 
+      await saveUserPreferences(currentUser.uid, {
         ...userPreferences,
         ...newPrefs,
       });
-    
+
       await markQuizCompletedInFirestore(currentUser.uid);
-    
+
       console.log("✅ Quiz complete for:", currentUser.uid);
-      console.log("✅ Firestore quiz completion marked");
-      router.replace("/dashboard"); 
+      router.replace("/dashboard");
     } else {
       console.warn("⚠️ No current user found during quiz submit");
     }
-  };    
+  };
+
   const renderStep = () => {
     switch (step) {
       case 0:
         return (
           <>
-
             <SafeAreaView>
-              
-              <View style={{ marginBottom: 20, marginTop:20 }}>
+              <View style={{ marginBottom: 20, marginTop: 20 }}>
                 <ProgressBar
                   progress={(step + 1) / totalSteps}
                   color="#A084DC"
@@ -336,33 +334,64 @@ export default function BasicQuiz() {
                 </Text>
               ) : null}
               {[
-                "General fitness/health",
-                "Weight management or body recomposition",
-                "Improve mental well-being",
-                "Build consistent eating habits",
-                "Enhance social connections or community support",
-                "Learn about nutrition and healthy eating",
-                "Track progress and set goals",
-                "Improve mindfulness or self-care habits",
+                {
+                  label: "General fitness/health",
+                  image: require("../../assets/images/goals/6124333.png"),
+                },
+                {
+                  label: "Weight management or body recomposition",
+                  image: require("../../assets/images/goals/general.png"),
+                },
+                {
+                  label: "Improve mental well-being",
+                  image: require("../../assets/images/goals/mind.png"),
+                },
+                {
+                  label: "Build consistent eating habits",
+                  image: require("../../assets/images/goals/learn.png"),
+                },
+                {
+                  label: "Enhance social connections or community support", 
+                  image: require("../../assets/images/goals/social.png"),
+                },
+                {
+                  label: "Learn about nutrition and healthy eating",
+                  image: require("../../assets/images/goals/nutrition.png"),
+                },
+                {
+                  label: "Track progress and set goals",
+                  image: require("../../assets/images/goals/6124333.png"),
+                },
+                {
+                  label: "Improve mindfulness or self-care habits",
+                  image: require("../../assets/images/goals/mindfullness.png"),
+                },
               ].map((option) => (
                 <TouchableOpacity
-                  key={option}
+                  key={option.label}
                   style={[
                     styles.optionButton,
-                    primaryGoals.includes(option) && styles.selectedOption,
+                    primaryGoals.includes(option.label) &&
+                      styles.selectedOption,
                   ]}
                   onPress={() =>
                     setPrimaryGoals((prev) =>
-                      prev.includes(option)
-                        ? prev.filter((g) => g !== option)
+                      prev.includes(option.label)
+                        ? prev.filter((g) => g !== option.label)
                         : prev.length < 3
-                        ? [...prev, option]
-                        : prev
+                          ? [...prev, option.label]
+                          : prev
                     )
                   }
                 >
                   <View style={styles.optionContent}>
-                    <Text style={styles.optionText}>{option}</Text>
+                    <Image
+                      source={option.image}
+                      style={{ width: 30, height: 30, marginRight: 10 }}
+                    />
+                    <View style={{ flex: 1, flexWrap: "wrap", justifyContent: "center", alignItems: "center" }}>
+                      <Text style={styles.optionText}>{option.label}</Text>
+                    </View>
                   </View>
                 </TouchableOpacity>
               ))}
@@ -397,7 +426,7 @@ export default function BasicQuiz() {
   const styles = StyleSheet.create({
     container: {
       flexGrow: 1,
-      padding: 20,
+      padding: 15,
       backgroundColor: "#F8F9FA",
     },
     errorText: {
@@ -409,14 +438,14 @@ export default function BasicQuiz() {
       marginBottom: 30,
     },
     sectionTitle: {
-      fontSize: 40,
+      fontSize: 34,
       fontWeight: "bold",
       marginBottom: 0,
       fontFamily: "PatrickHand-Regular",
     },
     question: {
       // fontFamily: "Comfortaa-Regular",
-      fontSize: 18,
+      fontSize: 16,
       marginVertical: 10,
       marginBottom: 10,
     },
@@ -431,24 +460,26 @@ export default function BasicQuiz() {
       flexDirection: "row",
       flexWrap: "wrap",
       marginBottom: 15,
+      marginLeft: 0,
     },
     optionContent: {
       flexDirection: "row",
       alignItems: "center",
-      justifyContent: "space-between",
+      justifyContent: "flex-start", // change if needed
       width: "100%",
+      
     },
 
     optionButton: {
       backgroundColor: "#eae9ee",
-      fontFamily: "Serif-font",
-      padding: 15,
-      margin: 5,
+      fontFamily: "Main-font",
+      padding: 12,
+      marginBottom: 12,
       borderWidth: 0,
       borderRadius: 35,
       width: "100%",
       textAlign: "left",
-      // alignItems: "center",
+      alignContent: "center",
       justifyContent: "center",
     },
     selectedOption: {

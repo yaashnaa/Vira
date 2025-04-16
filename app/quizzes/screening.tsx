@@ -44,7 +44,12 @@ export default function QuizScreen() {
   const [approach, setApproach] = useState("");
   const [caloriePreference, setCaloriePreference] = useState("");
   const [macroPreference, setMacroPreference] = useState("");
-  const [foodAnxietyLevel, setFoodAnxietyLevel] = useState(""); // string
+  const [foodAnxietyLevel, setFoodAnxietyLevel] = useState("");
+  const [movementRelationship, setMovementRelationship] = useState("");
+  const [tonePreference, setTonePreference] = useState("");
+  const [contentAvoidance, setContentAvoidance] = useState("");
+  const [copingConsent, setCopingConsent] = useState("");
+  const [userNotes, setUserNotes] = useState("");
 
   const { updatePreferences } = useUserPreferences();
   const [dataConsent, setDataConsent] = useState(false);
@@ -84,37 +89,47 @@ export default function QuizScreen() {
       mentalHealthResouces === "Yes, please show me available resources." ||
       mentalHealthResouces === "Not sure, remind me later.";
 
-  
     const updated = {
-      dietaryPreferences: finalDietaryPreferences,
-      physicalHealth: physicalHealth ?? "",
-      customDietaryPreferences: finalCustomDietaryPreferences,
-      mealLogging: mealLoggingComfort ?? "",
-      hideMealTracking: hideMealTrackingBool,
-      calorieViewing: calorieViewingBool,
-      macroViewing: macroViewingBool,
-      caloriePreference: caloriePreference ?? "",
-      macroPreference: macroPreference ?? "",
-      customMedicalConditions: customMedicalConditions ?? "",
-      customMentalHealthConditions: customDisorder ?? "",
+      dietaryPreferences: finalDietaryPreferences ?? [],
+      physicalHealth: physicalHealth || "Prefer not to say",
+      customDietaryPreferences: finalCustomDietaryPreferences ?? [],
+      mealLogging: mealLoggingComfort || "Not sure yet",
+      hideMealTracking: hideMealTrackingBool ?? false,
+      calorieViewing: calorieViewingBool ?? true,
+      macroViewing: macroViewingBool ?? true,
+      caloriePreference:
+        caloriePreference || "No, I’d prefer not to see calories.",
+      macroPreference: macroPreference || "No, I’d prefer not to see macros.",
+      customMedicalConditions: customMedicalConditions || "",
+      customMentalHealthConditions: customDisorder || "",
       foodAnxietyLevel: foodAnxietyLevel || "Prefer not to say",
-
-      anxiousFood: foodAnxietyLevel,
-      mentalHealthSupport: mentalHealthResouces ?? "",
-      remindersFrequency,
-      moodCheckIn: moodCheckIn ?? "", // user selection string
+      anxiousFood: foodAnxietyLevel || "Prefer not to say",
+      mentalHealthSupport: mentalHealthResouces || "Not sure, remind me later.",
+      remindersFrequency: remindersFrequency || "Standard",
+      moodCheckIn: moodCheckIn || "No, I’d rather keep it simple.",
       moodcCheckInBool: ["Yes, definitely.", "Maybe, but not sure."].includes(
         moodCheckIn
-      ), 
-      approach: approach ?? "",
+      ),
+      approach:
+        approach || "Adaptive – Let the app adjust to my mood logs and habits.",
+        movementRelationship: movementRelationship ?? "",
+        tonePreference: tonePreference ?? "",
+        contentAvoidance: contentAvoidance ?? "",
+        copingToolsConsent: copingConsent ?? "",
+        userNotes: userNotes ?? "",
     };
+
     const currentUser = auth.currentUser;
     updatePreferences(updated);
     if (currentUser) {
-      await setDoc(doc(db, "users", currentUser.uid), {
-        screeningQuizCompleted: true,
-      }, { merge: true });
-      
+      await setDoc(
+        doc(db, "users", currentUser.uid),
+        {
+          screeningQuizCompleted: true,
+        },
+        { merge: true }
+      );
+
       console.log("✅ Quiz complete for:", currentUser.uid);
     } else {
       console.error("No current user found.");
@@ -372,7 +387,6 @@ export default function QuizScreen() {
                   </View>
                 </View>
 
-        
                 <View style={styles.navigationButtons}>
                   <Button
                     onPress={handleBack}
@@ -536,6 +550,131 @@ export default function QuizScreen() {
             </SafeAreaView>
           </>
         );
+        case 3:
+          return (
+            <SafeAreaView style={styles.section}>
+              <View style={{ marginBottom: 20 }}>
+                <ProgressBar
+                  progress={(step + 1) / totalSteps}
+                  color="#A084DC"
+                  style={{ height: 10, borderRadius: 5 }}
+                />
+                <Text style={{ textAlign: "center", fontSize: 16, marginTop: 5 }}>
+                  Step {step + 1} of {totalSteps}
+                </Text>
+              </View>
+          
+              <Text style={styles.sectionTitle}>3. Personal Preferences</Text>
+          
+              <Text style={styles.question}>How would you describe your current relationship with movement/exercise?</Text>
+              <View style={styles.optionContainer}>
+                {[
+                  "Love it, I look forward to it",
+                  "Neutral, depends on the day",
+                  "Struggling or inconsistent",
+                  "Avoid it or feel negative about it",
+                  "Prefer not to say"
+                ].map((option) => (
+                  <TouchableOpacity
+                    key={option}
+                    style={[
+                      styles.optionButton,
+                      movementRelationship === option && styles.selectedOption,
+                    ]}
+                    onPress={() => setMovementRelationship(option)}
+                  >
+                    <Text>{option}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+          
+              <Text style={styles.question}>What tone motivates you best?</Text>
+              <View style={styles.optionContainer}>
+                {[
+                  "Gentle & encouraging",
+                  "Direct & motivational",
+                  "Neutral",
+                  "Let me choose per situation"
+                ].map((option) => (
+                  <TouchableOpacity
+                    key={option}
+                    style={[
+                      styles.optionButton,
+                      tonePreference === option && styles.selectedOption,
+                    ]}
+                    onPress={() => setTonePreference(option)}
+                  >
+                    <Text>{option}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+          
+              <Text style={styles.question}>Are there any topics you’d like us to avoid showing in content (like workouts, food, body image)?</Text>
+              <View style={styles.optionContainer}>
+                {[
+                  "No, I’m okay seeing everything",
+                  "Avoid body image content",
+                  "Avoid diet/food content",
+                  "Avoid weight loss content",
+                  "Avoid all fitness content",
+                  "Not sure, let me adjust later"
+                ].map((option) => (
+                  <TouchableOpacity
+                    key={option}
+                    style={[
+                      styles.optionButton,
+                      contentAvoidance === option && styles.selectedOption,
+                    ]}
+                    onPress={() => setContentAvoidance(option)}
+                  >
+                    <Text>{option}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+          
+              <Text style={styles.question}>Would you like to see gentle coping tools (like breathing exercises, journal prompts) during check-ins?</Text>
+              <View style={styles.optionContainer}>
+                {[
+                  "Yes, I’d love that",
+                  "Maybe, let me decide later",
+                  "No, I’d prefer not to see them"
+                ].map((option) => (
+                  <TouchableOpacity
+                    key={option}
+                    style={[
+                      styles.optionButton,
+                      copingConsent === option && styles.selectedOption,
+                    ]}
+                    onPress={() => setCopingConsent(option)}
+                  >
+                    <Text>{option}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+          
+              <View style={styles.navigationButtons}>
+                <Button
+                  onPress={handleBack}
+                  mode="contained"
+                  style={{ marginTop: 20 }}
+                  textColor="#390a84"
+                  theme={{ colors: { primary: "#C3B1E1" } }}
+                >
+                  Back
+                </Button>
+                <Button
+                  mode="contained"
+                  onPress={handleNext}
+                  style={{ marginTop: 20 }}
+                  textColor="#390a84"
+                  theme={{ colors: { primary: "#C3B1E1" } }}
+                >
+                  Next
+                </Button>
+              </View>
+            </SafeAreaView>
+          );
+          
       // Continue with further steps for Personal Goals & App Preferences and Disclaimers & Consent.
       default:
         return (

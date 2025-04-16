@@ -53,6 +53,7 @@ export default {
       NUTRITIONIX_APP_ID: process.env.NUTRITIONIX_APP_ID,
       NUTRITIONIX_API_KEY: process.env.NUTRITIONIX_API_KEY,
       X_API_KEY: process.env.X_API_KEY,
+      GEMINI_API_KEY: process.env.GEMINI_API_KEY,
     },
   },
 };

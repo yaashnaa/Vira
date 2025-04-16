@@ -24,9 +24,15 @@ import {
   orderBy,
 } from "firebase/firestore";
 
-import CustomMoonRating from "../components/customMoonRating";
 import { Rating } from "@rneui/themed";
-import { Modal, Portal, Button, Provider, Card } from "react-native-paper";
+import {
+  Modal,
+  Portal,
+  Button,
+  Provider,
+  Card,
+  Divider,
+} from "react-native-paper";
 import { useRouter } from "expo-router";
 import JournalEntry from "@/components/Journal/journalEntry";
 import { useUserPreferences } from "@/context/userPreferences";
@@ -46,7 +52,7 @@ const energyOptions = [
   },
 ];
 
-export default function JournalScreen() {
+export default function CheckInScreen() {
   const { userPreferences } = useUserPreferences();
   const [sleepRating, setSleepRating] = useState(0);
   const [checkInComplete, setCheckInComplete] = useState(false);
@@ -170,92 +176,110 @@ export default function JournalScreen() {
       <Provider>
         <KeyboardAvoidingView>
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={styles.container}>
-              <Text style={styles.heading}>
-                Hi {userPreferences?.name || "there"} ✨
-              </Text>
-              <Text style={styles.subHeading}>Today's Check-In ({today})</Text>
+            <ScrollView>
+              <View style={styles.container}>
+                <Text style={styles.heading}>
+                  Hi {userPreferences?.name || "there"} ✨
+                </Text>
+                <Text style={styles.subHeading}>
+                  Today's Check-In ({today})
+                </Text>
 
-              {checkInComplete ? (
-                <SuggestionCard mood={mood} energyLevel={energyLevel} />
-              ) : (
-                <Card style={styles.card}>
-                  <Card.Content>
-                    <Text style={styles.label}>How did you sleep?</Text>
-                    <CustomMoonRating
-                      rating={sleepRating}
-                      onChange={setSleepRating}
-                    />
-                    <Text style={styles.energyLabel}>
-                      {sleepRating > 0 && `Sleep Rating: ${sleepRating} / 5`}
-                    </Text>
-                    <Text style={styles.label}>How's your energy today?</Text>
-                    <View style={styles.energyContainer}>
-                      {energyOptions.map((option, index) => (
-                        <TouchableOpacity
-                          key={index}
-                          onPress={() => setEnergyLevel(option.label)}
-                          style={[
-                            styles.energyOption,
-                            energyLevel === option.label &&
-                              styles.energySelected,
-                          ]}
+                {checkInComplete ? (
+                  <SuggestionCard mood={mood} energyLevel={energyLevel} />
+                ) : (
+                  <View>
+                    <Card style={styles.card}>
+                      <Card.Content>
+                        <Text style={styles.sectionTitle}>Sleep Check-In</Text>
+
+                        <Text style={styles.label}>How did you sleep?</Text>
+           
+
+                        <Divider style={styles.divider} />
+
+                        <Text style={styles.sectionTitle}>Energy Check-In</Text>
+
+                        <Text style={styles.label}>
+                          How's your energy today?
+                        </Text>
+                        <View style={styles.energyContainer}>
+                          {energyOptions.map((option, index) => (
+                            <TouchableOpacity
+                              key={index}
+                              onPress={() => setEnergyLevel(option.label)}
+                              style={[
+                                styles.energyOption,
+                                energyLevel === option.label &&
+                                  styles.energySelected,
+                              ]}
+                            >
+                              <Image
+                                source={option.image}
+                                style={styles.energyImage}
+                              />
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+
+                        {energyLevel && (
+                          <Text style={styles.energyLabel}>{energyLevel}</Text>
+                        )}
+
+                        <Divider style={styles.divider} />
+
+                        <Text style={styles.sectionTitle}>
+                          Reflection Space
+                        </Text>
+
+                        <Text style={styles.label}>What's on your mind?</Text>
+                        <TextInput
+                          style={[styles.input, styles.journalBox]}
+                          placeholder="Free write your thoughts here..."
+                          value={reflection}
+                          onChangeText={setReflection}
+                          multiline
+                        />
+
+                        <Button
+                          mode="contained-tonal"
+                          icon="check"
+                          textColor="#580b88"
+                          onPress={handleSaveCheckIn}
+                          style={styles.button}
                         >
-                          <Image
-                            source={option.image}
-                            style={styles.energyImage}
-                          />
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                    {energyLevel && (
-                      <Text style={styles.energyLabel}>{energyLevel}</Text>
-                    )}
-                    <Text style={styles.label}>What's on your mind?</Text>
+                          Save Check-in
+                        </Button>
+                      </Card.Content>
+                    </Card>
 
-                    <TextInput
-                      style={[styles.input, styles.journalBox]}
-                      placeholder="Free write your thoughts here..."
-                      value={reflection}
-                      onChangeText={setReflection}
-                      multiline
-                    />
+              
+                  </View>
+                )}
 
-                    <Button
-                      mode="contained-tonal"
-                      icon="check"
-                      textColor="#580b88"
-                      onPress={handleSaveCheckIn}
-                      style={styles.button}
-                    >
-                      Save Check-in
-                    </Button>
-                  </Card.Content>
-                </Card>
-              )}
-
-              <Text style={styles.heading}>Your Journal</Text>
-              <View style={styles.buttons}>
-                <Button
-                  mode="contained"
-                  onPress={() => setIsNewEntryVisible(true)}
-                  compact={true}
-                  icon={"plus"}
-                  style={styles.actionButton}
-                >
-                  New Entry
-                </Button>
-                <Button
-                  mode="contained"
-                  compact={true}
-                  icon={"link-variant"}
-                  onPress={() => router.replace("/previousJournalEntries")}
-                  style={styles.actionButton}
-                >
-                  View previous entries
-                </Button>
+                <Text style={styles.heading}>Your Journal</Text>
+                <View style={styles.buttons}>
+                  <Button
+                    mode="contained"
+                    onPress={() => setIsNewEntryVisible(true)}
+                    compact={true}
+                    icon={"plus"}
+                    style={styles.actionButton}
+                  >
+                    New Entry
+                  </Button>
+                  <Button
+                    mode="contained"
+                    compact={true}
+                    icon={"link-variant"}
+                    onPress={() => router.replace("/previousJournalEntries")}
+                    style={styles.actionButton}
+                  >
+                    View previous entries
+                  </Button>
+                </View>
               </View>
-            </View>
+            </ScrollView>
           </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
         <Portal>
@@ -295,6 +319,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     margin: "auto",
   },
+
   buttons: {
     display: "flex",
     flexDirection: "row",
@@ -345,6 +370,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8f6f4",
     width: "50%",
   },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    marginBottom: 8,
+    marginTop: 20,
+    color: "#271949",
+  },
+
+  divider: {
+    marginVertical: 20,
+    borderColor: "#ddd",
+    borderWidth: 0.5,
+  },
+
   modal: {
     backgroundColor: "white",
     padding: 20,
@@ -352,6 +391,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     height: "105%",
   },
+  saveButton: {},
   entryCard: {
     backgroundColor: "#fff",
     marginVertical: 10,

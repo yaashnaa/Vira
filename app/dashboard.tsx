@@ -1,5 +1,7 @@
 // Redesigned Dashboard Layout with cleaner structure and visual hierarchy
 import React, { useRef, useState, useCallback } from "react";
+import { getDocs, collection, query, orderBy, limit } from "firebase/firestore";
+import { db } from "@/config/firebaseConfig";
 import {
   View,
   Text,
@@ -9,7 +11,9 @@ import {
   FlatList,
   Button,
   ScrollView,
+  Image, Dimensions
 } from "react-native";
+import { Surface } from "react-native-paper";
 import { Divider, useTheme } from "@rneui/themed";
 import {
   removeWidget as removeWidgetFromStorage,
@@ -21,7 +25,9 @@ import {
   isQuizCompletedInFirestore,
   isScreeningQuizCompleted,
 } from "@/utils/firestore";
-import { useFocusEffect } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
+
+import { Link, useFocusEffect } from "expo-router";
 import { Header as HeaderRNE, HeaderProps, Icon } from "@rneui/themed";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
@@ -33,7 +39,6 @@ import { lightTheme } from "@/config/theme";
 import { Animated } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { resetAllAsyncStorage } from "@/utils/asyncStorage";
-
 // Components
 import FadeInText from "@/components/fadeInText";
 import MoodCalendar from "@/components/moodCalender";
@@ -51,10 +56,15 @@ import WaterWidget from "@/components/widgets/WaterWidget";
 import MoodWidget from "@/components/widgets/MoodWidget";
 import { useEffect } from "react";
 import MindfullnessWidget from "@/components/widgets/Mindfullness";
+import ThoughtReframeScreen from "../components/ThoughtReframe/chatbot";
+import ReflectionCard from "./reflectionCard";
+import CombinedCheckInCard from "./combinedCheckInCard";
 const STORAGE_KEY = "@enabledWidgets";
 const dashboardSections = [
   { key: "greeting" },
   { key: "quote" },
+  { key: "cards" },
+  { key: "tools" },
   { key: "logMood" },
   { key: "widgets" },
   { key: "quiz" },
@@ -66,10 +76,15 @@ export default function Dashboard() {
   const router = useRouter();
   const { userPreferences, loading } = useUserPreferences();
   const { hasLoggedToday } = useMoodContext();
+  const [showTools, setShowTools] = useState(false);
   const [authReady, setAuthReady] = useState(false);
   const opacity = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0.5)).current;
   const [enabledWidgets, setEnabledWidgetsState] = useState<string[]>([]);
+  const [latestCheckIn, setLatestCheckIn] = useState<null | Record<
+    string,
+    any
+  >>(null);
 
   const slideAnim = useRef(new Animated.Value(100)).current; // starts 100px down
   const [hasCompletedScreening, setHasCompletedScreening] =
@@ -93,7 +108,7 @@ export default function Dashboard() {
     const uid = auth.currentUser?.uid;
     if (!uid) return;
     await addWidget(uid, widgetId);
-    setWidgetChangeTrigger((prev) => prev + 1); 
+    setWidgetChangeTrigger((prev) => prev + 1);
   };
 
   useEffect(() => {
@@ -119,7 +134,35 @@ export default function Dashboard() {
     };
     checkScreening();
   }, []);
-  
+  const renderToolItems = () =>
+    toolsData.map((tool, index) => (
+      <View key={index} style={styles.toolItem}>
+        <Surface style={styles.surface} elevation={4}>
+          <Image style={styles.toolsImage} source={tool.image} />
+        </Surface>
+        <Text style={styles.toolLabel}>{tool.label}</Text>
+      </View>
+    ));
+
+  const toolsData = [
+    {
+      image: require("../assets/images/dashboard/comment_15422558.png"),
+      label: "Reflect",
+    },
+    {
+      image: require("../assets/images/dashboard/comment_15422558.png"),
+      label: "Reframe",
+    },
+    {
+      image: require("../assets/images/dashboard/comment_15422558.png"),
+      label: "Plan",
+    },
+    {
+      image: require("../assets/images/dashboard/comment_15422558.png"),
+      label: "Cope",
+    },
+  ];
+
   // const [enabledWidgets, setEnabledWidgets] = useState<string[]>([]);
   const [widgetChangeTrigger, setWidgetChangeTrigger] = useState(0);
 
@@ -133,6 +176,31 @@ export default function Dashboard() {
       };
       loadWidgets();
     }, [widgetChangeTrigger])
+  );
+  const params = useLocalSearchParams();
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchCheckIn = async () => {
+        const uid = auth.currentUser?.uid;
+        if (!uid) return;
+
+        const q = query(
+          collection(db, "users", uid, "checkins"),
+          orderBy("timestamp", "desc"),
+          limit(1)
+        );
+
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+          setLatestCheckIn(snapshot.docs[0].data());
+        } else {
+          setLatestCheckIn(null);
+        }
+      };
+
+      fetchCheckIn();
+    }, [params.refresh])
   );
 
   useEffect(() => {
@@ -158,7 +226,7 @@ export default function Dashboard() {
     setWidgetChangeTrigger((prev) => prev + 1);
   };
   console.log("🧠 userPreferences from context:", userPreferences);
-  
+
   if (loading || !userPreferences?.name || !authReady || !auth.currentUser) {
     return (
       <View style={styles.loadingContainer}>
@@ -205,6 +273,7 @@ export default function Dashboard() {
           </View>
         }
       />
+
       <FlatList
         data={dashboardSections}
         style={styles.container}
@@ -216,6 +285,10 @@ export default function Dashboard() {
               return (
                 <Text style={styles.title}>
                   Hello, {userPreferences.name} 👋
+                  <Button
+                    onPress={() => handleNavigate("/thoughtReframeScreen")}
+                    title="Go to Thoughts"
+                  />
                 </Text>
               );
 
@@ -232,14 +305,95 @@ export default function Dashboard() {
                   </View>
                 </Animated.View>
               );
+            case "cards":
+              return (
+                <View
+                  style={{ display: "flex", flexDirection: "row", gap: 10 }}
+                >
+                  <CombinedCheckInCard />
+
+                  {/* <CheckInCard latestCheckIn={latestCheckIn} />
+                <ReflectionCard /> */}
+                </View>
+              );
 
             case "logMood":
-              return userPreferences.moodCheckIn ? (
-                <LogMoodButton
-                  onPress={() => handleNavigate("/mood")}
-                  isLogged={hasLoggedToday}
-                />
-              ) : null; 
+              return (
+                <TouchableOpacity
+                  onPress={() => handleNavigate("/checkInScreen")}
+                >
+                  {/* <LogMoodButton latestCheckIn={latestCheckIn} /> */}
+                </TouchableOpacity>
+              );
+            case "tools":
+              return (
+                <View style={{ marginTop: 10 }}>
+                  <TouchableOpacity
+                    onPress={() => setShowTools((prev) => !prev)}
+                  >
+                    <Text style={styles.sectionToggle}>
+                      🧰 Tools {showTools ? "▲" : "▼"}
+                    </Text>
+                  </TouchableOpacity>
+                  {showTools && (
+                    <View style={styles.toolsContainer}>
+                      {renderToolItems()}
+                    </View>
+                  )}
+                </View>
+              );
+
+            // case "tools":
+            //   return (
+            //     <View style={styles.toolsContainer}>
+            //       <View
+            //         style={{ flexDirection: "column", alignItems: "center", width: "15%", flexWrap:'wrap' }}
+            //       >
+            //         <Surface style={{ ...styles.surface }} elevation={4}>
+            //           <Image
+            //             style={styles.image}
+            //             source={require("../assets/images/dashboard/comment_15422558.png")}
+            //           />
+            //         </Surface>
+            //         <Text>Tools Section</Text>
+            //       </View>
+
+            //       <View
+            //         style={{ flexDirection: "column", alignItems: "center", width: "15%", flexWrap:'wrap' }}
+            //       >
+            //         <Surface style={{ ...styles.surface }} elevation={4}>
+            //           <Image
+            //             style={styles.image}
+            //             source={require("../assets/images/dashboard/comment_15422558.png")}
+            //           />
+            //         </Surface>
+            //         <Text>Tools Section</Text>
+            //       </View>
+
+            //       <View
+            //         style={{ flexDirection: "column", alignItems: "center", width: "15%", flexWrap:'wrap' }}
+            //       >
+            //         <Surface style={{ ...styles.surface }} elevation={4}>
+            //           <Image
+            //             style={styles.image}
+            //             source={require("../assets/images/dashboard/comment_15422558.png")}
+            //           />
+            //         </Surface>
+            //         <Text>Tools Section</Text>
+            //       </View>
+            //       <View
+            //         style={{ flexDirection: "column", alignItems: "center", width: "15%", flexWrap:'wrap' }}
+            //       >
+            //         <Surface style={{ ...styles.surface }} elevation={4}>
+            //           <Image
+            //             style={styles.image}
+            //             source={require("../assets/images/dashboard/comment_15422558.png")}
+            //           />
+            //         </Surface>
+            //         <Text>Tools Section</Text>
+            //       </View>
+            //     </View>
+            //   );
 
             case "widgets":
               return (
@@ -328,6 +482,8 @@ export default function Dashboard() {
   );
 }
 
+const { width } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
   container: {
     // padding: 20,
@@ -345,6 +501,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#150b01",
   },
+  // toolsContainer: {
+  //   width: "90%",
+  //   flexDirection: "row",
+  //   justifyContent: "space-between",
+  //   marginBottom: 20,
+  //   gap: 20,
+  // },
   title: {
     fontSize: 32,
     fontWeight: "bold",
@@ -359,8 +522,12 @@ const styles = StyleSheet.create({
   gridContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between", // Or "space-between" if you want gaps
-    gap: 12, // Optional: adds spacing between cards (for newer RN versions)
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  image: {
+    height: 40,
+    width: 40,
   },
   card: {
     backgroundColor: "#fff",
@@ -415,6 +582,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  surface: {
+    padding: 4,
+    height: 80,
+    width: 80,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#f8edeb",
+    marginRight: 10,
+  },
   divider: {
     width: "100%",
     height: 1.3,
@@ -422,4 +598,35 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginVertical: 20,
   },
+  toolsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-around",
+    marginTop: 10,
+  },
+  toolItem: {
+    flexDirection: "column",
+    alignItems: "center",
+    width: width * 0.2,
+    marginHorizontal: 5,
+  },
+ toolsImage: {
+    width: 40,
+    height: 40,
+    resizeMode: "contain",
+  },
+  toolLabel: {
+    fontSize: 12,
+    marginTop: 4,
+    textAlign: "center",
+    color: "#444",
+    fontFamily: "Main-font",
+  },
+  sectionToggle: {
+    fontSize: 16,
+    fontFamily: "PatrickHand-Regular",
+    marginLeft: 16,
+    marginBottom: 4,
+  },
+  
 });

@@ -39,7 +39,8 @@ import { auth } from "@/config/firebaseConfig";
 
 export default function Settings() {
   // Get current preferences and the updater function from the context.
-  const { userPreferences, updatePreferences, updatePreferencesFromFirestore } = useUserPreferences();
+  const { userPreferences, updatePreferences, updatePreferencesFromFirestore } =
+    useUserPreferences();
   const router = useRouter();
 
   // Local state initialized from context
@@ -127,7 +128,28 @@ export default function Settings() {
   const [showPhysicalMenu, setShowPhysicalMenu] = useState(false);
   const [showMoodCheckInMenu, setShowMoodCheckInMenu] = useState(false);
   const [showMacroMenu, setShowMacroMenu] = useState(false);
+  const [showmovementMenu, setShowMovementMenu] = useState(false);
+  const [showToneMenu, setShowToneMenu] = useState(false);
+  const [showContentAvoidanceMenu, setShowContentAvoidanceMenu] =
+    useState(false);
+  const [showContentMenu, setShowContentMenu] = useState(false);
+  const [showCopingMenu, setShowCopingMenu] = useState(false);
+
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [movementRelationship, setMovementRelationship] = useState(
+    userPreferences.movementRelationship ?? ""
+  );
+  const [tonePreference, setTonePreference] = useState(
+    userPreferences.tonePreference ?? ""
+  );
+  const [contentAvoidance, setContentAvoidance] = useState(
+    userPreferences.contentAvoidance ?? ""
+  );
+  const [copingConsent, setCopingConsent] = useState(
+    userPreferences.copingToolsConsent ?? ""
+  );
+  const [userNotes, setUserNotes] = useState(userPreferences.userNotes ?? "");
+
   useEffect(() => {
     const checkScreening = async () => {
       const uid = auth.currentUser?.uid;
@@ -272,6 +294,17 @@ export default function Settings() {
       mentalHealthSupport: mentalHealthResouces ?? "",
       triggerWarnings: hideTriggers ?? "",
       approach: approach ?? "",
+      movementRelationship: movementRelationship ?? "",
+      tonePreference: tonePreference ?? "",
+      contentAvoidance:
+      Array.isArray(contentAvoidance)
+        ? contentAvoidance.join(", ")
+        : typeof contentAvoidance === "string"
+          ? contentAvoidance
+          : "",
+    
+      copingToolsConsent: copingConsent ?? "",
+      userNotes: userNotes ?? "",
     };
 
     try {
@@ -857,6 +890,152 @@ export default function Settings() {
                   />
                 ))}
               </Menu>
+              <Text style={styles.label}>
+                How would you describe your relationship with movement or
+                exercise?
+              </Text>
+              <Menu
+                visible={showmovementMenu}
+                onDismiss={() => setShowMovementMenu(false)}
+                anchor={
+                  <TouchableOpacity
+                    onPress={() => setShowMovementMenu(true)}
+                    style={styles.dropdown}
+                  >
+                    <Text
+                      style={{ color: movementRelationship ? "#000" : "#888" }}
+                    >
+                      {movementRelationship || "Select your response"}
+                    </Text>
+                  </TouchableOpacity>
+                }
+              >
+                {[
+                  "Joyful & energizing",
+                  "Neutral or routine",
+                  "Stressful or overwhelming",
+                  "Still figuring it out",
+                  "Prefer not to say",
+                ].map((option) => (
+                  <Menu.Item
+                    key={option}
+                    title={option}
+                    onPress={() => {
+                      setMovementRelationship(option);
+                      setShowMovementMenu(false);
+                    }}
+                  />
+                ))}
+              </Menu>
+              <Text style={styles.label}>
+                How would you like the app's tone to feel?
+              </Text>
+              <Menu
+                visible={showToneMenu}
+                onDismiss={() => setShowToneMenu(false)}
+                anchor={
+                  <TouchableOpacity
+                    onPress={() => setShowToneMenu(true)}
+                    style={styles.dropdown}
+                  >
+                    <Text style={{ color: tonePreference ? "#000" : "#888" }}>
+                      {tonePreference || "Select your preference"}
+                    </Text>
+                  </TouchableOpacity>
+                }
+              >
+                {[
+                  "Gentle & supportive",
+                  "Direct & motivating",
+                  "Flexible — depends on the day",
+                  "No preference",
+                ].map((option) => (
+                  <Menu.Item
+                    key={option}
+                    title={option}
+                    onPress={() => {
+                      setTonePreference(option);
+                      setShowToneMenu(false);
+                    }}
+                  />
+                ))}
+              </Menu>
+              <Text style={styles.label}>
+                Are there any topics you'd like to avoid seeing?
+              </Text>
+              <Menu
+                visible={showContentMenu}
+                onDismiss={() => setShowContentMenu(false)}
+                anchor={
+                  <TouchableOpacity
+                    onPress={() => setShowContentMenu(true)}
+                    style={styles.dropdown}
+                  >
+                    <Text style={{ color: contentAvoidance ? "#000" : "#888" }}>
+                      {contentAvoidance || "Select your response"}
+                    </Text>
+                  </TouchableOpacity>
+                }
+              >
+                {[
+                  "Diet talk",
+                  "Weight loss focus",
+                  "Body image content",
+                  "None",
+                  "Not sure yet",
+                ].map((option) => (
+                  <Menu.Item
+                    key={option}
+                    title={option}
+                    onPress={() => {
+                      setContentAvoidance(option);
+                      setShowContentMenu(false);
+                    }}
+                  />
+                ))}
+              </Menu>
+              <Text style={styles.label}>
+                Would you like the app to suggest coping tools when you're
+                struggling?
+              </Text>
+              <Menu
+                visible={showCopingMenu}
+                onDismiss={() => setShowCopingMenu(false)}
+                anchor={
+                  <TouchableOpacity
+                    onPress={() => setShowCopingMenu(true)}
+                    style={styles.dropdown}
+                  >
+                    <Text style={{ color: copingConsent ? "#000" : "#888" }}>
+                      {copingConsent || "Select your response"}
+                    </Text>
+                  </TouchableOpacity>
+                }
+              >
+                {[
+                  "Yes, always",
+                  "Yes, but only if I ask",
+                  "No, I prefer not to",
+                ].map((option) => (
+                  <Menu.Item
+                    key={option}
+                    title={option}
+                    onPress={() => {
+                      setCopingConsent(option);
+                      setShowCopingMenu(false);
+                    }}
+                  />
+                ))}
+              </Menu>
+              <Text style={styles.label}>
+                Anything else you'd like us to know about you or your needs?
+              </Text>
+              <TextInput
+                style={styles.input}
+                value={userNotes}
+                onChangeText={setUserNotes}
+                placeholder="Optional — share anything you’d like"
+              />
             </View>
           ) : (
             <Text style={{ fontStyle: "italic", marginBottom: 10 }}>
@@ -893,9 +1072,7 @@ export default function Settings() {
           <Button onPress={() => setConfirmDelete(true)}>Delete Account</Button>
           <Button onPress={handleLogout}>Logout</Button>
           <Button onPress={handleResetPassword}>Reset Password</Button>
-          <Button onPress={resetOnboarding}>
-            Reset
-          </Button>
+          <Button onPress={resetOnboarding}>Reset</Button>
         </View>
       </SafeAreaView>
     </Provider>

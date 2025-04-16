@@ -110,8 +110,6 @@ const ViewLoggedMeals: React.FC = () => {
         
         setMeals(cleanTodayList);
         setPreviousMeals(cleanPrevList);
-        setMeals(todayList);
-        setPreviousMeals(prevList);
       } catch (err) {
         console.error("Failed to fetch logged meals:", err);
       }

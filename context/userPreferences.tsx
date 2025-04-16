@@ -19,13 +19,14 @@ export interface UserPreferences {
   ageGroup: string;
   activityLevel: string;
   dietaryPreferences: string[];
+  customDietaryPreferences: string[];
   mealLogging: string;
-  physicalHealth: string;
-  mentalHealthOptIn: boolean;
-  remindersFrequency: string;
   hideMealTracking: boolean;
+  physicalHealth: string;
   mentalHealthConditions: string[];
   medicalConditions: string[];
+  customMedicalConditions: string;
+  customMentalHealthConditions: string;
   calorieViewing: boolean;
   macroViewing: boolean;
   caloriePreference: string;
@@ -35,42 +36,52 @@ export interface UserPreferences {
   foodAnxietyLevel: string;
   primaryGoals: string[];
   moodCheckIn: string;
+  moodcCheckInBool: boolean;
   mentalHealthSupport: string;
   triggerWarnings: string;
+  remindersFrequency: string;
   approach: string;
-  moodcCheckInBool: boolean;
-  customMedicalConditions: string;
-  customMentalHealthConditions: string;
-  customDietaryPreferences: string[];
+  mentalHealthOptIn: boolean;
+  movementRelationship: string;
+  tonePreference: string;
+  contentAvoidance: string;
+  copingToolsConsent: string;
+  userNotes: string;
 }
+
 export const DEFAULT_PREFS: UserPreferences = {
   name: "",
-  ageGroup: "",
-  activityLevel: "",
-  dietaryPreferences: [],
-  mealLogging: "",
-  physicalHealth: "",
-  mentalHealthOptIn: true,
-  remindersFrequency: "Standard",
+  ageGroup: "18–25", // ← ✅ your desired default
+  activityLevel: "Moderately active (3–5 days/week)",
+  dietaryPreferences: ["Vegetarian"],
+  customDietaryPreferences: [],
+  mealLogging: "Yes, I’m okay with logging (including approximate calories or macros).",
   hideMealTracking: false,
+  physicalHealth: "Average",
   mentalHealthConditions: [],
   medicalConditions: [],
-  calorieViewing: true,
-  macroViewing: true,
-  foodAnxietyLevel: "",
-  foodAnxiety: false,
-  anxiousFood: "",
-  primaryGoals: [],
-  moodCheckIn: "",
-  caloriePreference: "",
-  macroPreference: "",
-  moodcCheckInBool: true,
-  mentalHealthSupport: "",
-  triggerWarnings: "",
-  approach: "",
   customMedicalConditions: "",
   customMentalHealthConditions: "",
-  customDietaryPreferences: [],
+  calorieViewing: true,
+  macroViewing: true,
+  caloriePreference: "Yes, I’d like to see calories.",
+  macroPreference: "Yes, I’d like to see macros.",
+  foodAnxiety: false,
+  anxiousFood: "No, I don't feel anxious",
+  foodAnxietyLevel: "None",
+  primaryGoals: ["Build consistency"],
+  moodCheckIn: "Yes, definitely.",
+  moodcCheckInBool: true,
+  mentalHealthSupport: "Yes, please show me available resources.",
+  triggerWarnings: "I’m okay with seeing all data.",
+  remindersFrequency: "Standard (2–3 times per day)",
+  approach: "Slow and steady",
+  mentalHealthOptIn: true,
+  movementRelationship: "Joyful & energizing",
+  tonePreference: "Gentle & supportive",
+  contentAvoidance: "None",
+  copingToolsConsent: "Yes, always",
+  userNotes: "",
 };
 
 interface UserPreferencesContextProps {
@@ -79,7 +90,6 @@ interface UserPreferencesContextProps {
   updatePreferencesFromFirestore: () => Promise<void>;
   loading: boolean;
 }
-
 
 const UserPreferencesContext = createContext<
   UserPreferencesContextProps | undefined

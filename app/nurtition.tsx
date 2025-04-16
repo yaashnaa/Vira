@@ -156,11 +156,13 @@ export default function NutritionScreen() {
               value: "log",
               icon: "silverware-fork-knife", // ✅ string name
               label: "Log ",
+              uncheckedColor: "#888",
               disabled: userPreferences?.hideMealTracking,
             },
             {
               value: "view",
               label: "View logs",
+              uncheckedColor: "#888",
               icon: "clipboard-list",
               disabled: userPreferences?.hideMealTracking,
             },
@@ -168,6 +170,7 @@ export default function NutritionScreen() {
               value: "search",
               label: "Search info",
               icon: "magnify",
+              uncheckedColor: "#888",
               disabled: userPreferences?.hideMealTracking,
             },
           ]}
