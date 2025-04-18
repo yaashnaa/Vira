@@ -49,15 +49,15 @@ export default function WelcomeScreen() {
 
   return (
     <View
-      style={[styles.container, { backgroundColor: lightTheme.background }]}
+      style={styles.container}
     >
       <Image
         source={require("../../assets/images/welcome.jpg")}
         style={styles.image}
       />
       <Text style={[styles.title, { color: lightTheme.text }]}>
-        {" "}
-        Get started{" "}
+
+        Get started
       </Text>
       <Text style={[styles.subtitle, { color: lightTheme.text }]}>
         Please log in or sign up to continue.
@@ -86,12 +86,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 20,
+    backgroundColor: "#fff",
   },
   title: {
     fontSize: 42,
     fontWeight: "bold",
     marginBottom: 10,
-    fontFamily: "Charm-Regular",
+    fontFamily: "Title-font-regular",
   },
   image: {
     width: 300,

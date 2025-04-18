@@ -1,41 +1,59 @@
-import React, { useEffect } from "react";
-import { View, Image } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { View, StyleSheet, Dimensions, LogBox } from "react-native";
+import { Video, ResizeMode } from "expo-av";
 import * as SplashScreen from "expo-splash-screen";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
+
+const { width } = Dimensions.get("window");
+LogBox.ignoreLogs([
+  "Support for defaultProps will be removed from function components",
+  "Text strings must be rendered within a <Text> component."
+]);
 interface SplashScreenProps {
   onFinish: () => void;
 }
 
 export default function SplashScreenComponent({ onFinish }: SplashScreenProps) {
-  const router = useRouter();
-  const [loading, setLoading] = React.useState(true);
-
+  const videoRef = useRef<Video>(null);
 
   useEffect(() => {
-    const hideSplash = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 3000)); // Wait 3 sec
-      await SplashScreen.hideAsync();
-      onFinish(); // Calls function to transition to onboarding
+    const run = async () => {
+      try {
+        await SplashScreen.preventAutoHideAsync();
+        await new Promise((resolve) => setTimeout(resolve, 4000)); // wait 2 seconds
+        onFinish(); // Signal to the app that splash is done
+        await SplashScreen.hideAsync(); // Now hide splash screen
+      } catch (e) {
+        console.error("Error during splash screen logic:", e);
+      }
     };
-    hideSplash();
+
+    run();
   }, []);
-  if (loading) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "#ffffff",
-        }}
-      >
-        <Image
-          source={require("../assets/images/vira.gif")}
-          style={{ width: 500, height: 500 }}
-        />
-      </View>
-    );
-  }
-  return null;
+
+  return (
+    <View style={styles.container}>
+      <Video
+        ref={videoRef}
+        source={require("../assets/images/Vira.mp4")}
+        style={styles.video}
+        resizeMode={ResizeMode.CONTAIN}
+        shouldPlay
+        isLooping
+        useNativeControls={false}
+      />
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  video: {
+    width: width,
+    height: width,
+  },
+});

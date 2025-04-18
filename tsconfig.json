@@ -1,21 +1,26 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "jsx": "react-native",   
+    "jsx": "react-native",
+     "module": "es2020",
     "strict": true,
     "paths": {
-      "@firebase/auth": ["./node_modules/@firebase/auth/dist/index.rn.d.ts"],
+      "@firebase/auth": [
+        "./node_modules/@firebase/auth/dist/index.rn.d.ts"
+      ],
       "@/*": [
         "./*"
       ]
     }
-  },  
-  "extends": "expo/tsconfig.base",
+  },
   "include": [
+    "src",
+    "types",
+    "react-native-circular-slider.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "app/(auth)/OnBoarding.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts",
-    "app/(auth)/OnBoarding.tsx"
-  ]
+    "expo-env.d.ts"
+, "components/Nutrition/logMeal.tsx"  ]
 }

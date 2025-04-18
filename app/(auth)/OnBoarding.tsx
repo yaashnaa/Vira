@@ -3,12 +3,15 @@ import { View, Image, StyleSheet, Dimensions } from "react-native";
 import Onboarding from "react-native-onboarding-swiper";
 import { useRouter } from "expo-router";
 import LottieView from "lottie-react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  isOnboardingComplete,
+  markOnboardingComplete,
+} from "@/utils/asyncStorage";
 
-const welcome = require("../../assets/animations/welcome1.json");
-const mindfulTracking = require("../../assets/animations/1.json");
-const selfCompassion = require("../../assets/animations/compassion.json");
-const holisticWellBeing = require("../../assets/animations/holistic.json");
+const welcome = require("../../assets/animations/7.json");
+const mindfulTracking = require("../../assets/animations/4.json");
+const selfCompassion = require("../../assets/animations/9.json");
+const holisticWellBeing = require("../../assets/animations/3.json");
 const getStarted = require("../../assets/animations/getstarted.json");
 
 const { width } = Dimensions.get("window");
@@ -16,42 +19,40 @@ const { width } = Dimensions.get("window");
 export default function OnBoardingScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  // This flag indicates whether to show the onboarding screen.
   const [shouldShowOnboarding, setShouldShowOnboarding] = useState(false);
 
-  const checkOnboardingAndAuth = async () => {
-    try {
-      const onboardingComplete = await AsyncStorage.getItem("@onboardingComplete");
-      if (onboardingComplete) {
-        // If onboarding is complete, navigate to home.
-        router.replace("/signup");
-      } else {
-        // Otherwise, set the flag to show onboarding.
-        setShouldShowOnboarding(true);
-      }
-    } catch (error) {
-      console.error("Error checking onboarding status:", error);
-      setShouldShowOnboarding(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    checkOnboardingAndAuth();
-  }, [router]);
+    const checkOnboarding = async () => {
+      try {
+        const onboardingComplete = await isOnboardingComplete();
+        console.log("📦 Onboarding complete?", onboardingComplete);
+
+        if (onboardingComplete) {
+          router.replace("/(auth)/welcome");
+        } else {
+          setShouldShowOnboarding(true);
+        }
+      } catch (error) {
+        console.error("❌ Error checking onboarding status:", error);
+        setShouldShowOnboarding(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkOnboarding();
+  }, []);
 
   const handleFinishOnboarding = async () => {
     try {
-      // Save flag so onboarding isn't shown again.
-      await AsyncStorage.setItem("@onboardingComplete", "true");
-      router.replace("/home");
+      await markOnboardingComplete();
+      console.log("✅ Onboarding marked complete");
+      router.replace("/(auth)/signup");
     } catch (error) {
-      console.error("Error saving onboarding status:", error);
+      console.error("❌ Error saving onboarding status:", error);
     }
   };
 
-  // While loading, you might show a splash image
   if (loading) {
     return (
       <View style={styles.container}>
@@ -63,16 +64,25 @@ export default function OnBoardingScreen() {
     );
   }
 
-  // If onboarding hasn't been completed, show the onboarding swiper.
   if (shouldShowOnboarding) {
     return (
       <View style={styles.container}>
         <Onboarding
           onDone={handleFinishOnboarding}
           onSkip={handleFinishOnboarding}
+          titleStyles={{
+            fontFamily: "PatrickHand-Regular",
+            fontSize: 29,
+            color: "#361d05",
+          }}
+          subTitleStyles={{
+            fontFamily: "Main-font",
+            fontSize: 16,
+            color: "#333",
+          }}
           pages={[
             {
-              backgroundColor: "#ffffff",
+              backgroundColor: "#e8c3f1",
               image: (
                 <LottieView
                   source={welcome}
@@ -81,12 +91,12 @@ export default function OnBoardingScreen() {
                   style={styles.lottie}
                 />
               ),
-              title: "Welcome to Your Wellness Journey",
+              title: "Welcome to Your Wellness Companion",
               subtitle:
-                "A mindful approach to fitness, nutrition, and mental health.",
+                "This is a space to nurture your mental, physical, and emotional well-being—gently and intentionally.",
             },
             {
-              backgroundColor: "#ffffff",
+              backgroundColor: "#b5758cbc",
               image: (
                 <LottieView
                   source={mindfulTracking}
@@ -95,12 +105,12 @@ export default function OnBoardingScreen() {
                   style={styles.lottie}
                 />
               ),
-              title: "Mindful Tracking, Not Numbers",
+              title: "Feel First, Track Second",
               subtitle:
-                "We focus on how you feel, not just what you do. No calorie counting, just mindful self-reflection.",
+                "We guide you to tune into your emotions and energy, instead of obsessing over numbers or calories.",
             },
             {
-              backgroundColor: "#ffffff",
+              backgroundColor: "#b5d6d8",
               image: (
                 <LottieView
                   source={selfCompassion}
@@ -109,26 +119,26 @@ export default function OnBoardingScreen() {
                   style={styles.lottie}
                 />
               ),
-              title: "Self-Compassionate Guidance",
+              title: "Compassion Over Perfection",
               subtitle:
-                "Your journey is unique. No pressure, just support for lasting healthy habits.",
+                "No pressure. No judgment. Just small steps and honest check-ins toward a healthier you.",
             },
             {
-              backgroundColor: "#ffffff",
+              backgroundColor: "#f9eba7a1",
               image: (
                 <LottieView
                   source={holisticWellBeing}
                   autoPlay
                   loop
-                  style={[{ width: width * 1.4, height: width - 10 }, styles.lottie]}
+                  style={[{ width: width * 1.0, height: width }, styles.lottie]}
                 />
               ),
-              title: "Holistic Well-Being",
+              title: "Whole-Self Wellness",
               subtitle:
-                "Wellness isn’t just about fitness—it’s about your mind, body, and emotions working together.",
+                "Your mind, body, habits, and feelings are all connected. Let’s explore how they support each other.",
             },
             {
-              backgroundColor: "#ffffff",
+              backgroundColor: "#e1cfff",
               image: (
                 <LottieView
                   source={getStarted}
@@ -137,9 +147,9 @@ export default function OnBoardingScreen() {
                   style={styles.lottie}
                 />
               ),
-              title: "Let's Begin!",
+              title: "Let’s Begin, Gently",
               subtitle:
-                "Take small steps towards a healthier you. Start your journey today!",
+                "We're here to support you in building habits that feel good, not forced. Ready to start your journey?",
             },
           ]}
         />
@@ -147,7 +157,6 @@ export default function OnBoardingScreen() {
     );
   }
 
-  // If loading is false and onboarding is not to be shown (meaning onboarding is complete), nothing renders here
   return null;
 }
 
@@ -157,7 +166,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   lottie: {
-    width: width * 1.4,
+    width: width,
     height: width - 10,
   },
 });

@@ -4,6 +4,7 @@ import { darkTheme, lightTheme } from "@/config/theme";
 import Header from "@/components/header";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { auth } from "../../config/firebaseConfig";
 import {
   StyleSheet,
   Text,
@@ -12,20 +13,45 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  Dimensions,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ScrollView,
+  Platform,
 } from "react-native";
+import { Button } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { loginUser } from "../../utils/auth"; // Firebase authentication function
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { fetchUserPreferences } from "@/utils/firestore";
+import { useUserPreferences } from "@/context/userPreferences"; // Custom hook for user preferences
+import { ensureUserDocumentExists } from "../../utils/firestore"; // Function to ensure user document exists
 export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const { updatePreferences, updatePreferencesFromFirestore } =
+    useUserPreferences();
+
   const handleLogin = async () => {
     try {
-      await loginUser(email, password);
-      Alert.alert("Login Successful!");
-      router.replace("/dashboard"); // Redirect to Home Screen
+      await loginUser(email, password); // 🔐 logs in with Firebase Auth
+
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        Alert.alert("Error", "User not found.");
+        return;
+      }
+
+      await ensureUserDocumentExists(); // ✅ no need to pass UID
+      const prefs = await fetchUserPreferences(currentUser.uid);
+      if (prefs) {
+        updatePreferences(prefs); // ✅ updates context from Firestore only
+      }
+
+      router.replace("/dashboard"); // ✅ route to dashboard
     } catch (error) {
       Alert.alert("Login Failed", (error as Error).message);
     }
@@ -33,61 +59,79 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Logo Image */}
       <Image
         style={styles.image}
-        source={require("../../assets/images/vira.png")}
+        source={require("../../assets/images/Vira.png")}
       />
       <StatusBar style="auto" />
-      {/* <Header title="Log In" /> */}
-      <View style={styles.insideCont}>
-        <View style={styles.inputs}>
-          <View style={styles.inputView}>
-            <AntDesign
-              name="user"
-              size={24}
-              color="black"
-              style={{ marginLeft: 10 }}
-            />
-            <TextInput
-              style={styles.TextInput}
-              placeholder="Email"
-              placeholderTextColor="#003f5c"
-              onChangeText={(text) => setEmail(text)}
-              keyboardType="email-address"
-            />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <ScrollView
+            contentContainerStyle={{
+              // flexGrow: 1,
+              justifyContent: "center",
+              padding: 20,
+            }}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.insideCont}>
+              <View style={styles.inputs}>
+                <View style={styles.inputView}>
+                  <AntDesign
+                    name="user"
+                    size={24}
+                    color="#150b01"
+                    style={{ marginLeft: 10 }}
+                  />
+                  <TextInput
+                    style={styles.TextInput}
+                    placeholder="Email"
+                    placeholderTextColor="#003f5c"
+                    onChangeText={(text) => setEmail(text)}
+                    keyboardType="email-address"
+                  />
+                </View>
 
-          </View>
+                <View style={styles.inputView}>
+                  <MaterialIcons
+                    name="password"
+                    size={24}
+                    color="black"
+                    style={{ marginLeft: 10 }}
+                  />
+                  <TextInput
+                    style={styles.TextInput}
+                    placeholder="Password"
+                    placeholderTextColor="#0c5e84"
+                    secureTextEntry
+                    onChangeText={(text) => setPassword(text)}
+                  />
+                </View>
+              </View>
 
-          {/* Password Input */}
-          <View style={styles.inputView}>
-            <MaterialIcons
-              name="password"
-              size={24}
-              color="black"
-              style={{ marginLeft: 10 }}
-            />
-            <TextInput
-              style={styles.TextInput}
-              placeholder="Password"
-              placeholderTextColor="#0c5e84"
-              secureTextEntry
-              onChangeText={(text) => setPassword(text)}
-            />
-          </View>
-        </View>
-        {/* Forgot Password */}
-        <TouchableOpacity>
-          <Text style={styles.forgot_button}>Forgot Password?</Text>
-        </TouchableOpacity>
-
-        {/* Login Button */}
-        <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
+              <TouchableOpacity>
+                <Text style={styles.forgot_button}>Forgot Password?</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+      <View style={styles.button}>
+        <Button
+          mode="contained-tonal"
+          buttonColor="#86508f"
+          textColor="#fefefe"
+          onPress={handleLogin}
+        >
           <Text style={styles.loginText}>LOGIN</Text>
-        </TouchableOpacity>
+        </Button>
+      </View>
 
-        {/* Navigate to Signup */}
-        <TouchableOpacity onPress={() => router.push("/signup")}>
+      <View style={styles.link}>
+        <TouchableOpacity onPress={() => router.push("/(auth)/signup")}>
           <Text style={styles.signupText}>Don't have an account? Sign up</Text>
         </TouchableOpacity>
       </View>
@@ -95,58 +139,63 @@ export default function LoginScreen() {
   );
 }
 
-// 🔹 Styles from your provided code
+const width = Dimensions.get("window").width;
 const styles = StyleSheet.create({
   container: {
     display: "flex",
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: "#ffffff",
     alignItems: "center",
     justifyContent: "center",
     margin: 0,
     color: lightTheme.accent,
+  },
+  link: {
+    bottom: 65,
+    position: "absolute",
+  },
+  button: {
+    bottom: 120,
   },
   insideCont: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    bottom: 80,
-    width: "100%",
+    top: 50,
+    bottom: 0,
+    width: width * 0.7,
   },
   image: {
-    height: 450,
-    width: 250,
+    height: 400,
+    width: 400,
+    top: 40,
     marginBottom: 10,
   },
 
   mainText: {
-    color: "black",
+    color: "#150b01",
     marginBottom: 10,
   },
   inputView: {
-    // backgroundColor: lightTheme.accent, \
-    // opacity: 0.5,
     display: "flex",
     borderRadius: 20,
-    width: "70%",
+    width: "100%",
     height: 50,
     marginBottom: 20,
-    // justifyContent: "center",
+
     alignItems: "center",
     flexDirection: "row",
     gap: 1,
     borderBottomWidth: 1.5,
     borderBottomColor: lightTheme.accent3,
-    // backgroundColor: lightTheme.secondary,
-    // Android elevation
     elevation: 5,
   },
   TextInput: {
     height: 50,
     flex: 1,
     padding: 5,
-    width: "80%",
+    width: "100%",
     color: "black",
   },
   forgot_button: {
@@ -163,7 +212,7 @@ const styles = StyleSheet.create({
     // justifyContent: "center",
     // position: "absolute",
   },
-  loginBtn: {
+  signupBtn: {
     width: "40%",
     borderRadius: 15,
     height: 50,
@@ -172,16 +221,16 @@ const styles = StyleSheet.create({
     marginTop: 20,
     color: "black",
     borderWidth: 3,
-    borderColor: lightTheme.accent,
+    borderColor: "#150b01",
     borderStyle: "solid",
     // backgroundColor: lightTheme.accent, // Use secondary color for the button
   },
   loginText: {
-    color: "black",
+    color: "#f5f0f9",
     fontWeight: "bold",
   },
   signupText: {
     marginTop: 20,
-    color: "#007BFF",
+    color: "#1d5ea4",
   },
 });
