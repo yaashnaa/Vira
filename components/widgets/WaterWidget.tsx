@@ -40,7 +40,7 @@ const WaterWidget: React.FC<WaterWidgetProps> = ({ onRemove }) => {
       <WidgetCard
         title="Water Tracker"
         subtitle={`${waterDrank} / ${waterGoal} mL`}
-        imageSource={require("../../assets/images/widgets/water.png")}
+        imageSource={require("../../assets/images/widgetImages/water.png")}
         onPress={handlePress}
       />
     </View>

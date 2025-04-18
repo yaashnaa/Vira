@@ -6,7 +6,7 @@ import { Header as HeaderRNE, Icon } from "@rneui/themed";
 
 const width = Dimensions.get("window").width;
 const height = Dimensions.get("window").height;
-export default function Mindfulness() {
+export default function Mindfullness() {
   const router = useRouter();
   const mindfullnessLottie = require("../assets/animations/underConstruction.json");
   const handleBackPress = () => {

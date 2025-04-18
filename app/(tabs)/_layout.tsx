@@ -1,19 +1,60 @@
-// app/(tabs)/_layout.tsx
 import { Tabs } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Icon } from "@rneui/themed";
+import { BottomTabNavigationOptions } from "@react-navigation/bottom-tabs";
 
 export default function TabLayout() {
   return (
-    <Tabs  screenOptions={{
-        animation: 'shift',
-        headerShown: false
-      }}>
-      <Tabs.Screen name="dashboard" options={{ title: "Dashboard" }} />
-      <Tabs.Screen name="nurtition" options={{ title: "Nurtition" }} />
-      <Tabs.Screen name="mood" options={{ title: "Mood" }} />
-      <Tabs.Screen name="journal" options={{ title: "Journal" }} />
-      <Tabs.Screen name="fitness" options={{ title: "Fitness" }} />
-      <Tabs.Screen name="settings" options={{ title: "Settings" }} />
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: "#6b4c9a",
+        headerShown: false,
+      }}
+    >
+      <Tabs.Screen
+        name="dashboard"
+        options={{
+          tabBarLabel: "Home",
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <Icon name="home" type="feather" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="checkInScreen"
+        options={{
+          tabBarLabel: "Journal",
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <Icon name="pen-tool" type="feather" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="resources"
+        options={{
+          tabBarLabel: "Resources",
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <Icon name="book" type="feather" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="community"
+        options={{
+          tabBarLabel: "Community",
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <Icon name="users" type="feather" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          tabBarLabel: "Settings",
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <Icon name="settings" type="feather" color={color} size={size} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }

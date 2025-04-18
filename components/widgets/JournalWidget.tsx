@@ -21,7 +21,7 @@ const JournalWidget: React.FC<JournalWidgetProps> = ({ onRemove }) => {
     )}
     <WidgetCard
       title="Journal"
-      imageSource={require('../../assets/images/widgets/notebook.png')}
+      imageSource={require('../../assets/images/widgetImages/notebook.png')}
       onPress={handlePress}
     />
   </View>

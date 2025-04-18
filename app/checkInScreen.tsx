@@ -23,7 +23,7 @@ import {
   orderBy,
   getDocs,
   updateDoc,
-  doc,
+  doc, limit
 } from "firebase/firestore";
 import { useRouter, useFocusEffect } from "expo-router";
 import dayjs from "dayjs";
@@ -64,7 +64,9 @@ export default function CheckInScreen() {
   const [mood, setMood] = useState("");
   const [energy, setEnergy] = useState("");
   const [checkInId, setCheckInId] = useState<string | null>(null);
-
+  const start = dayjs().startOf("day").toDate();
+  const end = dayjs().endOf("day").toDate();
+  
   useEffect(() => {
     const fetchCheckIn = async () => {
       const uid = auth.currentUser?.uid;
@@ -72,8 +74,10 @@ export default function CheckInScreen() {
 
       const q = query(
         collection(db, "users", uid, "checkins"),
-        where("date", "==", today),
-        orderBy("timestamp", "desc")
+        where("timestamp", ">=", start),
+        where("timestamp", "<=", end),
+        orderBy("timestamp", "desc"),
+        limit(1)
       );
 
       const snapshot = await getDocs(q);

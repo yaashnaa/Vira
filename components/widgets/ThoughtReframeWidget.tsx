@@ -1,17 +1,14 @@
-import React from "react";
-import { useRouter, Link } from "expo-router";
+// components/widgets/ThoughtReframeWidget.tsx
 import WidgetCard from "../widgetCard";
-import { Icon } from "@rneui/themed";
+import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, View } from "react-native";
-
-interface MoodWidgetProps {
+import { Icon } from "@rneui/themed";
+export default function ThoughtReframeWidget({
+  onRemove,
+}: {
   onRemove?: () => void;
-}
-const MoodWidget: React.FC<MoodWidgetProps> = ({ onRemove }) => {
+}) {
   const router = useRouter();
-  const handlePress = () => {
-    router.replace("/mood");
-  };
 
   return (
     <View style={styles.container}>
@@ -21,24 +18,22 @@ const MoodWidget: React.FC<MoodWidgetProps> = ({ onRemove }) => {
         </Pressable>
       )}
       <WidgetCard
-        title="Mood Tracker"
-        imageSource={require("../../assets/images/widgetImages/mood.png")}
-        onPress={handlePress}
+        title="Thought Reframer"
+
+        imageSource={require("../../assets/images/widgetImages/rainbow.png")}
+        onPress={() => router.push("/thoughtReframeScreen")}
       />
     </View>
   );
-};
-
+}
 const styles = StyleSheet.create({
   container: {
     position: "relative",
   },
   removeIcon: {
     position: "absolute",
-    top: 25,
-    right: 19,
+    top: 20,
+    right: 20,
     zIndex: 1,
   },
 });
-
-export default MoodWidget;

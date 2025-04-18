@@ -6,10 +6,18 @@ import {
   ScrollView,
   ActivityIndicator,
   FlatList,
+  Dimensions,
 } from "react-native";
 import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { Button, Card, Chip } from "react-native-paper";
+import {
+  Button,
+  Card,
+  Chip,
+  Modal,
+  Portal,
+  Provider,
+} from "react-native-paper";
 import { useMoodContext } from "@/context/moodContext";
 import { useUserPreferences } from "@/context/userPreferences";
 import {
@@ -22,6 +30,10 @@ export const screenOptions = {
 };
 export default function FitnessScreen() {
   const { userPreferences } = useUserPreferences();
+
+  const [selectedExercise, setSelectedExercise] =
+    useState<ExerciseProps | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
   const { mood } = useMoodContext();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -29,6 +41,8 @@ export default function FitnessScreen() {
   const [muscle, setMuscle] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [type, setType] = useState("");
+  const formatLabel = (text: string) =>
+    text.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 
   const muscleOptions = [
     "abdominals",
@@ -107,7 +121,10 @@ export default function FitnessScreen() {
   const fetchExercises = async () => {
     setLoading(true);
     try {
-      const results = await fetchExerciseData(muscle, type, difficulty);
+      const isMuscleRelevant = !["cardio", "stretching"].includes(type);
+      const selectedMuscle = isMuscleRelevant ? muscle : "";
+
+      const results = await fetchExerciseData(selectedMuscle, type, difficulty);
       setExercises(results);
     } catch (error) {
       console.error("Error fetching exercises:", error);
@@ -160,13 +177,17 @@ export default function FitnessScreen() {
               key={item}
               mode="outlined"
               selected={muscle === item}
+              disabled={["cardio", "stretching"].includes(type)}
               onPress={() => setMuscle(muscle === item ? "" : item)}
-              style={styles.chip}
+              style={[
+                styles.chip,
+                ["cardio", "stretching"].includes(type) && styles.chipDisabled,
+              ]}
               textStyle={[styles.chipText, { textTransform: "capitalize" }]}
               selectedColor="#000000"
               showSelectedOverlay={true}
             >
-              {item}
+              {formatLabel(item)}
             </Chip>
           ))}
         </View>
@@ -206,7 +227,7 @@ export default function FitnessScreen() {
               selectedColor="#000000"
               showSelectedOverlay={true}
             >
-              {item}
+              {formatLabel(item)}
             </Chip>
           ))}
         </View>
@@ -224,31 +245,80 @@ export default function FitnessScreen() {
           <ActivityIndicator size="large" style={{ marginTop: 20 }} />
         )}
 
-        <FlatList
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          data={exercises}
-          keyExtractor={(_, index) => index.toString()}
-          contentContainerStyle={styles.resultsContainer}
-          renderItem={({ item }) => (
-            <Card style={styles.card}>
-              <Card.Title title={item.name} subtitle={item.type} />
-              <Card.Content>
-                <Text style={styles.label}>Muscle:</Text>
-                <Text>{item.muscle}</Text>
-                <Text style={styles.label}>Difficulty:</Text>
-                <Text>{item.difficulty}</Text>
-                <Text style={styles.label}>Instructions:</Text>
-                <Text>{item.instructions}</Text>
-              </Card.Content>
-            </Card>
-          )}
-        />
+        <Provider>
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            data={exercises}
+            keyExtractor={(_, index) => index.toString()}
+            contentContainerStyle={styles.resultsContainer}
+            renderItem={({ item }) => (
+              <Card style={styles.card} mode="outlined">
+                <TouchableOpacity
+                  onPress={() => {
+                    setSelectedExercise(item);
+                    setModalVisible(true);
+                  }}
+                >
+                  <Card.Title
+                    title={item.name}
+                    subtitle={formatLabel(item.type)}
+                    titleStyle={styles.cardTitle}
+                    subtitleStyle={styles.cardSubtitle}
+                  />
+                  <Card.Content>
+                    <Text style={styles.label}>Muscle:</Text>
+                    <Text>{formatLabel(item.muscle)}</Text>
+                    <Text style={styles.label}>Difficulty:</Text>
+                    <Text>{formatLabel(item.difficulty)}</Text>
+                    <Text style={styles.label}>Instructions:</Text>
+                    <Text style={styles.instructions}>
+                      {item.instructions.length > 100
+                        ? `${item.instructions.slice(0, 100)}...`
+                        : item.instructions}
+                    </Text>
+                    {item.instructions.length > 100 && (
+                      <Text style={styles.readMore}>Tap to read more</Text>
+                    )}
+                  </Card.Content>
+                </TouchableOpacity>
+              </Card>
+            )}
+          />
+
+          <Portal>
+            <Modal
+              visible={modalVisible}
+              onDismiss={() => setModalVisible(false)}
+              contentContainerStyle={styles.modal}
+            >
+              {selectedExercise && (
+                <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+                  <Text style={styles.sectionTitle}>
+                    {selectedExercise.name}
+                  </Text>
+                  <Text style={styles.label}>Muscle:</Text>
+                  <Text>{formatLabel(selectedExercise.muscle)}</Text>
+                  <Text style={styles.label}>Difficulty:</Text>
+                  <Text>{formatLabel(selectedExercise.difficulty)}</Text>
+                  <Text style={styles.label}>Full Instructions:</Text>
+                  <Text>{selectedExercise.instructions}</Text>
+                  <Button
+                    onPress={() => setModalVisible(false)}
+                    style={styles.button}
+                  >
+                    Close
+                  </Button>
+                </ScrollView>
+              )}
+            </Modal>
+          </Portal>
+        </Provider>
       </ScrollView>
     </>
   );
 }
-
+const height= Dimensions.get("window").height;
 const styles = StyleSheet.create({
   container: {
     padding: 20,
@@ -285,20 +355,62 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     backgroundColor: "#ffffff",
   },
-  card: {
-    marginRight: 16,
-    width: 300,
-    borderRadius: 12,
-    backgroundColor: "#ffffff",
-  },
+ 
   label: {
     fontWeight: "600",
     marginTop: 8,
     fontFamily: "Main-font",
   },
+  card: {
+    marginRight: 16,
+    width: 300,
+    height: 320, // fixed height
+    borderRadius: 12,
+    backgroundColor: "#ffffff",
+  },
+  readMore: {
+    color: "#6d4c8d",
+    fontStyle: "italic",
+    marginTop: 10,
+    fontSize: 14,
+  },
+  modal: {
+    backgroundColor: "#fff",
+    padding: 20,
+    margin: 20,
+    borderRadius: 12,
+    height: height * 0.7,
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: "600",
+    marginTop: 20,
+    marginBottom: 8,
+    color: "#271949",
+    fontFamily: "Comfortaa-Regular",
+  },
+  instructions: {
+    fontSize: 14,
+    marginTop: 5,
+  },
   headerRight: {
     display: "flex",
     flexDirection: "row",
     marginTop: 5,
+  },
+  chipDisabled: {
+    opacity: 0.3,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#271949",
+    fontFamily: "Main-font",
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#271949",
+    fontFamily: "Main-font",
   },
 });

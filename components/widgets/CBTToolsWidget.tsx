@@ -1,18 +1,13 @@
-import React from "react";
-import { useRouter, Link } from "expo-router";
 import WidgetCard from "../widgetCard";
-import { Icon } from "@rneui/themed";
+import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, View } from "react-native";
-
-interface MoodWidgetProps {
+import { Icon } from "@rneui/themed";
+export default function CBTToolsWidget({
+  onRemove,
+}: {
   onRemove?: () => void;
-}
-const MoodWidget: React.FC<MoodWidgetProps> = ({ onRemove }) => {
+}) {
   const router = useRouter();
-  const handlePress = () => {
-    router.replace("/mood");
-  };
-
   return (
     <View style={styles.container}>
       {onRemove && (
@@ -21,24 +16,22 @@ const MoodWidget: React.FC<MoodWidgetProps> = ({ onRemove }) => {
         </Pressable>
       )}
       <WidgetCard
-        title="Mood Tracker"
-        imageSource={require("../../assets/images/widgetImages/mood.png")}
-        onPress={handlePress}
+        title="Thought Reframer"
+        subtitle="Reframe unhelpful thoughts"
+        imageSource={require("../../assets/images/widgetImages/notebook.png")}
+        onPress={() => router.push("/thoughtReframeScreen")}
       />
     </View>
   );
-};
-
+}
 const styles = StyleSheet.create({
   container: {
     position: "relative",
   },
   removeIcon: {
     position: "absolute",
-    top: 25,
-    right: 19,
+    top: 20,
+    right: 20,
     zIndex: 1,
   },
 });
-
-export default MoodWidget;

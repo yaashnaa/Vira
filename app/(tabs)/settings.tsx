@@ -28,12 +28,12 @@ import { resetOnboarding } from "@/utils/resetOnboarding";
 import { Header as HeaderRNE, HeaderProps, Icon } from "@rneui/themed";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { doc, setDoc, updateDoc } from "firebase/firestore";
-import { db } from "../config/firebaseConfig"; // adjust path as needed
+import { db } from "../../config/firebaseConfig"; // adjust path as needed
 import { getAuth } from "firebase/auth";
 import { signOut, deleteUser, sendPasswordResetEmail } from "firebase/auth";
 import MentalHealthCheckboxModal from "@/components/mentalHealthModal";
 import BasicButton from "@/components/Buttons/basicButton";
-import { useUserPreferences } from "../context/userPreferences"; // Adjust the path as necessary
+import { useUserPreferences } from "../../context/userPreferences"; // Adjust the path as necessary
 import { useRouter } from "expo-router";
 import { auth } from "@/config/firebaseConfig";
 
@@ -291,6 +291,10 @@ export default function Settings() {
       foodAnxietyLevel: anxiousFood ?? "",
       primaryGoals: Array.isArray(primaryGoals) ? primaryGoals : [],
       moodCheckIn: moodCheckIn ?? "",
+      moodcCheckInBool:
+      moodCheckIn === "No, I’d rather keep it simple." ? false : true,
+    
+      
       mentalHealthSupport: mentalHealthResouces ?? "",
       triggerWarnings: hideTriggers ?? "",
       approach: approach ?? "",
@@ -326,7 +330,7 @@ export default function Settings() {
         console.log("Preferences saved locally for UID:", currentUser.uid);
       }
       console.log("🎉 User Preferences Submitted & Stored!");
-      router.replace("/dashboard");
+      router.back();
     } catch (error) {
       console.error("🔥 Failed to update Firestore:", error);
       alert("Error saving preferences. Please try again.");
@@ -334,7 +338,7 @@ export default function Settings() {
   };
 
   const handleBackPress = () => {
-    router.replace("/dashboard");
+    router.back();
   };
   return (
     <Provider>

@@ -47,7 +47,9 @@ const moodMap = [
 
 const { width } = Dimensions.get("window");
 
-export default function MoodSuggestionsCard({ latestCheckIn }: MoodSuggestionsCardProps) {
+export default function MoodSuggestionsCard({
+  latestCheckIn,
+}: MoodSuggestionsCardProps) {
   const router = useRouter();
 
   const moodLabel = latestCheckIn?.mood;
@@ -62,7 +64,9 @@ export default function MoodSuggestionsCard({ latestCheckIn }: MoodSuggestionsCa
         <Text style={styles.suggestion}>{moodInfo.suggestion}</Text>
         <Button
           mode="contained"
-          onPress={() => router.push(moodInfo.route as Parameters<typeof router.push>[0])}
+          onPress={() =>
+            router.push(moodInfo.route as Parameters<typeof router.push>[0])
+          }
           style={styles.actionButton}
           labelStyle={{ fontSize: 14, color: "#3d1c03" }}
         >
@@ -75,11 +79,18 @@ export default function MoodSuggestionsCard({ latestCheckIn }: MoodSuggestionsCa
   return (
     <Card onPress={() => router.push("/checkInScreen")} style={styles.card}>
       <Card.Content style={styles.cardContent}>
-        <Text style={styles.heading}>
-          Check in to get personalized suggestions ✨
-        </Text>
+        <View style={{flexDirection: "row", alignItems: "center", justifyContent: "center"}}>
+          <Text style={styles.heading}>
+            Check in to get personalized suggestions ✨
+          </Text>
+          <Image
+            source={require("../../assets/images/dashboard/checkin.png")}
+            style={{ width: 50, height: 60, marginLeft: 10 }}
+          />
+        </View>
+
         <Divider style={styles.divider} />
-   
+
         <View style={styles.footer}>
           <Text style={styles.text}>Tap to check in</Text>
         </View>

@@ -23,7 +23,7 @@ const FitnessWidget: React.FC<FitnessWidgetProps> = ({ onRemove }) => {
       )}
       <WidgetCard
         title="Fitness"
-        imageSource={require('../../assets/images/widgets/triangle.png')}
+        imageSource={require('../../assets/images/widgetImages/triangle.png')}
         onPress={handlePress}
       />
     </View>

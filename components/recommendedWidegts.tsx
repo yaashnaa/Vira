@@ -20,38 +20,38 @@ const recommendedWidgets = [
   {
     id: "nutrition",
     title: "Nutrition",
-    image: require("../assets/images/widgets/diet.png"),
+    image: require("../assets/images/widgetImages/diet.png"),
     link: "../app/nutrition.tsx",
   },
   {
     id: "mindfulness",
     title: "Mindfullness",
-    image: require("../assets/images/widgets/yoga.png"),
+    image: require("../assets/images/widgetImages/yoga.png"),
   },
   {
     id: "water",
     title: "Water Intake",
-    image: require("../assets/images/widgets/water.png"),
+    image: require("../assets/images/widgetImages/water.png"),
   },
   {
     id: "fitness",
     title: "Fitness",
-    image: require("../assets/images/widgets/triangle.png"),
+    image: require("../assets/images/widgetImages/triangle.png"),
   },
   {
     id: "journal",
     title: "Journal",
-    image: require("../assets/images/widgets/notebook.png"),
+    image: require("../assets/images/widgetImages/notebook.png"),
   },
   {
     id: "mood",
     title: "Mood Tracker",
-    image: require("../assets/images/widgets/mood.png"),
+    image: require("../assets/images/widgetImages/mood.png"),
   },
 ];
 
 const { width } = Dimensions.get("window");
-interface RecommendedWidgetsBannerProps {
+interface RecommendedwidgetImagesBannerProps {
   triggerRefresh?: number;
   onAddWidget?: (id: string) => void;
 }
@@ -59,7 +59,7 @@ interface RecommendedWidgetsBannerProps {
 export default function RecommendedWidgetsBanner({
   triggerRefresh,
   onAddWidget,
-}: RecommendedWidgetsBannerProps) {
+}: RecommendedwidgetImagesBannerProps) {
   const { userPreferences } = useUserPreferences();
   const [enabledWidgets, setEnabledWidgets] = useState<string[]>([]);
 

@@ -1,37 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef,  useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  TextInput,
-  Alert,
   TouchableOpacity,
-  FlatList,
-  SafeAreaView,
-  Image,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
   Platform,
 } from "react-native";
 import { db, auth } from "@/config/firebaseConfig";
-import {
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  orderBy,
-} from "firebase/firestore";
-
-import { Rating } from "@rneui/themed";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import {
   Modal,
   Portal,
   Button,
   Provider,
-  Card,
-  Divider,
+  SegmentedButtons,
 } from "react-native-paper";
 import { useRouter } from "expo-router";
 import JournalEntry from "@/components/Journal/journalEntry";
@@ -39,81 +25,39 @@ import { useUserPreferences } from "@/context/userPreferences";
 import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import { useMoodContext } from "@/context/moodContext";
 import dayjs from "dayjs";
-import SuggestionCard from "@/components/Journal/suggestionCard";
-
-const energyOptions = [
-  { label: "Exhausted", image: require("../assets/images/energyScale/1.png") },
-  { label: "Low Energy", image: require("../assets/images/energyScale/2.png") },
-  { label: "Okay", image: require("../assets/images/energyScale/3.png") },
-  { label: "Energized", image: require("../assets/images/energyScale/4.png") },
-  {
-    label: "Fully Charged",
-    image: require("../assets/images/energyScale/5.png"),
-  },
-];
+import MoodTagSuggestions from "@/components/Journal/moodTagSuggestions";
+import CBTJournalingInfo from "@/components/Journal/CBTInfo";
+import JournalEntrySection from "@/components/Journal/JournalEntrySection";
+import CBTPromptSelector from "@/components/Journal/CBTPromptSelector";
+import LottieView from "lottie-react-native";
 
 export default function CheckInScreen() {
   const { userPreferences } = useUserPreferences();
-  const [sleepRating, setSleepRating] = useState(0);
-  const [checkInComplete, setCheckInComplete] = useState(false);
-  const { mood } = useMoodContext();
+  const { mood, hasLoggedToday } = useMoodContext();
   const today = dayjs().format("YYYY-MM-DD");
   const router = useRouter();
-  const [isNewEntryVisible, setIsNewEntryVisible] = useState(false);
-  const [sleepQuality, setSleepQuality] = useState("");
-  const [energyLevel, setEnergyLevel] = useState("");
-  const [reflection, setReflection] = useState("");
-  const [entries, setEntries] = useState<
-    {
-      id: string;
-      sleepQuality?: string;
-      energyLevel?: string;
-      reflection?: string;
-      mood?: string;
-      date?: string;
-      timestamp?: Date;
-    }[]
-  >([]);
+  const scrollRef = useRef<ScrollView>(null);
 
-  const handleSaveCheckIn = async () => {
-    try {
-      const userId = auth.currentUser?.uid;
-      if (!userId) return;
-
-      await addDoc(collection(db, "users", userId, "journalEntries"), {
-        sleepQuality,
-        energyLevel,
-        reflection,
-        mood,
-        date: today,
-        sleepRating,
-        timestamp: new Date(),
-      });
-      setSleepQuality("");
-      setEnergyLevel("");
-      setReflection("");
-      fetchEntries();
-      const todayEntry:
-        | {
-            id: string;
-            sleepQuality?: string;
-            energyLevel?: string;
-            reflection?: string;
-            mood?: string;
-            date?: string;
-            timestamp?: Date;
-          }
-        | undefined = entries.find((entry) => entry.date === today);
-      if (todayEntry) {
-        setCheckInComplete(true);
-      }
-      Alert.alert("Success", "Check-in saved!");
-      setCheckInComplete(true);
-    } catch (error) {
-      console.error("Error saving check-in:", error);
-      Alert.alert("Error", "Failed to save check-in.");
-    }
+  const scrollToInput = () => {
+    setTimeout(() => {
+      scrollRef.current?.scrollToEnd({ animated: true });
+    }, 300); // give time for keyboard to appear
   };
+  const [isNewEntryVisible, setIsNewEntryVisible] = useState(false);
+  const [entries, setEntries] = useState<{ id: string; [key: string]: any }[]>(
+    []
+  );
+  const [entryType, setEntryType] = useState("free"); // free, prompt, mood
+  const shouldShowMoodOption = userPreferences?.moodcCheckInBool;
+
+  const entryOptions = [
+    { value: "free", label: "Free Write" },
+    { value: "prompt", label: "Prompt-Based" },
+  ];
+
+  if (shouldShowMoodOption) {
+    entryOptions.push({ value: "mood", label: "Mood-Based" });
+  }
 
   const fetchEntries = async () => {
     try {
@@ -135,10 +79,26 @@ export default function CheckInScreen() {
   useEffect(() => {
     fetchEntries();
   }, []);
+
   const handleBackPress = () => {
     router.replace("/dashboard");
   };
-  const ratingProps = {};
+
+  const renderEntryExtras = () => {
+    if (entryType === "mood") {
+      return <MoodTagSuggestions mood={mood ?? 2} />;
+    }
+    if (entryType === "prompt") {
+      return (
+        <>
+          <CBTJournalingInfo />
+          <CBTPromptSelector />
+        </>
+      );
+    }
+    return null;
+  };
+
   return (
     <>
       <HeaderRNE
@@ -174,114 +134,91 @@ export default function CheckInScreen() {
       />
 
       <Provider>
-        <KeyboardAvoidingView>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          style={{ flex: 1 }}
+        >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <ScrollView>
-              <View style={styles.container}>
-                <Text style={styles.heading}>
-                  Hi {userPreferences?.name || "there"} ✨
-                </Text>
-                <Text style={styles.subHeading}>
-                  Today's Check-In ({today})
-                </Text>
+            <ScrollView contentContainerStyle={styles.container}   ref={scrollRef}>
+              <Text style={styles.heading}>
+                Hi {userPreferences?.name || "there"} ✨
+              </Text>
+              <LottieView
+                source={require("../assets/animations/write.json")}
+                autoPlay
+                loop
+                style={{
+                  width: 150,
+                  height: 150,
+                  alignSelf: "center",
+                  marginBottom: 10,
+                }}
+              />
+              <Text style={styles.sectionTitle}>
+                What kind of journaling today?
+              </Text>
+              <SegmentedButtons
+                value={entryType}
+                onValueChange={setEntryType}
+                buttons={entryOptions}
+              />
+              <Text style={styles.modeDescription}>
+                {entryType === "free" &&
+                  "Write freely about anything on your mind."}
+                {entryType === "prompt" &&
+                  "Answer structured CBT prompts to guide reflection."}
+                {entryType === "mood" &&
+                  "Get suggestions based on how you're feeling today."}
+              </Text>
 
-                {checkInComplete ? (
-                  <SuggestionCard mood={mood} energyLevel={energyLevel} />
-                ) : (
-                  <View>
-                    <Card style={styles.card}>
-                      <Card.Content>
-                        <Text style={styles.sectionTitle}>Sleep Check-In</Text>
-
-                        <Text style={styles.label}>How did you sleep?</Text>
-           
-
-                        <Divider style={styles.divider} />
-
-                        <Text style={styles.sectionTitle}>Energy Check-In</Text>
-
-                        <Text style={styles.label}>
-                          How's your energy today?
-                        </Text>
-                        <View style={styles.energyContainer}>
-                          {energyOptions.map((option, index) => (
-                            <TouchableOpacity
-                              key={index}
-                              onPress={() => setEnergyLevel(option.label)}
-                              style={[
-                                styles.energyOption,
-                                energyLevel === option.label &&
-                                  styles.energySelected,
-                              ]}
-                            >
-                              <Image
-                                source={option.image}
-                                style={styles.energyImage}
-                              />
-                            </TouchableOpacity>
-                          ))}
-                        </View>
-
-                        {energyLevel && (
-                          <Text style={styles.energyLabel}>{energyLevel}</Text>
-                        )}
-
-                        <Divider style={styles.divider} />
-
-                        <Text style={styles.sectionTitle}>
-                          Reflection Space
-                        </Text>
-
-                        <Text style={styles.label}>What's on your mind?</Text>
-                        <TextInput
-                          style={[styles.input, styles.journalBox]}
-                          placeholder="Free write your thoughts here..."
-                          value={reflection}
-                          onChangeText={setReflection}
-                          multiline
-                        />
-
-                        <Button
-                          mode="contained-tonal"
-                          icon="check"
-                          textColor="#580b88"
-                          onPress={handleSaveCheckIn}
-                          style={styles.button}
-                        >
-                          Save Check-in
-                        </Button>
-                      </Card.Content>
-                    </Card>
-
-              
-                  </View>
-                )}
-
-                <Text style={styles.heading}>Your Journal</Text>
-                <View style={styles.buttons}>
+              {/* Conditional: If mood mode selected but no check-in */}
+              {entryType === "mood" && !hasLoggedToday ? (
+                <View style={styles.checkInNotice}>
+                  <Text style={styles.noticeText}>
+                    You haven't checked in today. Please do a mood check-in
+                    first!
+                  </Text>
                   <Button
-                    mode="contained"
-                    onPress={() => setIsNewEntryVisible(true)}
-                    compact={true}
-                    icon={"plus"}
-                    style={styles.actionButton}
+                    onPress={() => router.push("/checkInScreen")}
+                    mode="outlined"
+                    style={{ marginTop: 8 }}
                   >
-                    New Entry
-                  </Button>
-                  <Button
-                    mode="contained"
-                    compact={true}
-                    icon={"link-variant"}
-                    onPress={() => router.replace("/previousJournalEntries")}
-                    style={styles.actionButton}
-                  >
-                    View previous entries
+                    Go to Check-In
                   </Button>
                 </View>
+              ) : (
+                <>
+                  {renderEntryExtras()}
+                  <JournalEntrySection onFocus={scrollToInput} />
+
+                </>
+              )}
+
+              <Text style={styles.heading}>Your Journal</Text>
+              <View style={styles.buttons}>
+                <Button
+                  mode="contained"
+                  onPress={() => setIsNewEntryVisible(true)}
+                  compact={true}
+                  icon={"plus"}
+                  style={styles.actionButton}
+                >
+                  New Entry
+                </Button>
+                <Button
+                  mode="contained"
+                  compact={true}
+                  icon={"link-variant"}
+                  onPress={() => router.replace("/previousJournalEntries")}
+                  style={styles.actionButton}
+                >
+                  View previous entries
+                </Button>
               </View>
             </ScrollView>
           </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
+
         <Portal>
           <Modal
             visible={isNewEntryVisible}
@@ -303,87 +240,36 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     backgroundColor: "#ffffff",
-    height: "100%",
+    flexGrow: 1,
   },
   heading: {
-    fontSize: 22,
+    fontSize: 26,
     fontWeight: "600",
     marginBottom: 16,
+    fontFamily: "PatrickHand-Regular",
     color: "#622f00",
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#3e2a6e",
+    marginBottom: 10,
+    fontFamily: "Main-font",
   },
   actionButton: {
     padding: 5,
-
     textAlign: "center",
     justifyContent: "center",
     alignItems: "center",
     margin: "auto",
   },
-
   buttons: {
-    display: "flex",
     flexDirection: "row",
-    width: "100%",
-    textAlign: "center",
     justifyContent: "center",
     alignItems: "center",
-  },
-  subHeading: {
-    fontSize: 18,
-    fontWeight: "500",
-    marginBottom: 10,
-    color: "#b488d0",
-  },
-  input: {
-    backgroundColor: "#ffffff",
-    borderColor: "#ccc",
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 8,
-    fontFamily: "Main-font",
-    marginTop: 8,
-  },
-  journalBox: {
-    height: 100,
-    textAlignVertical: "top",
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: "500",
-    marginTop: 10,
-    color: "#333",
-  },
-  card: {
-    backgroundColor: "#f8f6f4",
-    marginBottom: 24,
-    borderRadius: 12,
-    padding: 0,
-    // elevation: 3,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  button: {
-    marginTop: 16,
-    justifyContent: "center",
-    alignItems: "center",
-    margin: "auto",
-    backgroundColor: "#f8f6f4",
-    width: "50%",
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "600",
-    marginBottom: 8,
     marginTop: 20,
-    color: "#271949",
+    gap: 10,
   },
-
-  divider: {
-    marginVertical: 20,
-    borderColor: "#ddd",
-    borderWidth: 0.5,
-  },
-
   modal: {
     backgroundColor: "white",
     padding: 20,
@@ -391,61 +277,28 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     height: "105%",
   },
-  saveButton: {},
-  entryCard: {
-    backgroundColor: "#fff",
-    marginVertical: 10,
-    borderRadius: 10,
-    padding: 12,
-    elevation: 2,
-  },
-  entryTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  entryBody: {
-    fontSize: 14,
-    color: "#555",
-  },
-  rating: {
-    paddingVertical: 10,
-  },
   headerRight: {
-    display: "flex",
     flexDirection: "row",
     marginTop: 5,
   },
-  energyContainer: {
-    flexDirection: "row",
-    // justifyContent: "space-between",
+  modeDescription: {
+    fontSize: 14,
+    color: "#94618e",
+    marginVertical: 10,
+  },
+  checkInNotice: {
+    marginTop: 12,
+    padding: 12,
+    borderRadius: 10,
+    backgroundColor: "#fff4f4",
+    borderWidth: 1,
+    borderColor: "#fbb",
     alignItems: "center",
-    justifyContent: "center",
-    marginTop: 10,
-    marginBottom: 10,
-    margin: "auto",
-    padding: 0,
   },
-  energyOption: {
-    alignItems: "center",
-    // padding: 6,
-    flex: 1,
-  },
-  energySelected: {
-    borderColor: "#b488d0",
-    borderWidth: 2,
-    borderRadius: 8,
-  },
-  energyLabel: {
-    fontSize: 16,
-    color: "#555",
-    marginBottom: 4,
-    textAlign: "center",
+  noticeText: {
+    color: "#aa0000",
+    fontSize: 14,
     fontFamily: "Main-font",
-  },
-  energyImage: {
-    width: 55,
-    height: 55,
-    resizeMode: "contain",
+    textAlign: "center",
   },
 });

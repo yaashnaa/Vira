@@ -1,6 +1,14 @@
 // Redesigned Dashboard Layout with cleaner structure and visual hierarchy
 import React, { useRef, useState, useCallback } from "react";
-import { getDocs, collection, query, orderBy, limit } from "firebase/firestore";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  orderBy,
+  limit,
+} from "firebase/firestore";
+
 import { db } from "@/config/firebaseConfig";
 import {
   View,
@@ -11,7 +19,9 @@ import {
   FlatList,
   Button,
   ScrollView,
-  Image, Dimensions
+  Image,
+  Dimensions,
+  ImageBackground,
 } from "react-native";
 import { Surface } from "react-native-paper";
 import { Divider, useTheme } from "@rneui/themed";
@@ -26,7 +36,7 @@ import {
   isScreeningQuizCompleted,
 } from "@/utils/firestore";
 import { useLocalSearchParams } from "expo-router";
-
+import dayjs from "dayjs";
 import { Link, useFocusEffect } from "expo-router";
 import { Header as HeaderRNE, HeaderProps, Icon } from "@rneui/themed";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -47,7 +57,7 @@ import LogoutButton from "@/components/Buttons/logoutButton";
 import DeleteButton from "@/components/Buttons/deleteAccount";
 import TakeQuizButton from "@/components/takeQuiz";
 import RecommendedWidgetsBanner from "@/components/recommendedWidegts";
-import NutritionScreen from "./nurtition";
+import NutritionScreen from "../nurtition";
 import FitnessWidget from "@/components/widgets/FitnessWidget";
 import NutritionWidget from "@/components/widgets/NutritionWidget";
 // import JournalScreen from "./journal";
@@ -56,20 +66,20 @@ import WaterWidget from "@/components/widgets/WaterWidget";
 import MoodWidget from "@/components/widgets/MoodWidget";
 import { useEffect } from "react";
 import MindfullnessWidget from "@/components/widgets/Mindfullness";
-import ThoughtReframeScreen from "../components/ThoughtReframe/chatbot";
-import ReflectionCard from "./reflectionCard";
-import CombinedCheckInCard from "./combinedCheckInCard";
+import ThoughtReframeWidget from "@/components/widgets/ThoughtReframeWidget";
+import CopingBoxWidget from "@/components/widgets/CopingBoxWidget";
+import CBTToolsWidget from "@/components/widgets/CBTToolsWidget";
+import ThoughtReframeScreen from "../../components/ThoughtReframe/chatbot";
+import ReflectionCard from "../reflectionCard";
+import CombinedCheckInCard from "../combinedCheckInCard";
+
 const STORAGE_KEY = "@enabledWidgets";
 const dashboardSections = [
   { key: "greeting" },
   { key: "quote" },
-  { key: "cards" },
-  { key: "tools" },
+  { key: "checkinCard" },
   { key: "logMood" },
-  { key: "widgets" },
-  { key: "quiz" },
-  { key: "recommended" },
-  { key: "actions" },
+  { key: "pinnedWidgets" },
 ];
 
 export default function Dashboard() {
@@ -146,19 +156,19 @@ export default function Dashboard() {
 
   const toolsData = [
     {
-      image: require("../assets/images/dashboard/comment_15422558.png"),
+      image: require("../../assets/images/widgetImages/rainbow.png"),
       label: "Reflect",
     },
     {
-      image: require("../assets/images/dashboard/comment_15422558.png"),
+      image: require("../../assets/images/widgetImages/rainbow.png"),
       label: "Reframe",
     },
     {
-      image: require("../assets/images/dashboard/comment_15422558.png"),
+      image: require("../../assets/images/widgetImages/rainbow.png"),
       label: "Plan",
     },
     {
-      image: require("../assets/images/dashboard/comment_15422558.png"),
+      image: require("../../assets/images/widgetImages/rainbow.png"),
       label: "Cope",
     },
   ];
@@ -184,9 +194,10 @@ export default function Dashboard() {
       const fetchCheckIn = async () => {
         const uid = auth.currentUser?.uid;
         if (!uid) return;
-
+        const today = dayjs().format("YYYY-MM-DD");
         const q = query(
           collection(db, "users", uid, "checkins"),
+          where("date", "==", today),
           orderBy("timestamp", "desc"),
           limit(1)
         );
@@ -283,13 +294,20 @@ export default function Dashboard() {
           switch (item.key) {
             case "greeting":
               return (
-                <Text style={styles.title}>
-                  Hello, {userPreferences.name} 👋
-                  <Button
-                    onPress={() => handleNavigate("/thoughtReframeScreen")}
-                    title="Go to Thoughts"
-                  />
-                </Text>
+                <ImageBackground
+                  source={require("../../assets/images/dashboard/bg.png")} // your image here
+                  style={styles.greetingBackground}
+                  imageStyle={{ borderRadius: 16 }} // optional rounded corners
+                >
+                  <View style={styles.overlay}>
+                    <Text style={styles.greetingText}>
+                      Hello, {userPreferences.name} 👋
+                    </Text>
+                    <Text style={styles.subGreeting}>
+                      Wishing you a calm and kind day 🌸
+                    </Text>
+                  </View>
+                </ImageBackground>
               );
 
             case "quote":
@@ -305,160 +323,105 @@ export default function Dashboard() {
                   </View>
                 </Animated.View>
               );
-            case "cards":
+            case "checkinCard":
+              if (!userPreferences.moodcCheckInBool) return null;
+
               return (
                 <View
                   style={{ display: "flex", flexDirection: "row", gap: 10 }}
                 >
                   <CombinedCheckInCard />
-
-                  {/* <CheckInCard latestCheckIn={latestCheckIn} />
-                <ReflectionCard /> */}
                 </View>
               );
-
             case "logMood":
+              if (!userPreferences.moodcCheckInBool || hasLoggedToday)
+                return null;
+
               return (
                 <TouchableOpacity
                   onPress={() => handleNavigate("/checkInScreen")}
                 >
-                  {/* <LogMoodButton latestCheckIn={latestCheckIn} /> */}
+                  <LogMoodButton latestCheckIn={latestCheckIn} />
                 </TouchableOpacity>
               );
-            case "tools":
+
+            case "pinnedWidgets":
               return (
-                <View style={{ marginTop: 10 }}>
-                  <TouchableOpacity
-                    onPress={() => setShowTools((prev) => !prev)}
-                  >
-                    <Text style={styles.sectionToggle}>
-                      🧰 Tools {showTools ? "▲" : "▼"}
-                    </Text>
-                  </TouchableOpacity>
-                  {showTools && (
-                    <View style={styles.toolsContainer}>
-                      {renderToolItems()}
-                    </View>
-                  )}
+                <View>
+                  {/* Tracking Tools */}
+                  <Text style={styles.sectionHeader}>Pinned Widgets </Text>
+                  <View style={styles.gridContainer}>
+                    {enabledWidgets.includes("water") && (
+                      <WaterWidget
+                        onRemove={() =>
+                          removeWidget(auth.currentUser?.uid || "", "water")
+                        }
+                      />
+                    )}
+                    {enabledWidgets.includes("mood") && (
+                      <MoodWidget
+                        onRemove={() =>
+                          removeWidget(auth.currentUser?.uid || "", "mood")
+                        }
+                      />
+                    )}
+                    {enabledWidgets.includes("fitness") && (
+                      <FitnessWidget
+                        onRemove={() =>
+                          removeWidget(auth.currentUser?.uid || "", "fitness")
+                        }
+                      />
+                    )}
+                    {enabledWidgets.includes("nutrition") && (
+                      <NutritionWidget
+                        onRemove={() =>
+                          removeWidget(auth.currentUser?.uid || "", "nutrition")
+                        }
+                      />
+                    )}
+                    {enabledWidgets.includes("journal") && (
+                      <JournalWidget
+                        onRemove={() =>
+                          removeWidget(auth.currentUser?.uid || "", "journal")
+                        }
+                      />
+                    )}
+                    {enabledWidgets.includes("mindfulness") && (
+                      <MindfullnessWidget
+                        onRemove={() =>
+                          removeWidget(
+                            auth.currentUser?.uid || "",
+                            "mindfulness"
+                          )
+                        }
+                      />
+                    )}
+                    {enabledWidgets.includes("thoughtReframe") && (
+                      <ThoughtReframeWidget
+                        onRemove={() =>
+                          removeWidget(
+                            auth.currentUser?.uid || "",
+                            "thoughtReframe"
+                          )
+                        }
+                      />
+                    )}
+                    {enabledWidgets.includes("copingBox") && (
+                      <CopingBoxWidget
+                        onRemove={() =>
+                          removeWidget(auth.currentUser?.uid || "", "copingBox")
+                        }
+                      />
+                    )}
+                    {enabledWidgets.includes("cbtTools") && (
+                      <CBTToolsWidget
+                        onRemove={() =>
+                          removeWidget(auth.currentUser?.uid || "", "cbtTools")
+                        }
+                      />
+                    )}
+                  </View>
                 </View>
-              );
-
-            // case "tools":
-            //   return (
-            //     <View style={styles.toolsContainer}>
-            //       <View
-            //         style={{ flexDirection: "column", alignItems: "center", width: "15%", flexWrap:'wrap' }}
-            //       >
-            //         <Surface style={{ ...styles.surface }} elevation={4}>
-            //           <Image
-            //             style={styles.image}
-            //             source={require("../assets/images/dashboard/comment_15422558.png")}
-            //           />
-            //         </Surface>
-            //         <Text>Tools Section</Text>
-            //       </View>
-
-            //       <View
-            //         style={{ flexDirection: "column", alignItems: "center", width: "15%", flexWrap:'wrap' }}
-            //       >
-            //         <Surface style={{ ...styles.surface }} elevation={4}>
-            //           <Image
-            //             style={styles.image}
-            //             source={require("../assets/images/dashboard/comment_15422558.png")}
-            //           />
-            //         </Surface>
-            //         <Text>Tools Section</Text>
-            //       </View>
-
-            //       <View
-            //         style={{ flexDirection: "column", alignItems: "center", width: "15%", flexWrap:'wrap' }}
-            //       >
-            //         <Surface style={{ ...styles.surface }} elevation={4}>
-            //           <Image
-            //             style={styles.image}
-            //             source={require("../assets/images/dashboard/comment_15422558.png")}
-            //           />
-            //         </Surface>
-            //         <Text>Tools Section</Text>
-            //       </View>
-            //       <View
-            //         style={{ flexDirection: "column", alignItems: "center", width: "15%", flexWrap:'wrap' }}
-            //       >
-            //         <Surface style={{ ...styles.surface }} elevation={4}>
-            //           <Image
-            //             style={styles.image}
-            //             source={require("../assets/images/dashboard/comment_15422558.png")}
-            //           />
-            //         </Surface>
-            //         <Text>Tools Section</Text>
-            //       </View>
-            //     </View>
-            //   );
-
-            case "widgets":
-              return (
-                <View style={styles.gridContainer}>
-                  {enabledWidgets.includes("water") && (
-                    <WaterWidget
-                      onRemove={() =>
-                        removeWidget(auth.currentUser?.uid || "", "water")
-                      }
-                    />
-                  )}
-                  {enabledWidgets.includes("fitness") && (
-                    <FitnessWidget
-                      onRemove={() =>
-                        removeWidget(auth.currentUser?.uid || "", "fitness")
-                      }
-                    />
-                  )}
-                  {enabledWidgets.includes("nutrition") && (
-                    <NutritionWidget
-                      onRemove={() =>
-                        removeWidget(auth.currentUser?.uid || "", "nutrition")
-                      }
-                    />
-                  )}
-                  {enabledWidgets.includes("mindfulness") && ( // 🔥 fixed spelling
-                    <MindfullnessWidget
-                      onRemove={() =>
-                        removeWidget(auth.currentUser?.uid || "", "mindfulness")
-                      }
-                    />
-                  )}
-                  {enabledWidgets.includes("journal") && (
-                    <JournalWidget
-                      onRemove={() =>
-                        removeWidget(auth.currentUser?.uid || "", "journal")
-                      }
-                    />
-                  )}
-                  {enabledWidgets.includes("mood") && (
-                    <MoodWidget
-                      onRemove={() =>
-                        removeWidget(auth.currentUser?.uid || "", "mood")
-                      }
-                    />
-                  )}
-                </View>
-              );
-            case "quiz":
-              return !hasCompletedScreening ? (
-                <>
-                  <Divider style={styles.divider} />
-                  <TakeQuizButton
-                    onPress={() => handleNavigate("/quizzes/screening")}
-                  />
-                  <Divider style={styles.divider} />
-                </>
-              ) : null;
-
-            case "recommended":
-              return (
-                <RecommendedWidgetsBanner
-                  onAddWidget={handleAddWidget}
-                  triggerRefresh={widgetChangeTrigger}
-                />
               );
 
             case "actions":
@@ -508,6 +471,13 @@ const styles = StyleSheet.create({
   //   marginBottom: 20,
   //   gap: 20,
   // },
+
+  horizontalScroll: {
+    paddingHorizontal: 10,
+    flexDirection: "row",
+    gap: 12,
+  },
+
   title: {
     fontSize: 32,
     fontWeight: "bold",
@@ -522,7 +492,7 @@ const styles = StyleSheet.create({
   gridContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
+    justifyContent: "space-evenly",
     gap: 12,
   },
   image: {
@@ -552,6 +522,16 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: 8,
   },
+  sectionHeader: {
+    fontSize: 26,
+    fontWeight: "600",
+    fontFamily: "PatrickHand-Regular",
+    color: "#3e2a6e",
+    marginBottom: 8,
+    marginTop: 20,
+    paddingLeft: 6,
+  },
+
   quote: {
     fontStyle: "italic",
     color: "#555",
@@ -610,7 +590,7 @@ const styles = StyleSheet.create({
     width: width * 0.2,
     marginHorizontal: 5,
   },
- toolsImage: {
+  toolsImage: {
     width: 40,
     height: 40,
     resizeMode: "contain",
@@ -627,6 +607,33 @@ const styles = StyleSheet.create({
     fontFamily: "PatrickHand-Regular",
     marginLeft: 16,
     marginBottom: 4,
+  },
+  greetingBackground: {
+    height: 140,
+    resizeMode: "cover",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  
+  overlay: {
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    padding: 16,
+    borderRadius: 16,
+  },
+  
+  greetingText: {
+    fontSize: 24,
+    fontWeight: "bold",
+    fontFamily: "PatrickHand-Regular",
+    color: "#271949",
+  },
+  
+  subGreeting: {
+    fontSize: 16,
+    color: "#5a4c7c",
+    marginTop: 4,
+    fontFamily: "Main-font",
   },
   
 });

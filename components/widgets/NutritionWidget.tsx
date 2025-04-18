@@ -68,7 +68,7 @@ const NutritionWidget: React.FC<NutritionWidgetProps> = ({ onRemove }) => {
             ? `${mealsLogged} meals • Last: ${topMeal}`
             : `${mealsLogged} meals logged`
         }
-        imageSource={require("../../assets/images/widgets/diet.png")}
+        imageSource={require("../../assets/images/widgetImages/diet.png")}
         onPress={handlePress}
       />
     </View>

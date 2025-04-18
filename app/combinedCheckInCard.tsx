@@ -106,28 +106,40 @@ export default function CombinedCheckInCard() {
   }>(null);
 
   const router = useRouter();
-
   useEffect(() => {
     const fetchCheckIn = async () => {
-      const userId = auth.currentUser?.uid;
-      if (!userId) return;
-      const today = dayjs().format("YYYY-MM-DD");
-
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+  
       const q = query(
-        collection(db, "users", userId, "checkins"),
-        where("timestamp", ">=", start),
-        where("timestamp", "<=", end),
+        collection(db, "users", uid, "checkins"),
         orderBy("timestamp", "desc"),
-        limit(1)
+        limit(5) // You can adjust the number if needed
       );
+  
       const snapshot = await getDocs(q);
-      if (!snapshot.empty) {
-        setLatestCheckIn(snapshot.docs[0].data() as any);
+      const today = dayjs().format("YYYY-MM-DD");
+  
+      for (const doc of snapshot.docs) {
+        const data = doc.data();
+        const docDate = dayjs(data.timestamp?.toDate()).format("YYYY-MM-DD");
+        if (docDate === today) {
+          setLatestCheckIn({
+            mood: data.mood,
+            energy: data.energy,
+            sleep: data.sleep,
+            date: dayjs(data.timestamp?.toDate()).format("YYYY-MM-DD"),
+          });
+          return;
+        }
       }
+  
+      setLatestCheckIn(null); // No check-in for today
     };
-
+  
     fetchCheckIn();
   }, []);
+  
 
   const moodLabel = latestCheckIn?.mood;
   const moodInfo = moodLabel
@@ -202,7 +214,7 @@ export default function CombinedCheckInCard() {
                 )}
 
                 <Button
-                  onPress={() => router.push("/checkInScreen")}
+                  onPress={() => router.push("/checkInScreen?fromDashboard=true")}
                   mode="contained-tonal"
                   style={styles.entryButton}
                   textColor="#622f00"

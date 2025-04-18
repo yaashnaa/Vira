@@ -13,7 +13,7 @@ const MindfullnessWidget: React.FC<MindfullnessWidgetProps> = ({
 }) => {
   const router = useRouter();
   const handlePress = () => {
-    router.replace("/mindfullness");
+    router.replace("/mindfulness");
   };
 
   return (
@@ -25,7 +25,7 @@ const MindfullnessWidget: React.FC<MindfullnessWidgetProps> = ({
       )}
       <WidgetCard
         title="Mindfullness"
-        imageSource={require("../../assets/images/widgets/yoga.png")}
+        imageSource={require("../../assets/images/widgetImages/yoga.png")}
         onPress={handlePress}
       />
     </View>

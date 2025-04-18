@@ -20,6 +20,10 @@ const availableWidgets = [
   { id: "journal", label: "Journal" },
   { id: "water", label: "Water Intake" },
   { id: "mindfulness", label: "Mindfulness" },
+  // new psychological tools:
+  { id: "thoughtReframe", label: "Thought Reframer" },
+  { id: "cbtTools", label: "CBT Tools" },
+  { id: "copingBox", label: "Coping Tools" },
 ];
 
 export default function ManageWidgetsScreen() {
