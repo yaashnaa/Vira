@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "#fef9f6",
     borderRadius: 12,
-    marginBottom: 30,
+    // marginBottom: 30,
   },
   promptSection: {
     marginBottom: 16,
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ddd",
   },
   label: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "500",
     color: "#333",
     marginBottom: 8,
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 16,
-    backgroundColor: "#f8f6f4",
+    backgroundColor: "#fef9f6",
     alignSelf: "center",
   },
 });

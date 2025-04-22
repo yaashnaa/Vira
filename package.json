@@ -20,6 +20,7 @@
     "@lottiefiles/dotlottie-react": "^0.6.5",
     "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-native-community/datetimepicker": "8.2.0",
+    "@react-native-community/slider": "4.5.5",
     "@react-native-firebase/app": "^21.13.0",
     "@react-navigation/material-top-tabs": "^7.2.4",
     "@react-navigation/native": "^7.1.5",
@@ -73,9 +74,10 @@
     "react-native-video": "^6.11.0",
     "react-native-web": "~0.19.13",
     "react-native-webview": "^13.12.5",
+    "react-spotlight-tour": "^1.1.0",
     "styled-components": "^6.1.16",
-    "undefined": "react-native-community/datetimepicker",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "expo-screen-orientation": "~8.0.4"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -84,6 +86,7 @@
     "@types/react": "~18.3.12",
     "@types/react-native": "^0.72.8",
     "@types/react-native-onboarding-swiper": "^1.1.9",
+    "@types/react-native-snap-carousel": "^3.8.11",
     "@types/react-test-renderer": "^18.3.0",
     "@types/uuid": "^10.0.0",
     "expo-module-scripts": "^4.0.5",

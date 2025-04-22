@@ -12,7 +12,7 @@ import { useRouter } from "expo-router";
 import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import { auth, db } from "@/config/firebaseConfig";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
-
+import { getJournalEntries } from "@/utils/journalHelper";
 export default function PreviousJournalEntries() {
   const [entries, setEntries] = useState<any[]>([]);
   const router = useRouter();

@@ -1,4 +1,4 @@
-import React, { useState, useRef,  useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -20,7 +20,6 @@ import {
   SegmentedButtons,
 } from "react-native-paper";
 import { useRouter } from "expo-router";
-import JournalEntry from "@/components/Journal/journalEntry";
 import { useUserPreferences } from "@/context/userPreferences";
 import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import { useMoodContext } from "@/context/moodContext";
@@ -30,8 +29,9 @@ import CBTJournalingInfo from "@/components/Journal/CBTInfo";
 import JournalEntrySection from "@/components/Journal/JournalEntrySection";
 import CBTPromptSelector from "@/components/Journal/CBTPromptSelector";
 import LottieView from "lottie-react-native";
+import { saveJournalEntry } from "@/utils/journalHelper";
 
-export default function CheckInScreen() {
+export default function Journal() {
   const { userPreferences } = useUserPreferences();
   const { mood, hasLoggedToday } = useMoodContext();
   const today = dayjs().format("YYYY-MM-DD");
@@ -139,7 +139,10 @@ export default function CheckInScreen() {
           style={{ flex: 1 }}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <ScrollView contentContainerStyle={styles.container}   ref={scrollRef}>
+            <ScrollView
+              contentContainerStyle={styles.container}
+              ref={scrollRef}
+            >
               <Text style={styles.heading}>
                 Hi {userPreferences?.name || "there"} ✨
               </Text>
@@ -190,23 +193,13 @@ export default function CheckInScreen() {
                 <>
                   {renderEntryExtras()}
                   <JournalEntrySection onFocus={scrollToInput} />
-
                 </>
               )}
 
-              <Text style={styles.heading}>Your Journal</Text>
               <View style={styles.buttons}>
                 <Button
-                  mode="contained"
-                  onPress={() => setIsNewEntryVisible(true)}
-                  compact={true}
-                  icon={"plus"}
-                  style={styles.actionButton}
-                >
-                  New Entry
-                </Button>
-                <Button
-                  mode="contained"
+                  mode="contained-tonal"
+                  textColor="#580b88"
                   compact={true}
                   icon={"link-variant"}
                   onPress={() => router.replace("/previousJournalEntries")}
@@ -218,19 +211,6 @@ export default function CheckInScreen() {
             </ScrollView>
           </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
-
-        <Portal>
-          <Modal
-            visible={isNewEntryVisible}
-            onDismiss={() => setIsNewEntryVisible(false)}
-            contentContainerStyle={styles.modal}
-          >
-            <JournalEntry
-              onSave={() => setIsNewEntryVisible(false)}
-              onCancel={() => setIsNewEntryVisible(false)}
-            />
-          </Modal>
-        </Portal>
       </Provider>
     </>
   );
@@ -262,6 +242,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     margin: "auto",
+    marginTop: 0,
+    backgroundColor: "#f8edeb",
   },
   buttons: {
     flexDirection: "row",

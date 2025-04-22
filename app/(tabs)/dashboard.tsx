@@ -72,6 +72,7 @@ import CBTToolsWidget from "@/components/widgets/CBTToolsWidget";
 import ThoughtReframeScreen from "../../components/ThoughtReframe/chatbot";
 import ReflectionCard from "../reflectionCard";
 import CombinedCheckInCard from "../combinedCheckInCard";
+import * as ScreenOrientation from "expo-screen-orientation";
 
 const STORAGE_KEY = "@enabledWidgets";
 const dashboardSections = [
@@ -95,7 +96,9 @@ export default function Dashboard() {
     string,
     any
   >>(null);
-
+  useEffect(() => {
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+  }, []);
   const slideAnim = useRef(new Animated.Value(100)).current; // starts 100px down
   const [hasCompletedScreening, setHasCompletedScreening] =
     useState<boolean>(false);
@@ -250,7 +253,7 @@ export default function Dashboard() {
 
   return (
     <>
-      <HeaderRNE
+      {/* <HeaderRNE
         containerStyle={{
           backgroundColor: "#f8edeb", // soft lilac or any color you want
           borderBottomWidth: 0,
@@ -283,175 +286,189 @@ export default function Dashboard() {
             </TouchableOpacity>
           </View>
         }
-      />
+      /> */}
+      <SafeAreaView style={styles.headerContainer}>
+        <FlatList
+          data={dashboardSections}
+          style={styles.container}
+          bounces={false}
+          overScrollMode="never"
+          keyExtractor={(item) => item.key}
+          contentContainerStyle={{ paddingBottom: 50 }}
+          renderItem={({ item }) => {
+            switch (item.key) {
+              case "greeting":
+                return (
+                  <ImageBackground
+                    source={require("../../assets/images/dashboard/bg.png")} // your image here
+                    style={styles.greetingBackground}
+                    imageStyle={{ borderRadius: 16 }} // optional rounded corners
+                  >
+                    <View style={styles.overlay}>
+                      <Text style={styles.greetingText}>
+                        Hello, {userPreferences.name} 👋
+                      </Text>
+                      <Text style={styles.subGreeting}>
+                        Wishing you a calm and kind day 🌸
+                      </Text>
+                    </View>
+                  </ImageBackground>
+                );
 
-      <FlatList
-        data={dashboardSections}
-        style={styles.container}
-        keyExtractor={(item) => item.key}
-        contentContainerStyle={{ padding: 20, paddingBottom: 50 }}
-        renderItem={({ item }) => {
-          switch (item.key) {
-            case "greeting":
-              return (
-                <ImageBackground
-                  source={require("../../assets/images/dashboard/bg.png")} // your image here
-                  style={styles.greetingBackground}
-                  imageStyle={{ borderRadius: 16 }} // optional rounded corners
-                >
-                  <View style={styles.overlay}>
-                    <Text style={styles.greetingText}>
-                      Hello, {userPreferences.name} 👋
-                    </Text>
-                    <Text style={styles.subGreeting}>
-                      Wishing you a calm and kind day 🌸
-                    </Text>
+              case "quote":
+                return (
+                  <Animated.View
+                    style={{ transform: [{ translateY: slideAnim }] }}
+                  >
+                    <View style={styles.card}>
+                      <Text style={styles.sectionTitle}>Today's Quote</Text>
+                      <Text style={styles.quote}>
+                        “Your body is your home — treat it gently.”
+                      </Text>
+                    </View>
+                  </Animated.View>
+                );
+              case "checkinCard":
+                if (!userPreferences.moodcCheckInBool || !hasLoggedToday)
+                  return null;
+
+                return (
+                  <View>
+                    <CombinedCheckInCard />
                   </View>
-                </ImageBackground>
-              );
+                );
+              case "logMood":
+                if (!userPreferences.moodcCheckInBool || hasLoggedToday)
+                  return null;
 
-            case "quote":
-              return (
-                <Animated.View
-                  style={{ transform: [{ translateY: slideAnim }] }}
-                >
-                  <View style={styles.card}>
-                    <Text style={styles.sectionTitle}>Today's Quote</Text>
-                    <Text style={styles.quote}>
-                      “Your body is your home — treat it gently.”
-                    </Text>
+                return (
+                  <TouchableOpacity
+                    onPress={() => handleNavigate("/checkInScreen")}
+                  >
+                    <LogMoodButton latestCheckIn={latestCheckIn} />
+                  </TouchableOpacity>
+                );
+
+              case "pinnedWidgets":
+                return (
+                  <View>
+                    {/* Tracking Tools */}
+                    <Text style={styles.sectionHeader}>Pinned Widgets </Text>
+                    <View style={styles.gridContainer}>
+                      {enabledWidgets.includes("water") && (
+                        <WaterWidget
+                          onRemove={() =>
+                            removeWidget(auth.currentUser?.uid || "", "water")
+                          }
+                        />
+                      )}
+                      {enabledWidgets.includes("mood") && (
+                        <MoodWidget
+                          onRemove={() =>
+                            removeWidget(auth.currentUser?.uid || "", "mood")
+                          }
+                        />
+                      )}
+                      {enabledWidgets.includes("fitness") && (
+                        <FitnessWidget
+                          onRemove={() =>
+                            removeWidget(auth.currentUser?.uid || "", "fitness")
+                          }
+                        />
+                      )}
+                      {enabledWidgets.includes("nutrition") && (
+                        <NutritionWidget
+                          onRemove={() =>
+                            removeWidget(
+                              auth.currentUser?.uid || "",
+                              "nutrition"
+                            )
+                          }
+                        />
+                      )}
+                      {enabledWidgets.includes("journal") && (
+                        <JournalWidget
+                          onRemove={() =>
+                            removeWidget(auth.currentUser?.uid || "", "journal")
+                          }
+                        />
+                      )}
+                      {enabledWidgets.includes("mindfulness") && (
+                        <MindfullnessWidget
+                          onRemove={() =>
+                            removeWidget(
+                              auth.currentUser?.uid || "",
+                              "mindfulness"
+                            )
+                          }
+                        />
+                      )}
+                      {enabledWidgets.includes("thoughtReframe") && (
+                        <ThoughtReframeWidget
+                          onRemove={() =>
+                            removeWidget(
+                              auth.currentUser?.uid || "",
+                              "thoughtReframe"
+                            )
+                          }
+                        />
+                      )}
+                      {enabledWidgets.includes("copingBox") && (
+                        <CopingBoxWidget
+                          onRemove={() =>
+                            removeWidget(
+                              auth.currentUser?.uid || "",
+                              "copingBox"
+                            )
+                          }
+                        />
+                      )}
+                      {enabledWidgets.includes("cbtTools") && (
+                        <CBTToolsWidget
+                          onRemove={() =>
+                            removeWidget(
+                              auth.currentUser?.uid || "",
+                              "cbtTools"
+                            )
+                          }
+                        />
+                      )}
+                    </View>
                   </View>
-                </Animated.View>
-              );
-            case "checkinCard":
-              if (!userPreferences.moodcCheckInBool) return null;
+                );
 
-              return (
-                <View
-                  style={{ display: "flex", flexDirection: "row", gap: 10 }}
-                >
-                  <CombinedCheckInCard />
-                </View>
-              );
-            case "logMood":
-              if (!userPreferences.moodcCheckInBool || hasLoggedToday)
+              case "actions":
+                return (
+                  <>
+                    <DeleteButton />
+                    <LogoutButton />
+                    <Button
+                      onPress={resetAllAsyncStorage}
+                      title="Reset Async Storage"
+                    />
+                  </>
+                );
+
+              default:
                 return null;
-
-              return (
-                <TouchableOpacity
-                  onPress={() => handleNavigate("/checkInScreen")}
-                >
-                  <LogMoodButton latestCheckIn={latestCheckIn} />
-                </TouchableOpacity>
-              );
-
-            case "pinnedWidgets":
-              return (
-                <View>
-                  {/* Tracking Tools */}
-                  <Text style={styles.sectionHeader}>Pinned Widgets </Text>
-                  <View style={styles.gridContainer}>
-                    {enabledWidgets.includes("water") && (
-                      <WaterWidget
-                        onRemove={() =>
-                          removeWidget(auth.currentUser?.uid || "", "water")
-                        }
-                      />
-                    )}
-                    {enabledWidgets.includes("mood") && (
-                      <MoodWidget
-                        onRemove={() =>
-                          removeWidget(auth.currentUser?.uid || "", "mood")
-                        }
-                      />
-                    )}
-                    {enabledWidgets.includes("fitness") && (
-                      <FitnessWidget
-                        onRemove={() =>
-                          removeWidget(auth.currentUser?.uid || "", "fitness")
-                        }
-                      />
-                    )}
-                    {enabledWidgets.includes("nutrition") && (
-                      <NutritionWidget
-                        onRemove={() =>
-                          removeWidget(auth.currentUser?.uid || "", "nutrition")
-                        }
-                      />
-                    )}
-                    {enabledWidgets.includes("journal") && (
-                      <JournalWidget
-                        onRemove={() =>
-                          removeWidget(auth.currentUser?.uid || "", "journal")
-                        }
-                      />
-                    )}
-                    {enabledWidgets.includes("mindfulness") && (
-                      <MindfullnessWidget
-                        onRemove={() =>
-                          removeWidget(
-                            auth.currentUser?.uid || "",
-                            "mindfulness"
-                          )
-                        }
-                      />
-                    )}
-                    {enabledWidgets.includes("thoughtReframe") && (
-                      <ThoughtReframeWidget
-                        onRemove={() =>
-                          removeWidget(
-                            auth.currentUser?.uid || "",
-                            "thoughtReframe"
-                          )
-                        }
-                      />
-                    )}
-                    {enabledWidgets.includes("copingBox") && (
-                      <CopingBoxWidget
-                        onRemove={() =>
-                          removeWidget(auth.currentUser?.uid || "", "copingBox")
-                        }
-                      />
-                    )}
-                    {enabledWidgets.includes("cbtTools") && (
-                      <CBTToolsWidget
-                        onRemove={() =>
-                          removeWidget(auth.currentUser?.uid || "", "cbtTools")
-                        }
-                      />
-                    )}
-                  </View>
-                </View>
-              );
-
-            case "actions":
-              return (
-                <>
-                  <DeleteButton />
-                  <LogoutButton />
-                  <Button
-                    onPress={resetAllAsyncStorage}
-                    title="Reset Async Storage"
-                  />
-                </>
-              );
-
-            default:
-              return null;
-          }
-        }}
-      />
+            }
+          }}
+        />
+      </SafeAreaView>
     </>
   );
 }
 
 const { width } = Dimensions.get("window");
-
+const { height } = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: {
-    // padding: 20,
+    flex: 1,
+    width: "100%",
     backgroundColor: "#ffffff",
-    flexGrow: 1,
+    height: height,
+    margin: 0,
+    padding: 0,
   },
   loadingContainer: {
     flex: 1,
@@ -539,13 +556,18 @@ const styles = StyleSheet.create({
   cont: {
     padding: 20,
   },
+
   headerContainer: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#397af8",
+    backgroundColor: "#aaaaaa",
     marginBottom: 20,
-    width: "100%",
+    width: width,
     paddingVertical: 15,
+    margin: 0,
+    padding: 0,
+    height: height,
   },
   heading: {
     color: "white",
@@ -609,31 +631,33 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   greetingBackground: {
-    height: 140,
+    height: 160,
     resizeMode: "cover",
     justifyContent: "center",
     paddingHorizontal: 20,
     marginBottom: 20,
+    width: width,
+    margin: 0,
+    padding: 0,
   },
-  
+
   overlay: {
     backgroundColor: "rgba(255, 255, 255, 0.4)",
     padding: 16,
     borderRadius: 16,
   },
-  
+
   greetingText: {
     fontSize: 24,
     fontWeight: "bold",
     fontFamily: "PatrickHand-Regular",
     color: "#271949",
   },
-  
+
   subGreeting: {
     fontSize: 16,
     color: "#5a4c7c",
     marginTop: 4,
     fontFamily: "Main-font",
   },
-  
 });

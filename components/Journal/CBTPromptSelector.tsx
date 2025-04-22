@@ -1,7 +1,7 @@
 // components/Journal/CBTPromptSelector.tsx
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
-
+import { saveJournalEntry } from '@/utils/journalHelper';
 const promptCategories: Array<keyof typeof prompts> = [
   'Understanding Negative Thought Patterns',
   'Challenging Negative Thoughts',
@@ -43,7 +43,7 @@ export default function CBTPromptSelector() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>📝 What kind of prompt would you like today?</Text>
+      <Text style={styles.title}> What kind of prompt would you like today?</Text>
       {selectedCategory === null ? (
         <FlatList
           data={promptCategories}
@@ -81,23 +81,24 @@ const styles = StyleSheet.create({
   container: {
     marginVertical: 16,
     padding: 16,
-    backgroundColor: '#f4f0f8',
+    backgroundColor: '#fef9f6',
     borderRadius: 12,
   },
   title: {
-    fontSize: 18,
+    fontSize: 19,
     fontWeight: '600',
     color: '#4e2a7e',
     marginBottom: 12,
+    fontFamily: 'PatrickHand-Regular',
   },
   categoryButton: {
     padding: 12,
-    backgroundColor: '#e6dbf5',
+    backgroundColor: '#ffffff',
     borderRadius: 8,
     marginBottom: 8,
   },
   categoryText: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#4e2a7e',
   },
   subtitle: {

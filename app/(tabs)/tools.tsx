@@ -45,7 +45,7 @@ const tools = [
       {
         id: "journal",
         label: "Reflection Journal",
-        route: "/checkInScreen",
+        route: "/journal",
         icon: require("../../assets/images/widgetImages/reflection.png"),
         description: "Write freely or with prompts to reflect on your day.",
       },
