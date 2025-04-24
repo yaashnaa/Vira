@@ -1,6 +1,7 @@
 import { Tabs } from "expo-router";
 import { Icon } from "@rneui/themed";
 import { BottomTabNavigationOptions } from "@react-navigation/bottom-tabs";
+import "react-native-reanimated";
 
 export default function TabLayout() {
   return (
@@ -22,7 +23,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="checkInScreen"
         options={{
-          tabBarLabel: "Journal",
+          tabBarLabel: "Widgets",
           tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <Icon name="pen-tool" type="feather" color={color} size={size} />
           ),

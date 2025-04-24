@@ -30,6 +30,9 @@ import JournalEntrySection from "@/components/Journal/JournalEntrySection";
 import CBTPromptSelector from "@/components/Journal/CBTPromptSelector";
 import LottieView from "lottie-react-native";
 import { saveJournalEntry } from "@/utils/journalHelper";
+import Header from "@/components/header";
+
+
 
 export default function Journal() {
   const { userPreferences } = useUserPreferences();
@@ -47,6 +50,8 @@ export default function Journal() {
   const [entries, setEntries] = useState<{ id: string; [key: string]: any }[]>(
     []
   );
+  const [selectedPrompt, setSelectedPrompt] = useState<string | undefined>();
+
   const [entryType, setEntryType] = useState("free"); // free, prompt, mood
   const shouldShowMoodOption = userPreferences?.moodcCheckInBool;
 
@@ -92,7 +97,7 @@ export default function Journal() {
       return (
         <>
           <CBTJournalingInfo />
-          <CBTPromptSelector />
+          <CBTPromptSelector onPromptSelect={setSelectedPrompt} />
         </>
       );
     }
@@ -101,7 +106,7 @@ export default function Journal() {
 
   return (
     <>
-      <HeaderRNE
+      {/* <HeaderRNE
         containerStyle={{
           backgroundColor: "#f8edeb",
           borderBottomWidth: 0,
@@ -131,7 +136,8 @@ export default function Journal() {
             </TouchableOpacity>
           </View>
         }
-      />
+      /> */}
+      <Header title="Journal" />
 
       <Provider>
         <KeyboardAvoidingView
@@ -192,7 +198,14 @@ export default function Journal() {
               ) : (
                 <>
                   {renderEntryExtras()}
-                  <JournalEntrySection onFocus={scrollToInput} />
+                  <JournalEntrySection
+                    onFocus={scrollToInput}
+                    entryType={entryType as "free" | "prompt" | "mood"}
+                    moodLabel={String(mood ?? "")}
+                    onSave={() => {
+                      fetchEntries();
+                    }}
+                  />
                 </>
               )}
 

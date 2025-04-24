@@ -4,6 +4,7 @@ import {
   getReactNativePersistence,
   getAuth,
 } from "firebase/auth";
+import { GoogleAuthProvider } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -29,7 +30,7 @@ const firebaseConfig = {
 };
 
 
-
+const provider = new GoogleAuthProvider();
 const app = initializeApp(firebaseConfig);
 
 // ✅ Use initializeAuth with AsyncStorage to persist login

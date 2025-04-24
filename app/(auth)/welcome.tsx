@@ -17,18 +17,18 @@ export default function WelcomeScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
-  console.log("Checking auth state...");
+  // console.log("Checking auth state...");
   // ✅ Check if a user is logged in
   useEffect(() => {
-    console.log("Checking auth state...");
-    console.log("Auth State: ", auth.currentUser);
+    // console.log("Checking auth state...");
+    // console.log("Auth State: ", auth.currentUser);
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
 
       setLoading(false);
       if (currentUser) {
-        console.log("User is logged in:", currentUser.email); // Debugging check
-        console.log("User detected:", currentUser);
+        // console.log("User is logged in:", currentUser.email); // Debugging check
+        // console.log("User detected:", currentUser);
 
         router.replace("/dashboard"); // ✅ Redirect to Home if logged in
       }

@@ -25,6 +25,7 @@ import {
   updateDoc,
   doc, limit
 } from "firebase/firestore";
+import Toast from "react-native-toast-message";
 import { useRouter, useFocusEffect } from "expo-router";
 import dayjs from "dayjs";
 import Header from "@/components/header";
@@ -120,11 +121,21 @@ export default function CheckInScreen() {
         await logMood(moodValue);
       }
 
-      Alert.alert("Check-in saved!", "Thanks for checking in 🌿");
+      Toast.show({
+        type: "success",
+        text1: "Check-in saved! 🌿",
+        visibilityTime: 3000,
+      });
+      
       router.replace("/dashboard?refresh=true");
     } catch (err) {
       console.error(err);
-      Alert.alert("Error", "Something went wrong.");
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong",
+        text2: "Unable to save your check-in 😞",
+      });
+      
     }
   };
 

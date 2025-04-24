@@ -25,7 +25,7 @@ export default function OnBoardingScreen() {
     const checkOnboarding = async () => {
       try {
         const onboardingComplete = await isOnboardingComplete();
-        console.log("📦 Onboarding complete?", onboardingComplete);
+        // console.log("📦 Onboarding complete?", onboardingComplete);
 
         if (onboardingComplete) {
           router.replace("/(auth)/welcome");
@@ -46,7 +46,7 @@ export default function OnBoardingScreen() {
   const handleFinishOnboarding = async () => {
     try {
       await markOnboardingComplete();
-      console.log("✅ Onboarding marked complete");
+      // console.log("✅ Onboarding marked complete");
       router.replace("/(auth)/signup");
     } catch (error) {
       console.error("❌ Error saving onboarding status:", error);

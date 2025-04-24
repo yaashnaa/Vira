@@ -75,10 +75,10 @@ const tools = [
     items: [
       {
         id: "mood",
-        label: "Mood Tracker",
-        route: "/moodTrackerScreen",
+        label: "Insights",
+        route: "/mood",
         icon: require("../../assets/images/widgetImages/mood.png"),
-        description: "Track how you’re feeling each day and see patterns.",
+        description: "Discover patterns in how you feel and grow with awareness.",
       },
       {
         id: "fitness",

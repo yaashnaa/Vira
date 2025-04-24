@@ -13,7 +13,7 @@ import {
 
 } from "react-native";
 import { Button, Card, Icon } from "react-native-paper";
-
+import Toast from "react-native-toast-message";
 import { db, auth } from "@/config/firebaseConfig";
 import { addDoc, collection } from "firebase/firestore";
 import { useRouter } from "expo-router";
@@ -44,11 +44,20 @@ export default function ManualThoughtReframeScreen() {
       setContraryEvidence("");
       setReframedThought("");
 
-      alert("Thought Reframe Saved!");
+      Toast.show({
+        type: "success",
+        text1: "✨ Thought Reframe saved!",
+        text2: "Your reframed thought has been safely recorded 💖" ,
+        position: "bottom",
+      });
       router.replace("/dashboard");
     } catch (error) {
       console.error("Error saving thought reframe:", error);
-      alert("Failed to save. Please try again.");
+      Toast.show({
+        type: "error",
+        text1: "Error saving thought reframe",
+        text2: "Please try again later.",
+      });
     }
   };
 

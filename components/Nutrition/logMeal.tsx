@@ -22,7 +22,7 @@ import { uploadImageAsync } from "@/utils/uploadImage";
 import { fetchNutritionData } from "@/utils/api/fetchNutritionData";
 import { auth, db } from "@/config/firebaseConfig";
 import { collection, doc, setDoc, serverTimestamp } from "firebase/firestore";
-
+import Toast from "react-native-toast-message";
 const mealOptions = [
   "Breakfast",
   "Lunch",
@@ -135,11 +135,21 @@ export default function LogMealCardModal({ onLog }: LogMealCardModalProps) {
       });
 
       onLog({ nutrition, mood, name: mealDescription });
-      alert("Meal logged successfully!");
+     Toast.show({
+        type: "success",
+        text1: "Meal logged! 🍽️",
+        text2: "Your meal has been successfully logged.",
+        position: "bottom",
+      });
       resetForm();
     } catch (err) {
       console.error("❌ Error logging meal:", err);
-      alert("Something went wrong while logging your meal. Please try again.");
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong",
+        text2: "Failed to save your meal log",
+        position: "bottom",
+      });
     } finally {
       setLoading(false);
     }

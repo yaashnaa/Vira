@@ -49,18 +49,18 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    backgroundColor: "#f3e8ff",
+    backgroundColor: "#FAE1DD",
     padding: 12,
     borderRadius: 10,
   },
   title: {
     fontFamily: "PatrickHand-Regular",
     fontSize: 16,
-    color: "#6a4c93",
+    color: "#301101",
   },
   content: {
     padding: 12,
-    backgroundColor: "#f9f5ff",
+    backgroundColor: "#FAE1DD",
     borderRadius: 10,
     marginTop: 8,
   },

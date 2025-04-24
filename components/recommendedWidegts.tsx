@@ -115,10 +115,10 @@ export default function RecommendedWidgetsBanner({
     )
     .filter((widget): widget is typeof recommendedWidgets[0] => widget !== undefined);
 
-  console.log("📦 Recommended left:", prioritizedWidgets.length);
-  console.log("📦 Recommended widgets:", prioritizedWidgets);
-  console.log("🧩 Enabled widgets:", enabledWidgets);
-  console.log("🧠 Sorted candidates:", sortedWidgets);
+  // console.log("📦 Recommended left:", prioritizedWidgets.length);
+  // console.log("📦 Recommended widgets:", prioritizedWidgets);
+  // console.log("🧩 Enabled widgets:", enabledWidgets);
+  // console.log("🧠 Sorted candidates:", sortedWidgets);
   
   if (prioritizedWidgets.length === 0) return null;
 

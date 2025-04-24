@@ -6,7 +6,6 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
-  Alert,
 } from "react-native";
 import { Card, Button, Divider } from "react-native-paper";
 import Collapsible from "react-native-collapsible";

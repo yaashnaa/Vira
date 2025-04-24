@@ -69,13 +69,30 @@ const handleBackPress = () => {
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View style={styles.entryCard}>
-              <Text style={styles.entryTitle}>{item.title}</Text>
-              <Text style={styles.entryBody}>{item.body}</Text>
+              <Text style={styles.entryTitle}>
+                {item.entryType === "prompt"
+                  ? "🧠 Prompt-Based Entry"
+                  : item.entryType === "mood"
+                  ? "💬 Mood-Based Entry"
+                  : "✍️ Free Write"}
+              </Text>
+              {item.prompt && (
+                <Text style={styles.entryMeta}>
+                  <Text style={{ fontWeight: "bold" }}>Prompt:</Text> {item.prompt}
+                </Text>
+              )}
+              <Text style={styles.entryBody}>{item.entryText}</Text>
+              {item.mood && (
+                <Text style={styles.entryMeta}>
+                  <Text style={{ fontWeight: "bold" }}>Mood:</Text> {item.mood}
+                </Text>
+              )}
               <Text style={styles.entryMeta}>
-                Tags: {item.tags?.join(", ")} 
+                <Text style={{ fontWeight: "bold" }}>Date:</Text> {item.date}
               </Text>
             </View>
           )}
+          
         />
       </View>
     </View>
@@ -102,13 +119,14 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   entryTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 14,
+    fontFamily: "PatrickHand-Regular",
+    // fontWeight: "bold",
     color: "#000000",
     marginBottom: 4,
   },
   entryBody: {
-    fontSize: 14,
+    fontSize: 16,
     color: "#555",
     marginBottom: 8,
   },

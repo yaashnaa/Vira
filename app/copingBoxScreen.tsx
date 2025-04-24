@@ -156,10 +156,11 @@ export default function CopingSuggestionsScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <>
+      <Header title="Explore Coping Strategies" />
 
       <ScrollView style={styles.container}>
-        <Text style={styles.header}>Explore Coping Strategies</Text>
+        {/* <Text style={styles.header}>Explore Coping Strategies</Text> */}
 
         <View style={styles.tipCard}>
           <Button mode="contained" icon="shuffle" onPress={generateRandomTip}>
@@ -180,33 +181,33 @@ export default function CopingSuggestionsScreen() {
                     }
                   </Text>
                   {/* {copingCategories.find((c) => c.key === currentTip.category)
-                    ?.resourceLink && (
-                    <Button
-                      icon="play-circle"
-                      mode="text"
-                      onPress={() =>
-                        Linking.openURL(
-                          copingCategories.find(
-                            (c) => c.key === currentTip.category
-                          )?.resourceLink!
-                        )
-                      }
-                      textColor="#865dff"
-                      style={{ marginTop: 8 }}
-                    >
-                      Learn More
-                    </Button>
-                  )} */}
+              ?.resourceLink && (
+              <Button
+                icon="play-circle"
+                mode="text"
+                onPress={() =>
+                  Linking.openURL(
+                    copingCategories.find(
+                      (c) => c.key === currentTip.category
+                    )?.resourceLink!
+                  )
+                }
+                textColor="#865dff"
+                style={{ marginTop: 8 }}
+              >
+                Learn More
+              </Button>
+            )} */}
                   {/* <Button
-                    icon="plus"
-                    mode="outlined"
-                    onPress={() =>
-                      saveToBox(currentTip.category, currentTip.tip)
-                    }
-                    style={{ marginTop: 8 }}
-                  >
-                    Add to My Box
-                  </Button> */}
+              icon="plus"
+              mode="outlined"
+              onPress={() =>
+                saveToBox(currentTip.category, currentTip.tip)
+              }
+              style={{ marginTop: 8 }}
+            >
+              Add to My Box
+            </Button> */}
                 </Card.Content>
               </Card>
             </Animated.View>
@@ -240,43 +241,43 @@ export default function CopingSuggestionsScreen() {
         ))}
 
         {/* <Card style={styles.resourceHubCard}>
-          <Card.Content>
-            <Text style={styles.title}>More Resources</Text>
-            <Button
-              icon="file-download"
-              mode="text"
-              onPress={() =>
-                Linking.openURL("https://feelingswheel.com/FeelingsWheel.pdf")
-              }
-              textColor="#865dff"
-            >
-              Download Emotion Wheel PDF
-            </Button>
-            <Button
-              mode="text"
-              icon="open-in-new"
-              onPress={() =>
-                Linking.openURL("https://www.mentalhealthamerica.net")
-              }
-              textColor="#865dff"
-            >
-              Mental Health America
-            </Button>
-            <Button
-              mode="text"
-              icon="open-in-new"
-              onPress={() => Linking.openURL("https://insighttimer.com")}
-              textColor="#865dff"
-            >
-              Insight Timer – Free meditations
-            </Button>
-          </Card.Content>
-        </Card> */}
+    <Card.Content>
+      <Text style={styles.title}>More Resources</Text>
+      <Button
+        icon="file-download"
+        mode="text"
+        onPress={() =>
+          Linking.openURL("https://feelingswheel.com/FeelingsWheel.pdf")
+        }
+        textColor="#865dff"
+      >
+        Download Emotion Wheel PDF
+      </Button>
+      <Button
+        mode="text"
+        icon="open-in-new"
+        onPress={() =>
+          Linking.openURL("https://www.mentalhealthamerica.net")
+        }
+        textColor="#865dff"
+      >
+        Mental Health America
+      </Button>
+      <Button
+        mode="text"
+        icon="open-in-new"
+        onPress={() => Linking.openURL("https://insighttimer.com")}
+        textColor="#865dff"
+      >
+        Insight Timer – Free meditations
+      </Button>
+    </Card.Content>
+  </Card> */}
 
         {/* <Divider style={styles.divider} /> */}
         <CrisisPlanSection />
       </ScrollView>
-    </SafeAreaView>
+    </>
   );
 }
 

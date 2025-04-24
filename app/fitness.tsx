@@ -48,7 +48,7 @@
       const health = userPreferences?.physicalHealth?.toLowerCase();
       const activity = userPreferences?.activityLevel?.toLowerCase();
       const goal = userPreferences?.primaryGoals?.[0]?.toLowerCase() || "";
-      console.log(mood)
+      // console.log(mood)
       if (mood !== null) {
         if (mood >= 75) {
           setType("stretching");

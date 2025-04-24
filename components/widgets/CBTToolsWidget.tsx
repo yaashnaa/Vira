@@ -17,7 +17,6 @@ export default function CBTToolsWidget({
       )}
       <WidgetCard
         title="Thought Reframer"
-        subtitle="Reframe unhelpful thoughts"
         imageSource={require("../../assets/images/widgetImages/notebook.png")}
         onPress={() => router.push("/thoughtReframeScreen")}
       />

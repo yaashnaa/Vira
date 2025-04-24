@@ -114,7 +114,7 @@ export default function CombinedCheckInCard() {
       const q = query(
         collection(db, "users", uid, "checkins"),
         orderBy("timestamp", "desc"),
-        limit(5) // You can adjust the number if needed
+        limit(5) 
       );
   
       const snapshot = await getDocs(q);
@@ -249,7 +249,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 5,
     width: width * 0.9,
-    alignSelf: "center",
+    alignContent: "center",
+    margin:"auto"
   },
   headerRow: {
     flexDirection: "row",

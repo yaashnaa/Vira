@@ -61,7 +61,7 @@ export async function deleteAccount() {
   } catch (error: any) {
     console.error("Error deleting account:", error.message);
 
-    // Some errors like recent login required
+
     if (error.code === "auth/requires-recent-login") {
       throw new Error("Please re-authenticate and try again.");
     }
@@ -70,4 +70,4 @@ export async function deleteAccount() {
   }
 }
 
-export { auth }; // convenient for testing or reusing
+export { auth }; 
