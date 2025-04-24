@@ -12,6 +12,12 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
+        name="index"
+        options={{
+          href: null, // 🚫 this will hide it from the tab bar
+        }}
+      />
+      <Tabs.Screen
         name="dashboard"
         options={{
           tabBarLabel: "Home",
@@ -20,24 +26,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="checkInScreen"
-        options={{
-          tabBarLabel: "Widgets",
-          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
-            <Icon name="pen-tool" type="feather" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="resources"
-        options={{
-          tabBarLabel: "Resources",
-          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
-            <Icon name="book" type="feather" color={color} size={size} />
-          ),
-        }}
-      />
+
       <Tabs.Screen
         name="community"
         options={{
@@ -53,6 +42,15 @@ export default function TabLayout() {
           tabBarLabel: "Settings",
           tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <Icon name="settings" type="feather" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="widgets"
+        options={{
+          tabBarLabel: "Widgets",
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <Icon name="grid" type="feather" color={color} size={size} />
           ),
         }}
       />

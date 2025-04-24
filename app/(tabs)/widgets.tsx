@@ -13,6 +13,7 @@ import { Card, IconButton } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { RelativePathString, ExternalPathString } from "expo-router";
 import { auth, db } from "@/config/firebaseConfig";
+import { useFocusEffect } from "expo-router";
 import {
   addWidget,
   removeWidget as removeWidgetFromStorage,
@@ -109,16 +110,17 @@ export default function ToolsScreen() {
   const router = useRouter();
   const [pinned, setPinned] = useState<string[]>([]);
 
-  useEffect(() => {
-    const fetchPinned = async () => {
-      const uid = auth.currentUser?.uid;
-      if (!uid) return;
-      const result = await getEnabledWidgets(uid);
-      setPinned(result);
-    };
-    fetchPinned();
-  }, []);
-
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchPinned = async () => {
+        const uid = auth.currentUser?.uid;
+        if (!uid) return;
+        const result = await getEnabledWidgets(uid);
+        setPinned(result);
+      };
+      fetchPinned();
+    }, [])
+  );
   const togglePin = async (id: string) => {
     const uid = auth.currentUser?.uid;
     if (!uid) return;

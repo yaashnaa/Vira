@@ -371,96 +371,121 @@ export default function Dashboard() {
                   );
 
                 case "pinnedWidgets":
+                  const hasNoPinned = enabledWidgets.length === 0;
+
                   return (
                     <View style={{ marginBottom: 50 }}>
-                      {/* Tracking Tools */}
-                      <Text style={styles.sectionHeader}>Pinned Widgets </Text>
-                      <View style={styles.gridContainer}>
-                        {enabledWidgets.includes("water") && (
-                          <WaterWidget
-                            onRemove={() =>
-                              removeWidget(auth.currentUser?.uid || "", "water")
-                            }
-                          />
-                        )}
-                        {enabledWidgets.includes("mood") && (
-                          <MoodWidget
-                            onRemove={() =>
-                              removeWidget(auth.currentUser?.uid || "", "mood")
-                            }
-                          />
-                        )}
-                        {enabledWidgets.includes("fitness") && (
-                          <FitnessWidget
-                            onRemove={() =>
-                              removeWidget(
-                                auth.currentUser?.uid || "",
-                                "fitness"
-                              )
-                            }
-                          />
-                        )}
-                        {enabledWidgets.includes("nutrition") && (
-                          <NutritionWidget
-                            onRemove={() =>
-                              removeWidget(
-                                auth.currentUser?.uid || "",
-                                "nutrition"
-                              )
-                            }
-                          />
-                        )}
-                        {enabledWidgets.includes("journal") && (
-                          <JournalWidget
-                            onRemove={() =>
-                              removeWidget(
-                                auth.currentUser?.uid || "",
-                                "journal"
-                              )
-                            }
-                          />
-                        )}
-                        {enabledWidgets.includes("mindfulness") && (
-                          <MindfullnessWidget
-                            onRemove={() =>
-                              removeWidget(
-                                auth.currentUser?.uid || "",
-                                "mindfulness"
-                              )
-                            }
-                          />
-                        )}
-                        {enabledWidgets.includes("thoughtReframe") && (
-                          <ThoughtReframeWidget
-                            onRemove={() =>
-                              removeWidget(
-                                auth.currentUser?.uid || "",
-                                "thoughtReframe"
-                              )
-                            }
-                          />
-                        )}
-                        {enabledWidgets.includes("copingBox") && (
-                          <CopingBoxWidget
-                            onRemove={() =>
-                              removeWidget(
-                                auth.currentUser?.uid || "",
-                                "copingBox"
-                              )
-                            }
-                          />
-                        )}
-                        {enabledWidgets.includes("cbtTools") && (
-                          <CBTToolsWidget
-                            onRemove={() =>
-                              removeWidget(
-                                auth.currentUser?.uid || "",
-                                "cbtTools"
-                              )
-                            }
-                          />
-                        )}
-                      </View>
+                      {hasNoPinned ? (
+                        <RecommendedWidgetsBanner />
+                      ) : (
+                        // <View style={styles.recommendationCard}>
+                        //   <Text style={styles.recommendationTitle}>
+                        //     ⭐ Try Adding a Widget
+                        //   </Text>
+                        //   <Text style={styles.recommendationText}>
+                        //     Tap the "+" icon to customize your dashboard with
+                        //     helpful tools like Mood Tracker, Journal, and Coping
+                        //     Box.
+                        //   </Text>
+                        // </View>
+                        <>
+                        <Text style={styles.sectionHeader}>
+                          Your Pinned Widgets
+                        </Text>
+                          <View style={styles.gridContainer}>
+                            {enabledWidgets.includes("water") && (
+                              <WaterWidget
+                                onRemove={() =>
+                                  removeWidget(
+                                    auth.currentUser?.uid || "",
+                                    "water"
+                                  )
+                                }
+                              />
+                            )}
+                            {enabledWidgets.includes("mood") && (
+                              <MoodWidget
+                                onRemove={() =>
+                                  removeWidget(
+                                    auth.currentUser?.uid || "",
+                                    "mood"
+                                  )
+                                }
+                              />
+                            )}
+                            {enabledWidgets.includes("fitness") && (
+                              <FitnessWidget
+                                onRemove={() =>
+                                  removeWidget(
+                                    auth.currentUser?.uid || "",
+                                    "fitness"
+                                  )
+                                }
+                              />
+                            )}
+                            {enabledWidgets.includes("nutrition") && (
+                              <NutritionWidget
+                                onRemove={() =>
+                                  removeWidget(
+                                    auth.currentUser?.uid || "",
+                                    "nutrition"
+                                  )
+                                }
+                              />
+                            )}
+                            {enabledWidgets.includes("journal") && (
+                              <JournalWidget
+                                onRemove={() =>
+                                  removeWidget(
+                                    auth.currentUser?.uid || "",
+                                    "journal"
+                                  )
+                                }
+                              />
+                            )}
+                            {enabledWidgets.includes("mindfulness") && (
+                              <MindfullnessWidget
+                                onRemove={() =>
+                                  removeWidget(
+                                    auth.currentUser?.uid || "",
+                                    "mindfulness"
+                                  )
+                                }
+                              />
+                            )}
+                            {enabledWidgets.includes("thoughtReframe") && (
+                              <ThoughtReframeWidget
+                                onRemove={() =>
+                                  removeWidget(
+                                    auth.currentUser?.uid || "",
+                                    "thoughtReframe"
+                                  )
+                                }
+                              />
+                            )}
+                            {enabledWidgets.includes("copingBox") && (
+                              <CopingBoxWidget
+                                onRemove={() =>
+                                  removeWidget(
+                                    auth.currentUser?.uid || "",
+                                    "copingBox"
+                                  )
+                                }
+                              />
+                            )}
+                            {enabledWidgets.includes("cbtTools") && (
+                              <CBTToolsWidget
+                                onRemove={() =>
+                                  removeWidget(
+                                    auth.currentUser?.uid || "",
+                                    "cbtTools"
+                                  )
+                                }
+                              />
+                            )}
+                          </View>
+                        </>
+                      )}
                     </View>
                   );
 
@@ -555,7 +580,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 1,
   },
-  checkinCard:{
+  checkinCard: {
     backgroundColor: "transparent",
     borderRadius: 12,
     padding: 16,
@@ -581,6 +606,7 @@ const styles = StyleSheet.create({
     fontFamily: "Patrickhand-regular",
     fontWeight: "600",
     marginBottom: 8,
+
   },
   sectionHeader: {
     fontSize: 26,
@@ -612,6 +638,25 @@ const styles = StyleSheet.create({
     padding: 0,
     height: height,
   },
+  recommendationCard: {
+    backgroundColor: "#f8f0ff",
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 12,
+  },
+  recommendationTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#865dff",
+    marginBottom: 4,
+    fontFamily: "Main-font",
+  },
+  recommendationText: {
+    fontSize: 14,
+    color: "#444",
+    fontFamily: "Main-font",
+  },
+
   heading: {
     color: "white",
     fontSize: 22,

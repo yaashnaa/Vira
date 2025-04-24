@@ -21,7 +21,7 @@ const JournalWidget: React.FC<JournalWidgetProps> = ({ onRemove }) => {
     )}
     <WidgetCard
       title="Journal"
-      imageSource={require('../../assets/images/widgetImages/notebook.png')}
+      imageSource={require('../../assets/images/widgetImages/reflection.png')}
       onPress={handlePress}
     />
   </View>
@@ -34,8 +34,8 @@ const styles = StyleSheet.create({
   },
   removeIcon: {
     position: "absolute",
-    top: 25,
-    right: 19,
+    top: 18,
+    left: 100,
     zIndex: 1,
   },
 });

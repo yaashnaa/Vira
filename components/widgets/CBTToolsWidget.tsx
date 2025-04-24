@@ -14,7 +14,7 @@ export default function CBTToolsWidget({
         <Pressable onPress={onRemove} style={styles.removeIcon}>
           <Icon name="minus-circle" type="feather" color="#c13e6a" size={20} />
         </Pressable>
-      )}
+      )} 
       <WidgetCard
         title="Thought Reframer"
         imageSource={require("../../assets/images/widgetImages/notebook.png")}
@@ -29,8 +29,8 @@ const styles = StyleSheet.create({
   },
   removeIcon: {
     position: "absolute",
-    top: 20,
-    right: 20,
+    top: 18,
+    left: 100,
     zIndex: 1,
   },
 });

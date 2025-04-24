@@ -26,7 +26,7 @@ export default {
     },
     plugins: [
       "expo-router",
-      "@react-native-firebase/app",
+      // "@react-native-firebase/app",
       [
         "expo-splash-screen",
         {
@@ -40,7 +40,7 @@ export default {
     experiments: {
       typedRoutes: true,
     },
-
+    devClient: false,
     extra: {
       eas: {
         projectId: "edd0899f-b5dc-488c-9013-81fe43cf72fc",
