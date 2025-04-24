@@ -27,18 +27,18 @@ export default function CBTJournalingInfo() {
   };
 
   const prompts = [
-    "1. **Thought recording**: Note situations that trigger strong emotions.",
-    "2. **Identifying distortions**: Spot “all-or-nothing,” “catastrophizing,” etc.",
-    "3. **Challenging thoughts**: Weigh evidence for/against the thought.",
-    "4. **Alternative perspectives**: What’s a more balanced interpretation?",
-    "5. **Behavior tracking**: Monitor how you reacted and what you did next.",
+    "1. Thought recording: Note situations that trigger strong emotions.",
+    "2. Identifying distortions: Spot “all-or-nothing,” “catastrophizing,” etc.",
+    "3. Challenging thoughts: Weigh evidence for/against the thought.",
+    "4. Alternative perspectives: What’s a more balanced interpretation?",
+    "5. Behavior tracking: Monitor how you reacted and what you did next.",
   ];
 
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={toggle} style={styles.headerRow}>
         <Text style={styles.headerText}>What is CBT Journaling?</Text>
-        <Icon source={expanded ? "chevron-up" : "chevron-down"} size={24} />
+        <Icon source={expanded ? "chevron-up" : "chevron-down"} size={24} color="#88" />
       </TouchableOpacity>
 
       {expanded && (
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#e6dbf5",
   },
   headerText: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: "600",
     color: "#4e2a7e",
     flex: 1,
@@ -97,6 +97,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
     marginBottom: 12,
+    marginTop: 10,
     fontFamily: "Main-font",
   },
   subHeader: {

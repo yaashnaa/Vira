@@ -26,7 +26,7 @@ export default {
     },
     plugins: [
       "expo-router",
-      "@react-native-firebase/app",
+      // "@react-native-firebase/app",
       [
         "expo-splash-screen",
         {
@@ -40,8 +40,11 @@ export default {
     experiments: {
       typedRoutes: true,
     },
-
+    devClient: false,
     extra: {
+      eas: {
+        projectId: "edd0899f-b5dc-488c-9013-81fe43cf72fc",
+      },
       FIREBASE_API_KEY: process.env.FIREBASE_API_KEY,
       FIREBASE_AUTH_DOMAIN: process.env.FIREBASE_AUTH_DOMAIN,
       FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,
@@ -54,6 +57,8 @@ export default {
       NUTRITIONIX_API_KEY: process.env.NUTRITIONIX_API_KEY,
       X_API_KEY: process.env.X_API_KEY,
       GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+      EXPO_PUSH_NOTIFICATION_KEY: process.env.EXPO_PUSH_NOTIFICATION_KEY,
+      expoClientId: "379116480076-fm59utduk6k817ojgvtrhsqjh9m3cner.apps.googleusercontent.com"
     },
   },
 };

@@ -12,20 +12,23 @@ import { Button, Divider, Card } from "react-native-paper";
 import { db, auth } from "@/config/firebaseConfig";
 import { addDoc, collection } from "firebase/firestore";
 import dayjs from "dayjs";
-
+import Toast from "react-native-toast-message";
 interface JournalEntrySectionProps {
   moodLabel?: string;
   selectedPrompt?: string;
   onSave?: () => void;
   onFocus?: () => void;
+  entryType: "free" | "prompt" | "mood"; // ✅ add this
 }
 
-export default function JournalEntrySection( {
+export default function JournalEntrySection({
   moodLabel,
   selectedPrompt,
   onSave,
-  onFocus
+  onFocus,
+  entryType, // ✅ include this
 }: JournalEntrySectionProps) {
+
   const [entryText, setEntryText] = useState("");
 
   const today = dayjs().format("YYYY-MM-DD");
@@ -40,15 +43,28 @@ export default function JournalEntrySection( {
         mood: moodLabel || null,
         date: today,
         prompt: selectedPrompt || null,
+        entryType, // ✅ store the type of journaling used
         timestamp: new Date(),
       });
+      
 
       setEntryText("");
-      Alert.alert("Saved", "Your journal entry has been saved.");
+      Toast.show({
+        type: "success",
+        text1: "✨ Journal saved!",
+        text2: "Your thoughts have been safely recorded 💖",
+        position: "bottom",
+      });
+      
       onSave?.();
     } catch (error) {
       console.error("Error saving journal entry:", error);
-      Alert.alert("Error", "Failed to save entry.");
+      Toast.show({
+        type: "error",
+        text1: "Error saving journal entry",
+        text2: "Please try again later.",
+        position: "bottom",
+      });
     }
   };
 
@@ -92,7 +108,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "#fef9f6",
     borderRadius: 12,
-    marginBottom: 30,
+    // marginBottom: 30,
   },
   promptSection: {
     marginBottom: 16,
@@ -116,7 +132,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ddd",
   },
   label: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "500",
     color: "#333",
     marginBottom: 8,
@@ -134,7 +150,7 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 16,
-    backgroundColor: "#f8f6f4",
+    backgroundColor: "#fef9f6",
     alignSelf: "center",
   },
 });

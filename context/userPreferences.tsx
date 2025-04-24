@@ -47,6 +47,10 @@ export interface UserPreferences {
   contentAvoidance: string;
   copingToolsConsent: string;
   userNotes: string;
+  notificationTime?: string; // Optional field for notification time
+  notificationSound?: string; // Optional field for notification sound
+  encouragementNotifications?: string; // Optional field for encouragement notifications
+
 }
 
 export const DEFAULT_PREFS: UserPreferences = {
@@ -113,7 +117,7 @@ export const UserPreferencesProvider = ({
       if (docSnap.exists()) {
         const data = docSnap.data();
         setUserPreferences({ ...DEFAULT_PREFS, ...(data as UserPreferences) });
-        console.log("🔄 User preferences updated from Firestore");
+        // console.log("🔄 User preferences updated from Firestore");
       } else {
         console.warn("⚠️ Preferences document does not exist for user:", uid);
       }
@@ -130,10 +134,10 @@ export const UserPreferencesProvider = ({
 
       const snapshot = await getDoc(docRef);
       if (snapshot.exists()) {
-        console.log(
-          "Fetched user preferences from Firestore:",
-          snapshot.data()
-        );
+        // console.log(
+        //   "Fetched user preferences from Firestore:",
+        //   snapshot.data()
+        // );
         return snapshot.data() as UserPreferences;
       }
       return null;
@@ -160,7 +164,7 @@ export const UserPreferencesProvider = ({
         if (prefs) {
           setUserPreferences({ ...DEFAULT_PREFS, ...prefs });
           setHasLoaded(true);
-          console.log("Loaded user preferences from Firestore:", prefs);
+          // console.log("Loaded user preferences from Firestore:", prefs);
         } else {
           setHasLoaded(true);
           console.log("No saved preferences found. Using defaults.");

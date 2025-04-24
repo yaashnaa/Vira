@@ -19,7 +19,7 @@ import { useUserPreferences } from "@/context/userPreferences";
 import { getMealInsights } from "@/utils/getMealInsights";
 import { Button } from "react-native-paper";
 import { useMealLog } from "@/context/mealLogContext";
-
+import Toast from "react-native-toast-message";
 interface Meal {
   id: string;
   name: string;
@@ -70,10 +70,20 @@ const ViewLoggedMeals: React.FC = () => {
       setMeals((prev) => prev.filter((meal) => meal.id !== mealId));
       setPreviousMeals((prev) => prev.filter((meal) => meal.id !== mealId));
       triggerRefresh(); // 🟣 trigger re-fetch in overview
-      Alert.alert("Meal deleted successfully");
+      Toast.show({
+        type: "success",
+        text1: "Meal deleted!",
+        text2: "Your meal has been removed from the log.",
+        position: "bottom",
+      });
     } catch (err) {
       console.error("Failed to delete meal:", err);
-      Alert.alert("Error deleting meal");
+      Toast.show({
+        type: "error",
+        text1: "Error deleting meal",
+        text2: "Please try again later.",
+        position: "bottom",
+      });
     }
   };
 

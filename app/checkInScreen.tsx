@@ -25,6 +25,7 @@ import {
   updateDoc,
   doc, limit
 } from "firebase/firestore";
+import Toast from "react-native-toast-message";
 import { useRouter, useFocusEffect } from "expo-router";
 import dayjs from "dayjs";
 import Header from "@/components/header";
@@ -120,11 +121,21 @@ export default function CheckInScreen() {
         await logMood(moodValue);
       }
 
-      Alert.alert("Check-in saved!", "Thanks for checking in 🌿");
+      Toast.show({
+        type: "success",
+        text1: "Check-in saved! 🌿",
+        visibilityTime: 3000,
+      });
+      
       router.replace("/dashboard?refresh=true");
     } catch (err) {
       console.error(err);
-      Alert.alert("Error", "Something went wrong.");
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong",
+        text2: "Unable to save your check-in 😞",
+      });
+      
     }
   };
 
@@ -137,7 +148,7 @@ export default function CheckInScreen() {
           style={{ flex: 1 }}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <ScrollView style={styles.container}>
+            <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignItems: "center", margin: "auto" }}>
               <Card style={styles.card} elevation={0} mode="elevated">
                 <Card.Content>
                   <Text style={styles.sectionTitle}>Mood Check-In</Text>
@@ -159,7 +170,7 @@ export default function CheckInScreen() {
 
                   <Divider style={styles.divider} />
 
-                  <Button mode="contained" icon="check" onPress={handleSaveCheckIn} style={styles.button}>
+                  <Button mode="contained" icon="check" onPress={handleSaveCheckIn} textColor="#3b0f04" style={styles.button}>
                     {checkInId ? "Update Check-In" : "Complete Check-In"}
                   </Button>
                 </Card.Content>
@@ -178,6 +189,9 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     width: "100%",
+    // alignItems: "center",
+    // justifyContent: "center",
+    // margin:"auto",
   },
   card: {
     backgroundColor: "#ffffff",

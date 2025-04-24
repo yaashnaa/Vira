@@ -13,6 +13,7 @@ import { Card, IconButton } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { RelativePathString, ExternalPathString } from "expo-router";
 import { auth, db } from "@/config/firebaseConfig";
+import { useFocusEffect } from "expo-router";
 import {
   addWidget,
   removeWidget as removeWidgetFromStorage,
@@ -45,7 +46,7 @@ const tools = [
       {
         id: "journal",
         label: "Reflection Journal",
-        route: "/checkInScreen",
+        route: "/journal",
         icon: require("../../assets/images/widgetImages/reflection.png"),
         description: "Write freely or with prompts to reflect on your day.",
       },
@@ -75,10 +76,10 @@ const tools = [
     items: [
       {
         id: "mood",
-        label: "Mood Tracker",
-        route: "/moodTrackerScreen",
+        label: "Insights",
+        route: "/mood",
         icon: require("../../assets/images/widgetImages/mood.png"),
-        description: "Track how you’re feeling each day and see patterns.",
+        description: "Discover patterns in how you feel and grow with awareness.",
       },
       {
         id: "fitness",
@@ -109,16 +110,17 @@ export default function ToolsScreen() {
   const router = useRouter();
   const [pinned, setPinned] = useState<string[]>([]);
 
-  useEffect(() => {
-    const fetchPinned = async () => {
-      const uid = auth.currentUser?.uid;
-      if (!uid) return;
-      const result = await getEnabledWidgets(uid);
-      setPinned(result);
-    };
-    fetchPinned();
-  }, []);
-
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchPinned = async () => {
+        const uid = auth.currentUser?.uid;
+        if (!uid) return;
+        const result = await getEnabledWidgets(uid);
+        setPinned(result);
+      };
+      fetchPinned();
+    }, [])
+  );
   const togglePin = async (id: string) => {
     const uid = auth.currentUser?.uid;
     if (!uid) return;

@@ -6,15 +6,29 @@ import { useRouter } from "expo-router";
 interface CustomHeaderProps {
   title: string;
   showSettings?: boolean;
-  backPath?: string;
+  useBackFunction?: boolean; // <- optional toggle for router.back()
+  backPath?: string; // fallback if useBackFunction is false
 }
 
 export default function Header({
   title,
   showSettings = true,
+  useBackFunction = true,
   backPath = "/dashboard",
 }: CustomHeaderProps) {
   const router = useRouter();
+
+  const handleBack = () => {
+    if (useBackFunction) {
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace(backPath as any);
+      }
+    } else {
+      router.replace(backPath as any);
+    }
+  };
 
   return (
     <HeaderRNE
@@ -24,9 +38,9 @@ export default function Header({
           style={{
             justifyContent: "center",
             alignItems: "center",
-            height: "100%",
+            height: 30,
           }}
-          onPress={() => router.replace(backPath as any)}
+          onPress={handleBack}
         >
           <Icon name="arrow-back" size={25} type="ionicon" color="#271949" />
         </TouchableOpacity>
@@ -39,44 +53,18 @@ export default function Header({
         justifyContent: "center",
         alignItems: "center",
       }}
-      rightComponent={
-        showSettings ? (
-          <View>
-            <TouchableOpacity
-              style={{
-                marginLeft: 12,
-                justifyContent: "center",
-                alignItems: "center",
-                height: "100%",
-              }}
-              onPress={() => router.replace("/settings")}
-            >
-              <Icon name="settings" size={25} type="feather" color="#271949" />
-            </TouchableOpacity>
-          </View>
-        ) : undefined
-      }
     />
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#f8edeb",
     borderBottomWidth: 0,
-    paddingBottom: 12,
-    paddingTop: 12,
-    height: 110,
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-    alignContent: "center",
-    flexDirection: "row",
-    margin: "auto",
+    paddingTop: 10,
   },
   title: {
     color: "#271949",
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "bold",
     fontFamily: "PatrickHand-Regular",
   },

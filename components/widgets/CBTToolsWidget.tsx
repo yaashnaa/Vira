@@ -14,12 +14,11 @@ export default function CBTToolsWidget({
         <Pressable onPress={onRemove} style={styles.removeIcon}>
           <Icon name="minus-circle" type="feather" color="#c13e6a" size={20} />
         </Pressable>
-      )}
+      )} 
       <WidgetCard
-        title="Thought Reframer"
-        subtitle="Reframe unhelpful thoughts"
+        title="Thought Log"
         imageSource={require("../../assets/images/widgetImages/notebook.png")}
-        onPress={() => router.push("/thoughtReframeScreen")}
+        onPress={() => router.push("/CBTToolsScreen")}
       />
     </View>
   );
@@ -30,8 +29,8 @@ const styles = StyleSheet.create({
   },
   removeIcon: {
     position: "absolute",
-    top: 20,
-    right: 20,
+    top: 18,
+    left: 100,
     zIndex: 1,
   },
 });

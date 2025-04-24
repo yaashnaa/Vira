@@ -1,74 +1,60 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import { SegmentedButtons } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { Header as HeaderRNE, Icon } from "@rneui/themed";
-
+import Header from "@/components/header";
 import MoodLogger from "@/components/moodLog"; // update the path as needed
 import MoodCalendar from "@/components/moodCalender"; // update the path as needed
-
+import TrendChart from "@/components/trendChart"; // update the path as needed
 export default function Mood() {
-  const [selectedSegment, setSelectedSegment] = useState("log");
+  const [selectedSegment, setSelectedSegment] = useState<
+    "mood" | "sleep" | "energy"
+  >("mood");
   const router = useRouter();
 
-  const handleBackPress = () => {
-    router.replace("/dashboard");
-  };
+ 
 
   return (
     <>
-      <HeaderRNE
-        containerStyle={{
-          backgroundColor: "#f8edeb",
-          borderBottomWidth: 0,
-          paddingTop: 10,
-        }}
-        leftComponent={
-          <TouchableOpacity onPress={handleBackPress}>
-            <Icon name="arrow-back" size={25} type="ionicon" color="#271949" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "MOOD TRACKER",
-          style: {
-            color: "#271949",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "PatrickHand-Regular",
-          },
-        }}
-        rightComponent={
-          <View style={styles.headerRight}>
-            <TouchableOpacity
-              style={{ marginLeft: 12 }}
-              onPress={handleBackPress}
-            >
-              <Icon name="settings" size={25} type="feather" color="#271949" />
-            </TouchableOpacity>
-          </View>
-        }
-      />
-
-      <View style={styles.container}>
+      <Header title="Insights" />
+      <ScrollView contentContainerStyle={[styles.container, { flexGrow: 1 }]}>
+        <MoodCalendar />
         <SegmentedButtons
           value={selectedSegment}
-          onValueChange={setSelectedSegment}
+          onValueChange={(value) =>
+            setSelectedSegment(value as "mood" | "sleep" | "energy")
+          }
           buttons={[
-            { value: "log", label: "Log Mood", icon: "pencil" },
-            { value: "calendar", label: "Mood Calendar", icon: "calendar" },
+            { value: "mood", label: "Mood" },
+            { value: "sleep", label: "Sleep" },
+            { value: "energy", label: "Energy" },
           ]}
+          style={{
+            backgroundColor: "#f4f0ff",
+            borderRadius: 10,
+            marginTop: 20,
+          }}
+          theme={{
+            colors: {
+              secondaryContainer: "#564592", // Active background
+              onSecondaryContainer: "#ffffff", // Active text color
+              surfaceVariant: "#ddd", // Inactive background
+              onSurfaceVariant: "#000000", // Inactive text
+            },
+          }}
         />
 
-        {selectedSegment === "log" && <MoodLogger />}
-        {selectedSegment === "calendar" && <MoodCalendar />}
-      </View>
+        <View style={{ marginTop: 20 }}>
+          <TrendChart metric={selectedSegment} />
+        </View>
+      </ScrollView>
     </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 20,
   },
   headerRight: {

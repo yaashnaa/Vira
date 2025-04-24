@@ -63,11 +63,7 @@ const NutritionWidget: React.FC<NutritionWidgetProps> = ({ onRemove }) => {
       )}
       <WidgetCard
         title="Nutrition"
-        subtitle={
-          topMeal
-            ? `${mealsLogged} meals • Last: ${topMeal}`
-            : `${mealsLogged} meals logged`
-        }
+        
         imageSource={require("../../assets/images/widgetImages/diet.png")}
         onPress={handlePress}
       />
@@ -81,8 +77,8 @@ const styles = StyleSheet.create({
   },
   removeIcon: {
     position: "absolute",
-    top: 16,
-    right: 19,
+    top: 18,
+    left: 100,
     zIndex: 1,
   },
 });

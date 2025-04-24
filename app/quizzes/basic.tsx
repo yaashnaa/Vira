@@ -131,7 +131,7 @@ export default function BasicQuiz() {
 
     updatePreferences(newPrefs);
 
-    console.log("🔁 Updating preferences in context:", newPrefs);
+    // console.log("🔁 Updating preferences in context:", newPrefs);
 
     const currentUser = auth.currentUser;
     if (currentUser) {
@@ -144,7 +144,7 @@ export default function BasicQuiz() {
 
       await markQuizCompletedInFirestore(currentUser.uid);
 
-      console.log("✅ Quiz complete for:", currentUser.uid);
+      // console.log("✅ Quiz complete for:", currentUser.uid);
       router.replace("/dashboard");
     } else {
       console.warn("⚠️ No current user found during quiz submit");

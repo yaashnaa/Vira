@@ -4,11 +4,18 @@ import { useMoodContext } from "../context/moodContext";
 import { Calendar } from "react-native-calendars";
 
 const moodImages = {
-  0: require("../assets/images/mood/vhappy.png"),
-  25: require("../assets/images/mood/happy.png"),
-  50: require("../assets/images/mood/neutral.png"),
-  75: require("../assets/images/mood/sad.png"),
-  100: require("../assets/images/mood/vsad.png"),
+  "Feeling Great": require("../assets/images/mood/vhappy.png"),
+  "Pretty Good": require("../assets/images/mood/happy.png"),
+  "Hanging in There": require("../assets/images/mood/neutral.png"),
+  "Not My Best": require("../assets/images/mood/sad.png"),
+  "Having a Tough Day": require("../assets/images/mood/vsad.png"),
+};
+const moodLabels: Record<number, keyof typeof moodImages> = {
+  0: "Feeling Great",
+  25: "Pretty Good",
+  50: "Hanging in There",
+  75: "Not My Best",
+  100: "Having a Tough Day",
 };
 
 export default function MoodCalendar() {
@@ -44,13 +51,22 @@ export default function MoodCalendar() {
       <Calendar
         markingType={"custom"}
         markedDates={markedDates}
-        dayComponent={({ date, marking }: { date: { day: number }; marking?: { mood?: number } }) => {
+        dayComponent={({
+          date,
+          marking,
+        }: {
+          date: { day: number };
+          marking?: { mood?: number };
+        }) => {
           const mood = marking?.mood;
           return (
             <View style={styles.dayContainer}>
               <Text style={styles.dayText}>{date.day}</Text>
               {mood !== undefined && (
-                <Image source={moodImages[mood as keyof typeof moodImages]} style={styles.moodIcon} />
+                <Image
+                  source={moodImages[moodLabels[mood]]}
+                  style={styles.moodIcon}
+                />
               )}
             </View>
           );

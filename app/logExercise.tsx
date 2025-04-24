@@ -19,6 +19,7 @@ import { auth } from "@/config/firebaseConfig";
 import { saveExerciseLog } from "@/utils/saveExerciseLog";
 import { useMoodContext } from "@/context/moodContext";
 import * as ImagePicker from "expo-image-picker";
+import Toast from "react-native-toast-message";
 const moodOptions = [
   {
     label: "Low Energy",
@@ -69,11 +70,21 @@ export default function LogExercise() {
         moodAfter: selectedMood,
       });
 
-      Alert.alert("Success", "Exercise and mood logged successfully!");
+      Toast.show({
+        type: "success",
+        text1: "Exercise log saved!👏🏻",
+ 
+      });
+      
       setExerciseText("");
       setMoodAfter("Neutral");
     } catch (err) {
-      Alert.alert("Error", "Something went wrong while saving your log.");
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong",
+        text2: "Failed to save your meal log",
+      });
+      
       console.error(err);
     } finally {
       setSubmitting(false);

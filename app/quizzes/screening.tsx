@@ -130,7 +130,7 @@ export default function QuizScreen() {
         { merge: true }
       );
 
-      console.log("✅ Quiz complete for:", currentUser.uid);
+      // console.log("✅ Quiz complete for:", currentUser.uid);
     } else {
       console.error("No current user found.");
     }

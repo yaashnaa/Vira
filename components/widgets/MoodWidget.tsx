@@ -35,8 +35,8 @@ const styles = StyleSheet.create({
   },
   removeIcon: {
     position: "absolute",
-    top: 25,
-    right: 19,
+    top: 18,
+    left: 100,
     zIndex: 1,
   },
 });

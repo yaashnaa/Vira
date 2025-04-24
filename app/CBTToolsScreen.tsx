@@ -15,7 +15,7 @@ import { addDoc, collection } from "firebase/firestore";
 import { db, auth } from "@/config/firebaseConfig";
 import { useRouter } from "expo-router";
 import CBTExplanationSection from "@/components/CBTExplanation";
-
+import Toast from "react-native-toast-message";
 export default function CBTToolsScreen() {
   const router = useRouter();
   const [situation, setSituation] = useState("");
@@ -43,7 +43,12 @@ export default function CBTToolsScreen() {
       });
 
       // Optional: Show success feedback
-      alert("Thought record saved successfully!");
+      Toast.show({
+        type: "success",
+        text1: "Thought Record Saved!",
+      
+      });
+      
 
       // Optional: Clear form
       setSituation("");
@@ -54,7 +59,12 @@ export default function CBTToolsScreen() {
       setOutcome("");
     } catch (error) {
       console.error("Error saving thought record:", error);
-      alert("Failed to save. Please try again.");
+      Toast.show({
+        type: "error",
+        text1: "Something went wrong",
+        text2: "Unable to save your check-in 😞",
+      });
+      
     }
   };
 
@@ -225,13 +235,14 @@ export default function CBTToolsScreen() {
 
           <Button
             mode="contained"
+            textColor="#3a1d04"
             onPress={handleSave}
             style={styles.saveButton}
           >
             Save Thought Record
           </Button>
 
-          <Divider style={{ marginVertical: 40 }} />
+          <Divider style={{ marginVertical: 20 }} />
           <Modal
             animationType="slide"
             transparent={true}
@@ -348,7 +359,7 @@ export default function CBTToolsScreen() {
               </View>
             </View>
           </Modal>
-          <Button onPress={() => router.push('/CBTRecordsScreen')}> View Previous Records</Button>
+          <Button textColor="#3a1d04" onPress={() => router.push('/CBTRecordsScreen')} style={[styles.button, { marginBottom: 40 }]}> View Previous Records</Button>
         </ScrollView>
       </KeyboardAvoidingView>
     </>
@@ -358,7 +369,7 @@ export default function CBTToolsScreen() {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    backgroundColor: "#fff8f0",
+    backgroundColor: "#F8EDEB",
   },
   card: {
     marginBottom: 20,
@@ -386,8 +397,10 @@ const styles = StyleSheet.create({
     color: "#3e2a6e",
   },
   button: {
-    marginTop: 20,
-    backgroundColor: "#DBE7E4",
+    // marginTop: 20,
+    backgroundColor: "#FAE1DD",
+    borderRadius: 10,
+    paddingVertical: 6,
   },
   row: {
     flexDirection: "row",

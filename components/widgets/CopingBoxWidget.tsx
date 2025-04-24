@@ -19,7 +19,7 @@ export default function CopingBoxWidget({
       <WidgetCard
         title="Coping Tools"
         imageSource={require("../../assets/images/widgetImages/heart.png")}
-        onPress={() => router.push("/thoughtReframeScreen")}
+        onPress={() => router.push("/copingBoxScreen")}
       />
     </View>
   );
@@ -30,8 +30,8 @@ const styles = StyleSheet.create({
   },
   removeIcon: {
     position: "absolute",
-    top: 20,
-    right: 20,
+    top: 18,
+    left: 100,
     zIndex: 1,
   },
 });

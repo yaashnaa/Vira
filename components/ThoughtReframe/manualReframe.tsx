@@ -13,7 +13,7 @@ import {
 
 } from "react-native";
 import { Button, Card, Icon } from "react-native-paper";
-
+import Toast from "react-native-toast-message";
 import { db, auth } from "@/config/firebaseConfig";
 import { addDoc, collection } from "firebase/firestore";
 import { useRouter } from "expo-router";
@@ -44,11 +44,20 @@ export default function ManualThoughtReframeScreen() {
       setContraryEvidence("");
       setReframedThought("");
 
-      alert("Thought Reframe Saved!");
+      Toast.show({
+        type: "success",
+        text1: "✨ Thought Reframe saved!",
+        text2: "Your reframed thought has been safely recorded 💖" ,
+        position: "bottom",
+      });
       router.replace("/dashboard");
     } catch (error) {
       console.error("Error saving thought reframe:", error);
-      alert("Failed to save. Please try again.");
+      Toast.show({
+        type: "error",
+        text1: "Error saving thought reframe",
+        text2: "Please try again later.",
+      });
     }
   };
 
@@ -71,6 +80,7 @@ export default function ManualThoughtReframeScreen() {
                 multiline
                 value={originalThought}
                 onChangeText={setOriginalThought}
+                placeholderTextColor={"#999"}
                 placeholder="e.g. I'm always failing."
               />
 
@@ -80,6 +90,8 @@ export default function ManualThoughtReframeScreen() {
               <TextInput
                 style={styles.input}
                 multiline
+                placeholderTextColor={"#999"}
+                placeholder="e.g. I didn't do well on my last exam."
                 value={supportingEvidence}
                 onChangeText={setSupportingEvidence}
               />
@@ -90,8 +102,10 @@ export default function ManualThoughtReframeScreen() {
               <TextInput
                 style={styles.input}
                 multiline
+                placeholderTextColor={"#999"}
                 value={contraryEvidence}
                 onChangeText={setContraryEvidence}
+                placeholder="e.g. I passed my last exam and did well in class."
               />
 
               <Text style={styles.label}>
@@ -100,6 +114,7 @@ export default function ManualThoughtReframeScreen() {
               <TextInput
                 style={styles.input}
                 multiline
+                placeholderTextColor={"#999"}
                 value={reframedThought}
                 onChangeText={setReframedThought}
                 placeholder="e.g. I'm learning and growing every day."
@@ -184,6 +199,6 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 20,
-    backgroundColor: "#d2c2ed",
+    backgroundColor: "#9f83ce",
   },
 });

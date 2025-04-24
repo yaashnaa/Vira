@@ -35,6 +35,7 @@ import {
   isQuizCompletedInFirestore,
   isScreeningQuizCompleted,
 } from "@/utils/firestore";
+
 import { useLocalSearchParams } from "expo-router";
 import dayjs from "dayjs";
 import { Link, useFocusEffect } from "expo-router";
@@ -72,6 +73,12 @@ import CBTToolsWidget from "@/components/widgets/CBTToolsWidget";
 import ThoughtReframeScreen from "../../components/ThoughtReframe/chatbot";
 import ReflectionCard from "../reflectionCard";
 import CombinedCheckInCard from "../combinedCheckInCard";
+import * as ScreenOrientation from "expo-screen-orientation";
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { fetchAndSendPushNotification } from "@/utils/fetchAndSendPushNotification";
+import * as Notifications from "expo-notifications";
+import { checkAndScheduleDailyReminder } from "@/utils/checkAndScheduleReminder";
+import { getDoc, doc } from "firebase/firestore";
 
 const STORAGE_KEY = "@enabledWidgets";
 const dashboardSections = [
@@ -95,10 +102,13 @@ export default function Dashboard() {
     string,
     any
   >>(null);
-
+  useEffect(() => {
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+  }, []);
   const slideAnim = useRef(new Animated.Value(100)).current; // starts 100px down
   const [hasCompletedScreening, setHasCompletedScreening] =
     useState<boolean>(false);
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setAuthReady(true);
@@ -120,6 +130,42 @@ export default function Dashboard() {
     await addWidget(uid, widgetId);
     setWidgetChangeTrigger((prev) => prev + 1);
   };
+  useEffect(() => {
+    const cancelAndSchedule = async () => {
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+
+      try {
+        const userDocRef = doc(db, "users", uid, "preferences", "main");
+        const userSnap = await getDoc(userDocRef);
+        const data = userSnap.exists() ? userSnap.data() : null;
+
+        let notificationTime: Date;
+
+        if (data?.notificationTime) {
+          notificationTime = new Date(data.notificationTime);
+        } else {
+          // Default to 3PM
+          const now = new Date();
+          notificationTime = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate(),
+            15,
+            0,
+            0
+          );
+        }
+
+        await Notifications.cancelAllScheduledNotificationsAsync();
+        await checkAndScheduleDailyReminder(notificationTime);
+      } catch (err) {
+        console.error("🔥 Failed to schedule reminder in dashboard:", err);
+      }
+    };
+
+    cancelAndSchedule();
+  }, []);
 
   useEffect(() => {
     const checkProgress = async () => {
@@ -144,6 +190,7 @@ export default function Dashboard() {
     };
     checkScreening();
   }, []);
+
   const renderToolItems = () =>
     toolsData.map((tool, index) => (
       <View key={index} style={styles.toolItem}>
@@ -236,7 +283,7 @@ export default function Dashboard() {
     await removeWidgetFromStorage(uid, widgetId);
     setWidgetChangeTrigger((prev) => prev + 1);
   };
-  console.log("🧠 userPreferences from context:", userPreferences);
+  // console.log("🧠 userPreferences from context:", userPreferences);
 
   if (loading || !userPreferences?.name || !authReady || !auth.currentUser) {
     return (
@@ -250,208 +297,245 @@ export default function Dashboard() {
 
   return (
     <>
-      <HeaderRNE
-        containerStyle={{
-          backgroundColor: "#f8edeb", // soft lilac or any color you want
-          borderBottomWidth: 0,
-          paddingTop: 10,
-        }}
-        leftComponent={
-          <TouchableOpacity>
-            <Icon name="home" type="ionicon" color="#150b01" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "",
-          style: {
-            color: "#3e2a6e",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "Main-font",
-          },
-        }}
-        rightComponent={
-          <View style={styles.headerRight}>
-            <TouchableOpacity onPress={() => handleNavigate("/manageWidgets")}>
-              <Icon name="grid" type="feather" color="#150b01" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{ marginLeft: 12 }}
-              onPress={() => handleNavigate("/settings")}
-            >
-              <Icon name="settings" type="feather" color="#150b01" />
-            </TouchableOpacity>
-          </View>
-        }
-      />
+      <ImageBackground
+        source={require("../../assets/images/dashboard/bg.png")} // your image here
+        style={styles.greetingBackground}
+        imageStyle={{ borderRadius: 16 }} // optional rounded corners
+      >
+        <SafeAreaView style={styles.headerContainer}>
+          <FlatList
+            data={dashboardSections}
+            style={styles.container}
+            bounces={false}
+            overScrollMode="never"
+            keyExtractor={(item) => item.key}
+            contentContainerStyle={{ paddingBottom: 50 }}
+            renderItem={({ item }) => {
+              switch (item.key) {
+                case "greeting":
+                  return (
+                    <View style={styles.overlay}>
+                      <Text style={styles.greetingText}>
+                        Hello, {userPreferences.name} 👋
+                      </Text>
+                      <Text style={styles.subGreeting}>
+                        Wishing you a calm and kind day 🌸
+                      </Text>
+                    </View>
+                  );
 
-      <FlatList
-        data={dashboardSections}
-        style={styles.container}
-        keyExtractor={(item) => item.key}
-        contentContainerStyle={{ padding: 20, paddingBottom: 50 }}
-        renderItem={({ item }) => {
-          switch (item.key) {
-            case "greeting":
-              return (
-                <ImageBackground
-                  source={require("../../assets/images/dashboard/bg.png")} // your image here
-                  style={styles.greetingBackground}
-                  imageStyle={{ borderRadius: 16 }} // optional rounded corners
-                >
-                  <View style={styles.overlay}>
-                    <Text style={styles.greetingText}>
-                      Hello, {userPreferences.name} 👋
-                    </Text>
-                    <Text style={styles.subGreeting}>
-                      Wishing you a calm and kind day 🌸
-                    </Text>
-                  </View>
-                </ImageBackground>
-              );
+                case "quote":
+                  return (
+                    <Animated.View
+                      style={{ transform: [{ translateY: slideAnim }] }}
+                    >
+                      <View style={styles.card}>
+                        <Text style={styles.sectionTitle}>Today's Quote</Text>
+                        <Text style={styles.quote}>
+                          “Your body is your home — treat it gently.”
+                        </Text>
+                        {/* <Button
+                          title="Send Notification"
+                          onPress={() => {
+                            const uid = auth.currentUser?.uid;
+                            if (uid) {
+                              fetchAndSendPushNotification(uid, {
+                                title: "Hey from Vira!",
+                                body: "Time to check in with your mood 🌸",
+                              });
+                            }
+                          }}
+                        /> */}
+                      </View>
+                    </Animated.View>
+                  );
+                case "checkinCard":
+                  if (!userPreferences.moodcCheckInBool || !hasLoggedToday)
+                    return null;
 
-            case "quote":
-              return (
-                <Animated.View
-                  style={{ transform: [{ translateY: slideAnim }] }}
-                >
-                  <View style={styles.card}>
-                    <Text style={styles.sectionTitle}>Today's Quote</Text>
-                    <Text style={styles.quote}>
-                      “Your body is your home — treat it gently.”
-                    </Text>
-                  </View>
-                </Animated.View>
-              );
-            case "checkinCard":
-              if (!userPreferences.moodcCheckInBool) return null;
+                  return (
+                    <View style={styles.checkinCard}>
+                      <CombinedCheckInCard />
+                    </View>
+                  );
+                case "logMood":
+                  if (!userPreferences.moodcCheckInBool || hasLoggedToday)
+                    return null;
 
-              return (
-                <View
-                  style={{ display: "flex", flexDirection: "row", gap: 10 }}
-                >
-                  <CombinedCheckInCard />
-                </View>
-              );
-            case "logMood":
-              if (!userPreferences.moodcCheckInBool || hasLoggedToday)
-                return null;
+                  return (
+                    <TouchableOpacity
+                      onPress={() => handleNavigate("/checkInScreen")}
+                    >
+                      <LogMoodButton latestCheckIn={latestCheckIn} />
+                    </TouchableOpacity>
+                  );
 
-              return (
-                <TouchableOpacity
-                  onPress={() => handleNavigate("/checkInScreen")}
-                >
-                  <LogMoodButton latestCheckIn={latestCheckIn} />
-                </TouchableOpacity>
-              );
+                case "pinnedWidgets":
+                  const hasNoPinned = enabledWidgets.length === 0;
 
-            case "pinnedWidgets":
-              return (
-                <View>
-                  {/* Tracking Tools */}
-                  <Text style={styles.sectionHeader}>Pinned Widgets </Text>
-                  <View style={styles.gridContainer}>
-                    {enabledWidgets.includes("water") && (
-                      <WaterWidget
-                        onRemove={() =>
-                          removeWidget(auth.currentUser?.uid || "", "water")
-                        }
-                      />
-                    )}
-                    {enabledWidgets.includes("mood") && (
-                      <MoodWidget
-                        onRemove={() =>
-                          removeWidget(auth.currentUser?.uid || "", "mood")
-                        }
-                      />
-                    )}
-                    {enabledWidgets.includes("fitness") && (
-                      <FitnessWidget
-                        onRemove={() =>
-                          removeWidget(auth.currentUser?.uid || "", "fitness")
-                        }
-                      />
-                    )}
-                    {enabledWidgets.includes("nutrition") && (
-                      <NutritionWidget
-                        onRemove={() =>
-                          removeWidget(auth.currentUser?.uid || "", "nutrition")
-                        }
-                      />
-                    )}
-                    {enabledWidgets.includes("journal") && (
-                      <JournalWidget
-                        onRemove={() =>
-                          removeWidget(auth.currentUser?.uid || "", "journal")
-                        }
-                      />
-                    )}
-                    {enabledWidgets.includes("mindfulness") && (
-                      <MindfullnessWidget
-                        onRemove={() =>
-                          removeWidget(
-                            auth.currentUser?.uid || "",
-                            "mindfulness"
-                          )
-                        }
-                      />
-                    )}
-                    {enabledWidgets.includes("thoughtReframe") && (
-                      <ThoughtReframeWidget
-                        onRemove={() =>
-                          removeWidget(
-                            auth.currentUser?.uid || "",
-                            "thoughtReframe"
-                          )
-                        }
-                      />
-                    )}
-                    {enabledWidgets.includes("copingBox") && (
-                      <CopingBoxWidget
-                        onRemove={() =>
-                          removeWidget(auth.currentUser?.uid || "", "copingBox")
-                        }
-                      />
-                    )}
-                    {enabledWidgets.includes("cbtTools") && (
-                      <CBTToolsWidget
-                        onRemove={() =>
-                          removeWidget(auth.currentUser?.uid || "", "cbtTools")
-                        }
-                      />
-                    )}
-                  </View>
-                </View>
-              );
+                  return (
+                    <View style={{ marginBottom: 50 }}>
+                      {hasNoPinned ? (
+                        <>
+                          <RecommendedWidgetsBanner />
 
-            case "actions":
-              return (
-                <>
-                  <DeleteButton />
-                  <LogoutButton />
-                  <Button
-                    onPress={resetAllAsyncStorage}
-                    title="Reset Async Storage"
-                  />
-                </>
-              );
+                          {/* <View style={styles.recommendationCard}>
+                            <Text style={styles.recommendationTitle}>
+                              ⭐ Try Adding a Widget
+                            </Text>
 
-            default:
-              return null;
-          }
-        }}
-      />
+                            <Text style={styles.recommendationText}>
+                              Tap the widgets tab to customize your dashboard with
+                              helpful tools like Mood Tracker, Journal, and
+                              Coping Box.
+                            </Text>
+                          </View> */}
+                        </>
+                      ) : (
+                        // <View style={styles.recommendationCard}>
+                        //   <Text style={styles.recommendationTitle}>
+                        //     ⭐ Try Adding a Widget
+                        //   </Text>
+                        //   <Text style={styles.recommendationText}>
+                        //     Tap the "+" icon to customize your dashboard with
+                        //     helpful tools like Mood Tracker, Journal, and Coping
+                        //     Box.
+                        //   </Text>
+                        // </View>
+                        <>
+                          <Text style={styles.sectionHeader}>
+                            Your Pinned Widgets
+                          </Text>
+                          <View style={styles.gridContainer}>
+                            {enabledWidgets.includes("water") && (
+                              <WaterWidget
+                                onRemove={() =>
+                                  removeWidget(
+                                    auth.currentUser?.uid || "",
+                                    "water"
+                                  )
+                                }
+                              />
+                            )}
+                            {enabledWidgets.includes("mood") && (
+                              <MoodWidget
+                                onRemove={() =>
+                                  removeWidget(
+                                    auth.currentUser?.uid || "",
+                                    "mood"
+                                  )
+                                }
+                              />
+                            )}
+                            {enabledWidgets.includes("fitness") && (
+                              <FitnessWidget
+                                onRemove={() =>
+                                  removeWidget(
+                                    auth.currentUser?.uid || "",
+                                    "fitness"
+                                  )
+                                }
+                              />
+                            )}
+                            {enabledWidgets.includes("nutrition") && (
+                              <NutritionWidget
+                                onRemove={() =>
+                                  removeWidget(
+                                    auth.currentUser?.uid || "",
+                                    "nutrition"
+                                  )
+                                }
+                              />
+                            )}
+                            {enabledWidgets.includes("journal") && (
+                              <JournalWidget
+                                onRemove={() =>
+                                  removeWidget(
+                                    auth.currentUser?.uid || "",
+                                    "journal"
+                                  )
+                                }
+                              />
+                            )}
+                            {enabledWidgets.includes("mindfulness") && (
+                              <MindfullnessWidget
+                                onRemove={() =>
+                                  removeWidget(
+                                    auth.currentUser?.uid || "",
+                                    "mindfulness"
+                                  )
+                                }
+                              />
+                            )}
+                            {enabledWidgets.includes("thoughtReframe") && (
+                              <ThoughtReframeWidget
+                                onRemove={() =>
+                                  removeWidget(
+                                    auth.currentUser?.uid || "",
+                                    "thoughtReframe"
+                                  )
+                                }
+                              />
+                            )}
+                            {enabledWidgets.includes("copingBox") && (
+                              <CopingBoxWidget
+                                onRemove={() =>
+                                  removeWidget(
+                                    auth.currentUser?.uid || "",
+                                    "copingBox"
+                                  )
+                                }
+                              />
+                            )}
+                            {enabledWidgets.includes("cbtTools") && (
+                              <CBTToolsWidget
+                                onRemove={() =>
+                                  removeWidget(
+                                    auth.currentUser?.uid || "",
+                                    "cbtTools"
+                                  )
+                                }
+                              />
+                            )}
+                          </View>
+                        </>
+                      )}
+                    </View>
+                  );
+
+                case "actions":
+                  return (
+                    <>
+                      <DeleteButton />
+                      <LogoutButton />
+                      <Button
+                        onPress={resetAllAsyncStorage}
+                        title="Reset Async Storage"
+                      />
+                    </>
+                  );
+
+                default:
+                  return null;
+              }
+            }}
+          />
+        </SafeAreaView>
+      </ImageBackground>
     </>
   );
 }
 
 const { width } = Dimensions.get("window");
-
+const { height } = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: {
-    // padding: 20,
-    backgroundColor: "#ffffff",
-    flexGrow: 1,
+    flex: 1,
+    width: "100%",
+    backgroundColor: "transparent",
+    height: height,
+    margin: 0,
+    padding: 0,
   },
   loadingContainer: {
     flex: 1,
@@ -500,7 +584,7 @@ const styles = StyleSheet.create({
     width: 40,
   },
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: "transparent",
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -509,6 +593,21 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 1,
+  },
+  checkinCard: {
+    backgroundColor: "transparent",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+    margin: "auto",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
   },
   quizContainer: {
     display: "flex",
@@ -539,14 +638,38 @@ const styles = StyleSheet.create({
   cont: {
     padding: 20,
   },
+
   headerContainer: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#397af8",
+    backgroundColor: "transparent",
     marginBottom: 20,
-    width: "100%",
+    width: width,
     paddingVertical: 15,
+    margin: 0,
+    padding: 0,
+    height: height,
   },
+  recommendationCard: {
+    backgroundColor: "#f8f0ff",
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 12,
+  },
+  recommendationTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#865dff",
+    marginBottom: 4,
+    fontFamily: "Main-font",
+  },
+  recommendationText: {
+    fontSize: 14,
+    color: "#444",
+    fontFamily: "Main-font",
+  },
+
   heading: {
     color: "white",
     fontSize: 22,
@@ -568,7 +691,7 @@ const styles = StyleSheet.create({
     width: 80,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#f8edeb",
+    backgroundColor: "transparent",
     marginRight: 10,
   },
   divider: {
@@ -609,31 +732,33 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   greetingBackground: {
-    height: 140,
+    height: height,
     resizeMode: "cover",
     justifyContent: "center",
-    paddingHorizontal: 20,
+    // paddingHorizontal: 20,
     marginBottom: 20,
+    width: width,
+    margin: 0,
+    padding: 0,
   },
-  
+
   overlay: {
-    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
     padding: 16,
     borderRadius: 16,
   },
-  
+
   greetingText: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: "bold",
     fontFamily: "PatrickHand-Regular",
     color: "#271949",
   },
-  
+
   subGreeting: {
     fontSize: 16,
     color: "#5a4c7c",
     marginTop: 4,
     fontFamily: "Main-font",
   },
-  
 });

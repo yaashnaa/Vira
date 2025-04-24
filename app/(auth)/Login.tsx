@@ -1,10 +1,11 @@
 import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { darkTheme, lightTheme } from "@/config/theme";
 import Header from "@/components/header";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { auth } from "../../config/firebaseConfig";
+import * as AuthSession from "expo-auth-session";
 import {
   StyleSheet,
   Text,
@@ -25,37 +26,59 @@ import { useRouter } from "expo-router";
 import { loginUser } from "../../utils/auth"; // Firebase authentication function
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fetchUserPreferences } from "@/utils/firestore";
+import { useGoogleAuth } from "@/utils/googleAuth"; // or wherever you placed the hook
+
 import { useUserPreferences } from "@/context/userPreferences"; // Custom hook for user preferences
 import { ensureUserDocumentExists } from "../../utils/firestore"; // Function to ensure user document exists
 export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { promptAsync, request } = useGoogleAuth();
+  const [errorMessage, setErrorMessage] = useState("");
 
   const { updatePreferences, updatePreferencesFromFirestore } =
     useUserPreferences();
 
   const handleLogin = async () => {
+    setErrorMessage(""); // Clear previous error
     try {
-      await loginUser(email, password); // 🔐 logs in with Firebase Auth
+      await loginUser(email, password);
 
       const currentUser = auth.currentUser;
       if (!currentUser) {
-        Alert.alert("Error", "User not found.");
+        setErrorMessage("User not found.");
         return;
       }
 
-      await ensureUserDocumentExists(); // ✅ no need to pass UID
+      await ensureUserDocumentExists();
       const prefs = await fetchUserPreferences(currentUser.uid);
       if (prefs) {
-        updatePreferences(prefs); // ✅ updates context from Firestore only
+        updatePreferences(prefs);
       }
 
-      router.replace("/dashboard"); // ✅ route to dashboard
+      router.replace("/dashboard");
     } catch (error) {
-      Alert.alert("Login Failed", (error as Error).message);
+      const message = (error as Error).message;
+
+      // Optionally match known Firebase error codes
+      if (message.includes("auth/wrong-password")) {
+        setErrorMessage("Invalid password. Please try again.");
+      } else if (message.includes("auth/user-not-found")) {
+        setErrorMessage("No account found with this email.");
+      } else {
+        setErrorMessage(
+          "Login failed. Please check your details and try again."
+        );
+      }
     }
   };
+
+  useEffect(() => {
+    const redirectUri = "https://auth.expo.io/@yg2348/vira";
+
+    console.log("✅ Redirect URI to add in Google Cloud:", redirectUri);
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -111,10 +134,16 @@ export default function LoginScreen() {
                   />
                 </View>
               </View>
+              {errorMessage !== "" && (
+                <Text style={styles.errorText}>{errorMessage}</Text>
+              )}
 
               <TouchableOpacity>
                 <Text style={styles.forgot_button}>Forgot Password?</Text>
               </TouchableOpacity>
+              {/* <Button style={{ marginTop: 50 }} onPress={() => promptAsync()}>
+                Log in with google
+              </Button> */}
             </View>
           </ScrollView>
         </TouchableWithoutFeedback>
@@ -130,11 +159,11 @@ export default function LoginScreen() {
         </Button>
       </View>
 
-      <View style={styles.link}>
+      {/* <View style={styles.link}>
         <TouchableOpacity onPress={() => router.push("/(auth)/signup")}>
           <Text style={styles.signupText}>Don't have an account? Sign up</Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
     </View>
   );
 }
@@ -203,6 +232,14 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     color: "#003f5c",
   },
+  errorText: {
+    color: "red",
+    fontSize: 14,
+    marginTop: 12,
+    fontFamily: "Main-font",
+    textAlign: "center",
+  }
+,  
   inputs: {
     display: "flex",
     gap: 20,
