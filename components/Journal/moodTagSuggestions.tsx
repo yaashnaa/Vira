@@ -37,11 +37,27 @@ const cbtPromptMap: Record<string, string[]> = {
 
 const moodLabels = [
   "Having a Tough Day", // 0
-  "Not My Best", // 1
-  "Hanging in There", // 2
-  "Pretty Good", // 3
-  "Feeling Great", // 4
+  "Not My Best",        // 1
+  "Hanging in There",   // 2
+  "Pretty Good",        // 3
+  "Feeling Great",      // 4
 ];
+
+const valueMap: Record<string, number> = {
+  "Feeling Great": 0,
+  "Pretty Good": 25,
+  "Hanging in There": 50,
+  "Not My Best": 75,
+  "Having a Tough Day": 100,
+};
+
+const labelMap: Record<number, string> = {
+  0: "Feeling Great",
+  25: "Pretty Good",
+  50: "Hanging in There",
+  75: "Not My Best",
+  100: "Having a Tough Day",
+};
 
 export default function MoodTagSuggestions({
   mood,
@@ -50,14 +66,21 @@ export default function MoodTagSuggestions({
 }) {
   let moodLabel: string | null = null;
 
-  if (typeof mood === "number") {
-    moodLabel = moodLabels[mood];
-  } else if (!isNaN(Number(mood))) {
-    moodLabel = moodLabels[Number(mood)];
-  } else if (typeof mood === "string") {
+  if (typeof mood === "string" && mood in valueMap) {
     moodLabel = mood;
+  } else if (!isNaN(Number(mood))) {
+    const moodNum = Number(mood);
+  
+    // First try value-to-label
+    if (labelMap[moodNum]) {
+      moodLabel = labelMap[moodNum];
+    } 
+    // Then try index-based fallback
+    else if (moodNum >= 0 && moodNum < moodLabels.length) {
+      moodLabel = moodLabels[moodNum];
+    }
   }
-
+  
   if (!moodLabel || !(moodLabel in cbtPromptMap)) {
     console.warn("⚠️ Invalid or unmapped mood passed:", mood);
     return null;

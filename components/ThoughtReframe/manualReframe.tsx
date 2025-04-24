@@ -80,6 +80,7 @@ export default function ManualThoughtReframeScreen() {
                 multiline
                 value={originalThought}
                 onChangeText={setOriginalThought}
+                placeholderTextColor={"#999"}
                 placeholder="e.g. I'm always failing."
               />
 
@@ -89,6 +90,8 @@ export default function ManualThoughtReframeScreen() {
               <TextInput
                 style={styles.input}
                 multiline
+                placeholderTextColor={"#999"}
+                placeholder="e.g. I didn't do well on my last exam."
                 value={supportingEvidence}
                 onChangeText={setSupportingEvidence}
               />
@@ -99,8 +102,10 @@ export default function ManualThoughtReframeScreen() {
               <TextInput
                 style={styles.input}
                 multiline
+                placeholderTextColor={"#999"}
                 value={contraryEvidence}
                 onChangeText={setContraryEvidence}
+                placeholder="e.g. I passed my last exam and did well in class."
               />
 
               <Text style={styles.label}>
@@ -109,6 +114,7 @@ export default function ManualThoughtReframeScreen() {
               <TextInput
                 style={styles.input}
                 multiline
+                placeholderTextColor={"#999"}
                 value={reframedThought}
                 onChangeText={setReframedThought}
                 placeholder="e.g. I'm learning and growing every day."
@@ -193,6 +199,6 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 20,
-    backgroundColor: "#d2c2ed",
+    backgroundColor: "#9f83ce",
   },
 });

@@ -376,7 +376,21 @@ export default function Dashboard() {
                   return (
                     <View style={{ marginBottom: 50 }}>
                       {hasNoPinned ? (
-                        <RecommendedWidgetsBanner />
+                        <>
+                          <RecommendedWidgetsBanner />
+
+                          {/* <View style={styles.recommendationCard}>
+                            <Text style={styles.recommendationTitle}>
+                              ⭐ Try Adding a Widget
+                            </Text>
+
+                            <Text style={styles.recommendationText}>
+                              Tap the widgets tab to customize your dashboard with
+                              helpful tools like Mood Tracker, Journal, and
+                              Coping Box.
+                            </Text>
+                          </View> */}
+                        </>
                       ) : (
                         // <View style={styles.recommendationCard}>
                         //   <Text style={styles.recommendationTitle}>
@@ -389,9 +403,9 @@ export default function Dashboard() {
                         //   </Text>
                         // </View>
                         <>
-                        <Text style={styles.sectionHeader}>
-                          Your Pinned Widgets
-                        </Text>
+                          <Text style={styles.sectionHeader}>
+                            Your Pinned Widgets
+                          </Text>
                           <View style={styles.gridContainer}>
                             {enabledWidgets.includes("water") && (
                               <WaterWidget
@@ -606,7 +620,6 @@ const styles = StyleSheet.create({
     fontFamily: "Patrickhand-regular",
     fontWeight: "600",
     marginBottom: 8,
-
   },
   sectionHeader: {
     fontSize: 26,

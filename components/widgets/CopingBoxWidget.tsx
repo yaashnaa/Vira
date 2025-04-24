@@ -19,7 +19,7 @@ export default function CopingBoxWidget({
       <WidgetCard
         title="Coping Tools"
         imageSource={require("../../assets/images/widgetImages/heart.png")}
-        onPress={() => router.push("/thoughtReframeScreen")}
+        onPress={() => router.push("/copingBoxScreen")}
       />
     </View>
   );

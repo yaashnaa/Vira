@@ -16,9 +16,9 @@ export default function CBTToolsWidget({
         </Pressable>
       )} 
       <WidgetCard
-        title="Thought Reframer"
+        title="Thought Log"
         imageSource={require("../../assets/images/widgetImages/notebook.png")}
-        onPress={() => router.push("/thoughtReframeScreen")}
+        onPress={() => router.push("/CBTToolsScreen")}
       />
     </View>
   );

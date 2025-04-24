@@ -148,7 +148,7 @@ export default function CheckInScreen() {
           style={{ flex: 1 }}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <ScrollView style={styles.container}>
+            <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignItems: "center", margin: "auto" }}>
               <Card style={styles.card} elevation={0} mode="elevated">
                 <Card.Content>
                   <Text style={styles.sectionTitle}>Mood Check-In</Text>
@@ -170,7 +170,7 @@ export default function CheckInScreen() {
 
                   <Divider style={styles.divider} />
 
-                  <Button mode="contained" icon="check" onPress={handleSaveCheckIn} style={styles.button}>
+                  <Button mode="contained" icon="check" onPress={handleSaveCheckIn} textColor="#3b0f04" style={styles.button}>
                     {checkInId ? "Update Check-In" : "Complete Check-In"}
                   </Button>
                 </Card.Content>
@@ -189,6 +189,9 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     width: "100%",
+    // alignItems: "center",
+    // justifyContent: "center",
+    // margin:"auto",
   },
   card: {
     backgroundColor: "#ffffff",

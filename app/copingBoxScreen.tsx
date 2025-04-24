@@ -27,7 +27,7 @@ const copingCategories = [
       "🎶 Listen to calming nature sounds",
       "🧣 Wrap yourself in a soft blanket",
       "🕯️ Light a candle with your favorite scent",
-      "🛁 Take a warm showe r or bath",
+      "🛁 Take a warm shower or bath",
       "🌸 Smell something comforting like lavender",
     ],
     resourceLink: "https://www.youtube.com/watch?v=W19PdslW7iw", // Soothing sounds

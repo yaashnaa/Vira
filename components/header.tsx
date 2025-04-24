@@ -20,7 +20,11 @@ export default function Header({
 
   const handleBack = () => {
     if (useBackFunction) {
-      router.back();
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace(backPath as any);
+      }
     } else {
       router.replace(backPath as any);
     }
