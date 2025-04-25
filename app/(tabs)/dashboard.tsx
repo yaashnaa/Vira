@@ -58,7 +58,7 @@ import LogoutButton from "@/components/Buttons/logoutButton";
 import DeleteButton from "@/components/Buttons/deleteAccount";
 import TakeQuizButton from "@/components/takeQuiz";
 import RecommendedWidgetsBanner from "@/components/recommendedWidegts";
-import NutritionScreen from "../nurtition";
+// import NutritionScreen from "../nutrition/combinedNutrition";
 import FitnessWidget from "@/components/widgets/FitnessWidget";
 import NutritionWidget from "@/components/widgets/NutritionWidget";
 // import JournalScreen from "./journal";
@@ -79,7 +79,7 @@ import { fetchAndSendPushNotification } from "@/utils/fetchAndSendPushNotificati
 import * as Notifications from "expo-notifications";
 import { checkAndScheduleDailyReminder } from "@/utils/checkAndScheduleReminder";
 import { getDoc, doc } from "firebase/firestore";
-
+import OuotesBanner from "@/components/quotesBanner";
 const STORAGE_KEY = "@enabledWidgets";
 const dashboardSections = [
   { key: "greeting" },
@@ -128,8 +128,9 @@ export default function Dashboard() {
     const uid = auth.currentUser?.uid;
     if (!uid) return;
     await addWidget(uid, widgetId);
-    setWidgetChangeTrigger((prev) => prev + 1);
+    setWidgetChangeTrigger((prev) => prev + 1); // ✅ triggers re-fetch
   };
+
   useEffect(() => {
     const cancelAndSchedule = async () => {
       const uid = auth.currentUser?.uid;
@@ -330,10 +331,11 @@ export default function Dashboard() {
                       style={{ transform: [{ translateY: slideAnim }] }}
                     >
                       <View style={styles.card}>
-                        <Text style={styles.sectionTitle}>Today's Quote</Text>
+                        <OuotesBanner />
+                        {/* <Text style={styles.sectionTitle}>Today's Quote</Text>
                         <Text style={styles.quote}>
                           “Your body is your home — treat it gently.”
-                        </Text>
+                        </Text> */}
                         {/* <Button
                           title="Send Notification"
                           onPress={() => {
@@ -377,33 +379,16 @@ export default function Dashboard() {
                     <View style={{ marginBottom: 50 }}>
                       {hasNoPinned ? (
                         <>
-                          <RecommendedWidgetsBanner />
-
-                          {/* <View style={styles.recommendationCard}>
-                            <Text style={styles.recommendationTitle}>
-                              ⭐ Try Adding a Widget
-                            </Text>
-
-                            <Text style={styles.recommendationText}>
-                              Tap the widgets tab to customize your dashboard with
-                              helpful tools like Mood Tracker, Journal, and
-                              Coping Box.
-                            </Text>
-                          </View> */}
+                          <RecommendedWidgetsBanner
+                            triggerRefresh={widgetChangeTrigger}
+                            onAddWidget={handleAddWidget}
+                          />
                         </>
                       ) : (
-                        // <View style={styles.recommendationCard}>
-                        //   <Text style={styles.recommendationTitle}>
-                        //     ⭐ Try Adding a Widget
-                        //   </Text>
-                        //   <Text style={styles.recommendationText}>
-                        //     Tap the "+" icon to customize your dashboard with
-                        //     helpful tools like Mood Tracker, Journal, and Coping
-                        //     Box.
-                        //   </Text>
-                        // </View>
                         <>
-                          <Text style={styles.sectionHeader}>
+                          <Text
+                            style={[styles.sectionHeader, { marginLeft: 20 }]}
+                          >
                             Your Pinned Widgets
                           </Text>
                           <View style={styles.gridContainer}>

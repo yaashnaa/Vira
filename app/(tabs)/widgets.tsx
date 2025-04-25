@@ -91,7 +91,7 @@ const tools = [
       {
         id: "nutrition",
         label: "Nutrition Tracker",
-        route: "/nutritionScreen",
+        route: "/nutrition",
         icon: require("../../assets/images/widgetImages/diet.png"),
         description: "Log meals, view insights, and reflect on how food feels.",
       },

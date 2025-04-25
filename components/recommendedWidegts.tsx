@@ -45,34 +45,36 @@ const recommendedWidgets = [
     image: require("../assets/images/widgetImages/mood.png"),
   },
 ];
+interface RecommendedwidgetImagesBannerProps {
+  triggerRefresh?: number;
+  onAddWidget?: (id: string) => void; // ✅ Add this line
+}
 
 const { width } = Dimensions.get("window");
 
-export default function RecommendedWidgetsBanner() {
+export default function RecommendedWidgetsBanner({
+  triggerRefresh,
+  onAddWidget,
+}: RecommendedwidgetImagesBannerProps) {
   const [enabledWidgets, setEnabledWidgets] = useState<string[]>([]);
 
-  const loadWidgets = async () => {
-    const uid = auth.currentUser?.uid;
-    if (!uid) return;
-    const stored = await getEnabledWidgets(uid);
-    setEnabledWidgets(stored);
-  };
-
   useEffect(() => {
+    const loadWidgets = async () => {
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+      const stored = await getEnabledWidgets(uid);
+      setEnabledWidgets(stored);
+    };
     loadWidgets();
-  }, []);
+  }, [triggerRefresh]);
 
   const handleAddWidget = async (id: string) => {
     const uid = auth.currentUser?.uid;
     if (!uid || enabledWidgets.includes(id)) return;
 
     await addWidget(uid, id);
-    Toast.show({
-      type: "success",
-      text1: `${id.charAt(0).toUpperCase() + id.slice(1)} added to dashboard`,
-    });
-
-    loadWidgets(); // Refresh
+    setEnabledWidgets((prev) => [...prev, id]);
+    onAddWidget?.(id); 
   };
 
   const widgetsToRecommend = recommendedWidgets.filter(

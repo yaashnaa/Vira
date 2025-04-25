@@ -7,15 +7,15 @@ export interface TastyRecipe {
   description?: string;
   thumbnail_url: string;
   video_url?: string;
-  tags?: { name: string }[]; // ✅ updated type for tags
+  tags?: { name: string }[]; 
+ 
 }
-
-export async function fetchTastyRecipes(
-  query = "",
-  tags: string[] = []
-): Promise<TastyRecipe[]> {
+export async function fetchTastyRecipes(query = "", tags: string[] = [], from=0) {
   const tagString = tags.join(",");
-  const url = `https://tasty.p.rapidapi.com/recipes/list?from=0&size=10&q=${query}&tags=${tagString}`;
+  const randomOffset = Math.floor(Math.random() * 100); 
+  console.log("Random Offset:", randomOffset);
+
+  const url = `https://tasty.p.rapidapi.com/recipes/list?from=${from}&size=100&q=${query}&tags=${tagString}`;
 
   const res = await fetch(url, {
     method: "GET",

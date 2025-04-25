@@ -19,7 +19,7 @@ const NutritionWidget: React.FC<NutritionWidgetProps> = ({ onRemove }) => {
   const [topMeal, setTopMeal] = useState<string | null>(null);
 
   const handlePress = () => {
-    router.replace("/nurtition");
+    router.replace("/nutrition/(tabs)/Overview");
   };
 
   const fetchMeals = async () => {

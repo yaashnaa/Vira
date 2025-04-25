@@ -5,7 +5,7 @@ import {
   TextInput,
   Image,
   StyleSheet,
-  TouchableOpacity, Dimensions
+  TouchableOpacity, Dimensions,
 } from "react-native";
 import {
   Modal,
@@ -21,6 +21,8 @@ import * as ImagePicker from "expo-image-picker";
 import { uploadImageAsync } from "@/utils/uploadImage";
 import { fetchNutritionData } from "@/utils/api/fetchNutritionData";
 import { auth, db } from "@/config/firebaseConfig";
+import { useMealLog } from "@/context/mealLogContext";
+
 import { collection, doc, setDoc, serverTimestamp } from "firebase/firestore";
 import Toast from "react-native-toast-message";
 const mealOptions = [
@@ -34,23 +36,23 @@ const mealOptions = [
 const moodOptions = [
   {
     label: "Uncomfortable",
-    image: require("../../assets/images/foodMood/vnothappy.png"),
+    image: require("../../../assets/images/foodMood/vnothappy.png"),
   },
   {
     label: "Still Hungry",
-    image: require("../../assets/images/foodMood/nothappy.png"),
+    image: require("../../../assets/images/foodMood/nothappy.png"),
   },
   {
     label: "Content",
-    image: require("../../assets/images/foodMood/neutral.png"),
+    image: require("../../../assets/images/foodMood/neutral.png"),
   },
   {
     label: "Satisfied",
-    image: require("../../assets/images/foodMood/satisfied.png"),
+    image: require("../../../assets/images/foodMood/satisfied.png"),
   },
   {
     label: "Nourished",
-    image: require("../../assets/images/foodMood/vsatisfied.png"),
+    image: require("../../../assets/images/foodMood/vsatisfied.png"),
   },
 ];
 
@@ -68,6 +70,7 @@ export default function LogMealCardModal({ onLog }: LogMealCardModalProps) {
   const [descriptionError, setDescriptionError] = useState(false);
   const [imageUri, setImageUri] = useState<string | null>(null);
   const router = useRouter();
+  const {triggerRefresh} = useMealLog();
   const [loading, setLoading] = useState(false);
 
   const pickImage = async () => {
@@ -135,6 +138,7 @@ export default function LogMealCardModal({ onLog }: LogMealCardModalProps) {
       });
 
       onLog?.({ nutrition, mood, name: mealDescription });
+      triggerRefresh();
 
      Toast.show({
         type: "success",
@@ -243,19 +247,18 @@ export default function LogMealCardModal({ onLog }: LogMealCardModalProps) {
     </View>
   );
 }
-const height = Dimensions.get("window").height;
+const height= Dimensions.get("window").height;
 const styles = StyleSheet.create({
   modal: {
-    backgroundColor: "#fff",
+    backgroundColor: "white",
     padding: 20,
     borderRadius: 12,
     width: "100%",
+    height: height * 0.8,
     display: "flex",
     // alignItems: "center",
     justifyContent: "center",
     margin: "auto",
-    height:height,
-    
   },
   title: {
     fontSize: 20,

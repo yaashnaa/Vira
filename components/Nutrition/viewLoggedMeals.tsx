@@ -2,61 +2,43 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
+  FlatList,
   TouchableOpacity,
   StyleSheet,
   Modal,
-  Pressable,
   ScrollView,
+  Dimensions,
+  Pressable,
   SafeAreaView,
   Alert,
-  Dimensions,
 } from "react-native";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import { auth, db } from "@/config/firebaseConfig";
 import dayjs from "dayjs";
 import { useUserPreferences } from "@/context/userPreferences";
-import { getMealInsights } from "@/utils/getMealInsights";
-import { Button } from "react-native-paper";
 import { useMealLog } from "@/context/mealLogContext";
 import Toast from "react-native-toast-message";
+
 interface Meal {
   id: string;
   name: string;
   calories: number;
   date: string;
+  mood?: string;
   nutrition?: {
     [key: string]: any;
   };
 }
 
-export async function getTodayMealsLogged(): Promise<string[]> {
-  const uid = auth.currentUser?.uid;
-  if (!uid) return [];
-
-  const snapshot = await getDocs(collection(db, "users", uid, "meals"));
-  const today = dayjs().format("YYYY-MM-DD");
-  const mealTypes: string[] = [];
-
-  snapshot.forEach((doc) => {
-    const data = doc.data();
-    const docDate = dayjs(data.timestamp?.toDate()).format("YYYY-MM-DD");
-    if (docDate === today && data.mealType) {
-      mealTypes.push(data.mealType.toLowerCase());
-    }
-  });
-
-  return mealTypes;
-}
-
 const ViewLoggedMeals: React.FC = () => {
   const { userPreferences } = useUserPreferences();
+  const { refreshFlag, triggerRefresh } = useMealLog();
+
   const [meals, setMeals] = useState<Meal[]>([]);
   const [previousMeals, setPreviousMeals] = useState<Meal[]>([]);
   const [expandedMealId, setExpandedMealId] = useState<string | null>(null);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [showPrevious, setShowPrevious] = useState(false);
-  const { triggerRefresh } = useMealLog();
+  const [previousModalVisible, setPreviousModalVisible] = useState(false);
+
   const toggleMealDetails = (id: string) => {
     setExpandedMealId(expandedMealId === id ? null : id);
   };
@@ -67,9 +49,12 @@ const ViewLoggedMeals: React.FC = () => {
       if (!uid) return;
 
       await deleteDoc(doc(db, "users", uid, "meals", mealId));
+
       setMeals((prev) => prev.filter((meal) => meal.id !== mealId));
       setPreviousMeals((prev) => prev.filter((meal) => meal.id !== mealId));
-      triggerRefresh(); // 🟣 trigger re-fetch in overview
+
+      triggerRefresh();
+
       Toast.show({
         type: "success",
         text1: "Meal deleted!",
@@ -77,7 +62,7 @@ const ViewLoggedMeals: React.FC = () => {
         position: "bottom",
       });
     } catch (err) {
-      console.error("Failed to delete meal:", err);
+      console.error("Error deleting meal:", err);
       Toast.show({
         type: "error",
         text1: "Error deleting meal",
@@ -87,236 +72,242 @@ const ViewLoggedMeals: React.FC = () => {
     }
   };
 
+  const fetchLoggedMeals = async () => {
+    try {
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+
+      const today = dayjs().format("YYYY-MM-DD");
+      const snapshot = await getDocs(collection(db, "users", uid, "meals"));
+
+      const todayList: Meal[] = [];
+      const prevList: Meal[] = [];
+
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        const docDate = dayjs(data.timestamp?.toDate()).format("YYYY-MM-DD");
+        const meal = {
+          id: docSnap.id,
+          name: data.description,
+          calories: data.nutrition?.calories || 0,
+          date: docDate,
+          mood: data.mood,
+          nutrition: data.nutrition || {},
+        };
+        if (docDate === today) {
+          todayList.push(meal);
+        } else {
+          prevList.push(meal);
+        }
+      });
+      setMeals(
+        todayList
+          .filter((meal) => meal && meal.name)
+          .sort((a, b) => dayjs(b.date).diff(dayjs(a.date)))
+      );
+
+      const sortedPrevious = prevList
+        .filter((meal) => meal && meal.name)
+        .sort((a, b) => dayjs(b.date).diff(dayjs(a.date)));
+      setPreviousMeals(sortedPrevious);
+    } catch (err) {
+      console.error("Error fetching meals:", err);
+    }
+  };
+
   useEffect(() => {
-    const fetchLoggedMeals = async () => {
-      try {
-        const uid = auth.currentUser?.uid;
-        if (!uid) return;
-
-        const today = dayjs().format("YYYY-MM-DD");
-        const snapshot = await getDocs(collection(db, "users", uid, "meals"));
-
-        const todayList: Meal[] = [];
-        const prevList: Meal[] = [];
-
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          const docDate = dayjs(data.timestamp?.toDate()).format("YYYY-MM-DD");
-          const meal = {
-            id: doc.id,
-            name: data.description,
-            calories: data.nutrition?.calories || 0,
-            date: docDate,
-            nutrition: data.nutrition || {},
-          };
-          if (docDate === today) {
-            todayList.push(meal);
-          } else {
-            prevList.push(meal);
-          }
-        });
-        const cleanTodayList = todayList.filter((meal) => meal && meal.name);
-        const cleanPrevList = prevList.filter((meal) => meal && meal.name);
-        
-        setMeals(cleanTodayList);
-        setPreviousMeals(cleanPrevList);
-      } catch (err) {
-        console.error("Failed to fetch logged meals:", err);
-      }
-    };
-
     fetchLoggedMeals();
-  }, []);
+  }, [refreshFlag]);
 
   return (
-    <SafeAreaView>
-      <View style={styles.wrapper}>
-        <View>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Today's Logged Meals</Text>
-            <ScrollView>
+    <>
+      <Text style={styles.sectionTitle}>🍽️ Today's Meals</Text>
 
-              {meals.map((meal) => (
-                
-                <View key={meal.id} style={styles.mealContainer}>
-                  <TouchableOpacity
-                    onPress={() => toggleMealDetails(meal.id)}
-                    style={styles.mealHeader}
-                  >
-                    <Text style={styles.mealName}>{meal.name}</Text>
-                    <View style={styles.controlButtons}>
-                      <Text style={styles.toggleText}>
-                        {expandedMealId === meal.id ? "-" : "+"}
-                      </Text>
-                      <Button onPress={() => deleteMeal(meal.id)}>
-                        <AntDesign name="delete" size={20} color="black" />
-                      </Button>
-                    </View>
-                  </TouchableOpacity>
-                  {expandedMealId === meal.id && (
-                    <View style={styles.mealDetails}>
-                      {userPreferences?.macroViewing === false &&
-                        userPreferences?.calorieViewing === false && (
-                          <Text>
-                            {getMealInsights(meal.nutrition)
-                              .map((i) => `🌟 This meal is ${i}.`)
-                              .join("\n")}
-                          </Text>
-                        )}
-
-                      {userPreferences?.calorieViewing && (
-                        <Text>Calories: {meal.calories}</Text>
-                      )}
-                      <Text>Date: {meal.date}</Text>
-                    </View>
-                  )}
-                </View>
-              ))}
-
-              <Pressable onPress={() => setShowPrevious(!showPrevious)}>
-                <Text style={styles.expandToggle}>
-                  {showPrevious ? "Hide" : "Show"} Previous Logged Meals
+      {meals.length === 0 ? (
+        <Text style={styles.emptyText}>You haven’t logged any meals yet.</Text>
+      ) : (
+        <FlatList
+          data={meals}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => toggleMealDetails(item.id)}
+              style={styles.mealCard}
+            >
+              <View>
+                <Text style={styles.mealName}>
+                  {item.name || "Unnamed Meal"}
                 </Text>
-              </Pressable>
-
-              {showPrevious &&
-                previousMeals.map((meal) => (
-                  <View key={meal.id} style={styles.mealContainer}>
-                    <TouchableOpacity
-                      onPress={() => toggleMealDetails(meal.id)}
-                      style={styles.mealHeader}
-                    >
-                      <View>
-                        <Text style={styles.mealName}>{meal.name}</Text>
-                        <Text style={styles.dateText}>
-                          Logged on {meal.date}
-                        </Text>
-                      </View>
-
-                      <Text style={styles.toggleText}>
-                        {expandedMealId === meal.id ? "-" : "+"}
-                        <Button
-                          mode="outlined"
-                          onPress={() => deleteMeal(meal.id)}
-                          style={{ marginTop: 10 }}
-                        >
-                          Delete
-                        </Button>
-                      </Text>
-                    </TouchableOpacity>
-                    {expandedMealId === meal.id && (
-                      <View style={styles.mealDetails}>
-                        {userPreferences?.calorieViewing && (
-                          <Text>Calories: {meal.calories}</Text>
-                        )}
-                        <Text>Date: {meal.date}</Text>
-                      </View>
+                {userPreferences.calorieViewing ||
+                userPreferences.macroViewing ? (
+                  <Text style={styles.mealDetail}>
+                    {userPreferences.calorieViewing && (
+                      <>
+                        {item.nutrition?.calories || 0} cal{" "}
+                        {userPreferences.macroViewing && " | "}
+                      </>
                     )}
-                  </View>
-                ))}
-            </ScrollView>
+                    {userPreferences.macroViewing && (
+                      <>
+                        {item.nutrition?.protein || 0}g protein |{" "}
+                        {item.nutrition?.carbs || 0}g carbs |{" "}
+                        {item.nutrition?.fat || 0}g fat
+                      </>
+                    )}
+                  </Text>
+                ) : (
+                  <Text style={styles.mealDetail}>🌟 Balanced Meal!</Text>
+                )}
+
+                {item.mood && (
+                  <Text style={styles.mealMood}>Mood: {item.mood}</Text>
+                )}
+              </View>
+              {expandedMealId === item.id && (
+                <TouchableOpacity
+                  onPress={() =>
+                    Alert.alert("Delete Meal", "Are you sure?", [
+                      { text: "Cancel", style: "cancel" },
+                      {
+                        text: "Delete",
+                        style: "destructive",
+                        onPress: () => deleteMeal(item.id),
+                      },
+                    ])
+                  }
+                  style={styles.deleteButton}
+                >
+                  <Text style={styles.deleteButtonText}>Delete</Text>
+                </TouchableOpacity>
+              )}
+            </TouchableOpacity>
+          )}
+        />
+      )}
+
+      {previousMeals.length > 0 && (
+        <Pressable
+          onPress={() => setPreviousModalVisible(true)}
+          style={styles.showPreviousButton}
+        >
+          <Text style={styles.showPreviousText}>Show Previous Meals</Text>
+        </Pressable>
+      )}
+
+      <Modal
+        visible={previousModalVisible}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={() => setPreviousModalVisible(false)}
+      >
+        <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+          <View style={{ padding: 20 }}>
+            <Text style={styles.sectionTitle}>📅 Previous Meals</Text>
+
+            {previousMeals.map((meal) => (
+              <View key={meal.id} style={styles.mealCard}>
+                <Text style={styles.mealName}>{meal.name}</Text>
+                <Text style={styles.mealDetail}>
+                  {meal.nutrition?.calories || 0} cal |{" "}
+                  {meal.nutrition?.protein || 0}g protein |{" "}
+                  {meal.nutrition?.carbs || 0}g carbs |{" "}
+                  {meal.nutrition?.fat || 0}g fat
+                </Text>
+                <Text style={styles.dateText}>Logged on {meal.date}</Text>
+              </View>
+            ))}
+
             <Pressable
-              onPress={() => setModalVisible(false)}
+              onPress={() => setPreviousModalVisible(false)}
               style={styles.closeButton}
             >
-              <Text style={styles.closeText}>Close</Text>
+              <Text style={styles.closeButtonText}>Close</Text>
             </Pressable>
           </View>
-        </View>
-      </View>
-    </SafeAreaView>
+        </SafeAreaView>
+      </Modal>
+    </>
   );
 };
-const screenWidth = Dimensions.get("window");
+
+export default ViewLoggedMeals;
+
+const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
-  wrapper: {
-    padding: 16,
-    alignItems: "center",
-  },
-  controlButtons: {
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 0,
-
-    // margin: "auto",
-    // gap: 10,
-  },
-  openButton: {
-    backgroundColor: "#C3B1E1",
-    padding: 12,
-    borderRadius: 8,
-    fontFamily: "PatrickHand-regular",
-  },
-  openButtonText: {
-    fontSize: 16,
-    color: "black",
-    fontWeight: "600",
-  },
-  modalContainer: {
-    flex: 1,
-    padding: 20,
-  },
-  modalTitle: {
-    fontSize: 30,
+  sectionTitle: {
+    fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 10,
-    textAlign: "center",
-    fontFamily: "PatrickHand-regular",
-  },
-  mealContainer: {
+    fontFamily: "PatrickHand-Regular",
     marginBottom: 12,
-    borderWidth: 1,
-    width: "100%",
-    borderColor: "#E7D2CF",
-    borderRadius: 8,
-    overflow: "hidden",
+    color: "#333",
   },
-  mealHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    // padding: 12,
-    paddingLeft: 10,
-    width: "100%",
-    alignItems: "center",
-    backgroundColor: "#f6dfdb",
+  emptyText: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+    marginVertical: 20,
+  },
+  mealCard: {
+    backgroundColor: "#fff",
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#eee",
   },
   mealName: {
-    fontSize: 14,
+    fontSize: 16,
+    fontFamily: "Main-font",
     fontWeight: "bold",
-    fontFamily: "Comfortaa-regular",
+    marginBottom: 4,
   },
-  toggleText: {
-    fontSize: 18,
-    fontWeight: "bold",
+  mealDetail: {
+    fontSize: 13,
+    color: "#555",
   },
-  mealDetails: {
-    padding: 12,
-    backgroundColor: "#fff",
+  mealMood: {
+    fontSize: 13,
+    color: "#888",
+    fontStyle: "italic",
+    marginTop: 4,
   },
-  expandToggle: {
+  deleteButton: {
+    marginTop: 10,
+    backgroundColor: "#e57373",
+    padding: 8,
+    borderRadius: 8,
+  },
+  deleteButtonText: {
+    color: "white",
     textAlign: "center",
-    marginVertical: 10,
-    color: "#5A67D8",
     fontWeight: "bold",
+  },
+  showPreviousButton: {
+    backgroundColor: "#A084DC",
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 16,
+  },
+  showPreviousText: {
+    color: "white",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  dateText: {
+    marginTop: 8,
+    fontSize: 12,
+    color: "#888",
   },
   closeButton: {
     marginTop: 20,
     alignSelf: "center",
     padding: 10,
+    backgroundColor: "#ccc",
+    borderRadius: 8,
   },
-  closeText: {
-    color: "#390a84",
-    fontSize: 16,
+  closeButtonText: {
+    color: "#333",
+    fontWeight: "bold",
   },
-  dateText: {
-    fontSize: 12,
-    color: "#666",
-    fontStyle: "italic",
-  },
-  
 });
-
-export default ViewLoggedMeals;
