@@ -10,6 +10,7 @@ import { Alert } from "react-native";
 import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
+import Header from "@/components/header";
 export default function ExerciseHistoryScreen() {
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,37 +43,7 @@ export default function ExerciseHistoryScreen() {
 
   return (
     <>
-      <HeaderRNE
-        containerStyle={{
-          backgroundColor: "#f8edeb",
-          borderBottomWidth: 0,
-          paddingTop: 10,
-        }}
-        leftComponent={
-          <TouchableOpacity onPress={handleBackPress}>
-            <Icon name="arrow-back" size={25} type="ionicon" color="#271949" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "EXERCISE LOGS",
-          style: {
-            color: "#271949",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "PatrickHand-Regular",
-          },
-        }}
-        rightComponent={
-          <View style={styles.headerRight}>
-            <TouchableOpacity
-              style={{ marginLeft: 12 }}
-              onPress={() => router.replace("/settings")}
-            >
-              <Icon name="settings" size={25} type="feather" color="#271949" />
-            </TouchableOpacity>
-          </View>
-        }
-      />
+    <Header title=""/>
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.container}>
           <Text style={styles.title}>Your Exercise Logs</Text>

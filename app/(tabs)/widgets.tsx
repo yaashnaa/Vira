@@ -65,7 +65,7 @@ const tools = [
       {
         id: "mindfulness",
         label: "Mindfulness",
-        route: "/mindfullness",
+        route: "/mindfulness.tsx",
         icon: require("../../assets/images/widgetImages/yoga.png"),
         description: "Breathe, pause, and reset with simple mindful exercises.",
       },
@@ -84,7 +84,7 @@ const tools = [
       {
         id: "fitness",
         label: "Fitness Tracker",
-        route: "/fitnessScreen",
+        route: "/fitness",
         icon: require("../../assets/images/widgetImages/triangle.png"),
         description: "Explore gentle, energy-based exercise suggestions.",
       },
@@ -98,7 +98,7 @@ const tools = [
       {
         id: "water",
         label: "Water Tracker",
-        route: "/waterScreen",
+        route: "/waterTracker",
         icon: require("../../assets/images/widgetImages/water.png"),
         description: "Track hydration without pressure. Just gentle reminders.",
       },

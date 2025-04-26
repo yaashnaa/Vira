@@ -332,22 +332,7 @@ export default function Dashboard() {
                     >
                       <View style={styles.card}>
                         <OuotesBanner />
-                        {/* <Text style={styles.sectionTitle}>Today's Quote</Text>
-                        <Text style={styles.quote}>
-                          “Your body is your home — treat it gently.”
-                        </Text> */}
-                        {/* <Button
-                          title="Send Notification"
-                          onPress={() => {
-                            const uid = auth.currentUser?.uid;
-                            if (uid) {
-                              fetchAndSendPushNotification(uid, {
-                                title: "Hey from Vira!",
-                                body: "Time to check in with your mood 🌸",
-                              });
-                            }
-                          }}
-                        /> */}
+                      
                       </View>
                     </Animated.View>
                   );
@@ -572,7 +557,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     borderRadius: 12,
     padding: 16,
-    marginBottom: 16,
+    // marginBottom: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,

@@ -54,14 +54,7 @@ export default function OnBoardingScreen() {
   };
 
   if (loading) {
-    return (
-      <View style={styles.container}>
-        <Image
-          source={require("../../assets/images/vira.gif")}
-          style={{ width: 500, height: 500 }}
-        />
-      </View>
-    );
+    return null
   }
 
   if (shouldShowOnboarding) {

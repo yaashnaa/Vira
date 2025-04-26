@@ -29,6 +29,7 @@ export interface TastyRecipe {
 
 export default function SuggestMeals() {
   const { userPreferences } = useUserPreferences();
+  const [wasFetched, setWasFetched] = useState(false);
   const { hasLoggedToday } = useMoodContext();
   const [recipes, setRecipes] = useState<TastyRecipe[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +53,7 @@ export default function SuggestMeals() {
         "Gluten-free": "gluten_free",
         "Dairy-free": "dairy_free",
       };
-      
+
       const goalToTagMap: Record<string, string> = {
         "General fitness/health": "healthy",
         "Weight management or body recomposition": "low_calorie",
@@ -63,10 +64,12 @@ export default function SuggestMeals() {
         "Track progress and set goals": "meal_prep",
         "Improve mindfulness or self-care habits": "under_30_minutes",
       };
-      
-      const userTags = preferences.map((p) => preferenceToTagMap[p]).filter(Boolean);
+
+      const userTags = preferences
+        .map((p) => preferenceToTagMap[p])
+        .filter(Boolean);
       const goalTags = goals.map((g) => goalToTagMap[g]).filter(Boolean);
-  
+
       const tags = [...userTags, ...goalTags];
 
       const hasLowMood =
@@ -82,6 +85,7 @@ export default function SuggestMeals() {
       const shuffledResults = results.sort(() => Math.random() - 0.5);
 
       setRecipes(shuffledResults);
+      setWasFetched(true);
     } catch (err) {
       console.error("Recipe fetch failed:", err);
     } finally {
@@ -91,14 +95,15 @@ export default function SuggestMeals() {
   };
 
   useEffect(() => {
-    getRecipes();
-  }, []);
+    if (!wasFetched) {
+      getRecipes();
+    }
+  }, [wasFetched]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    getRecipes();
+    setWasFetched(false); 
   }, []);
-
   const filteredRecipes = recipes.filter((r) => {
     const tagNames = r.tags?.map((tag) => tag.name.toLowerCase()) || [];
     switch (filter.toLowerCase()) {
@@ -108,8 +113,8 @@ export default function SuggestMeals() {
         return tagNames.includes("high_protein");
       case "under 30 minutes":
         return tagNames.includes("under_30_minutes");
-        case "dinner":
-          return tagNames.includes("dinner");
+      case "dinner":
+        return tagNames.includes("dinner");
       case "all":
       default:
         return true;
@@ -131,7 +136,10 @@ export default function SuggestMeals() {
             </View>
           ))}
         </View>
-        <Card.Cover source={{ uri: recipe.thumbnail_url }} style={styles.cover} />
+        <Card.Cover
+          source={{ uri: recipe.thumbnail_url }}
+          style={styles.cover}
+        />
         <ScrollView>
           <Card.Content>
             <Text style={styles.recipeTitle}>{recipe.name}</Text>
@@ -140,7 +148,10 @@ export default function SuggestMeals() {
             </Text>
 
             {recipe.video_url && recipe.id === playingVideoId && (
-              <Webview source={{ uri: recipe.video_url }} style={styles.video} />
+              <Webview
+                source={{ uri: recipe.video_url }}
+                style={styles.video}
+              />
             )}
             {recipe.video_url && recipe.id !== playingVideoId && (
               <Text
@@ -158,7 +169,7 @@ export default function SuggestMeals() {
 
   return (
     <View style={styles.container}>
-     <Text style={styles.title}>
+      <Text style={styles.title}>
         {useMoodTags
           ? "🍽️ Suggested Meals for Your Mood"
           : "🍽️ Suggested Meals"}

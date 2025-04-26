@@ -1,4 +1,3 @@
-// LogExercise.tsx - Component to log exercise using natural language + mood scale
 import React, { useState } from "react";
 import {
   View,
@@ -8,10 +7,10 @@ import {
   Alert,
   Image,
   SafeAreaView,
+  Dimensions,
   ScrollView,
 } from "react-native";
 import { useRouter } from "expo-router";
-import LottieView from "lottie-react-native";
 import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Button, Card, RadioButton } from "react-native-paper";
@@ -20,6 +19,9 @@ import { saveExerciseLog } from "@/utils/saveExerciseLog";
 import { useMoodContext } from "@/context/moodContext";
 import * as ImagePicker from "expo-image-picker";
 import Toast from "react-native-toast-message";
+import LottieView from "lottie-react-native";
+import { Animated } from "react-native";
+
 const moodOptions = [
   {
     label: "Low Energy",
@@ -50,12 +52,16 @@ const moodOptions = [
 
 export default function LogExercise() {
   const [exerciseText, setExerciseText] = useState("");
-  const [moodAfter, setMoodAfter] = useState("Neutral");
+  const [moodAfter, setMoodAfter] = useState("Balanced & Okay"); // ✅ Default matches moodOptions
   const [submitting, setSubmitting] = useState(false);
   const { userId } = useMoodContext();
+  const [animation] = useState(new Animated.Value(1));
+
   const router = useRouter();
+
   const selectedMood =
     moodOptions.find((m) => m.label === moodAfter)?.value ?? 50;
+
   const handleSubmit = async () => {
     if (!exerciseText.trim()) {
       Alert.alert("Oops!", "Please enter an exercise description.");
@@ -73,25 +79,25 @@ export default function LogExercise() {
       Toast.show({
         type: "success",
         text1: "Exercise log saved!👏🏻",
- 
       });
-      
+
       setExerciseText("");
-      setMoodAfter("Neutral");
+      setMoodAfter("Balanced & Okay"); // ✅ Reset to default after save
+      router.back(); // ✅ Auto-close modal
     } catch (err) {
       Toast.show({
         type: "error",
         text1: "Something went wrong",
-        text2: "Failed to save your meal log",
+        text2: "Failed to save your exercise log",
       });
-      
       console.error(err);
     } finally {
       setSubmitting(false);
     }
   };
+
   const handleBackPress = () => {
-    router.replace("/fitness");
+    router.replace("/fitness/(tabs)/explore");
   };
 
   const handleNavigate = (route: Parameters<typeof router.push>[0]): void =>
@@ -99,97 +105,115 @@ export default function LogExercise() {
 
   return (
     <>
-      <HeaderRNE
-        containerStyle={{
-          backgroundColor: "#f8edeb",
-          borderBottomWidth: 0,
-          paddingTop: 10,
-        }}
-        leftComponent={
-          <TouchableOpacity onPress={handleBackPress}>
-            <Icon name="arrow-back" size={25} type="ionicon" color="#271949" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "FIND EXERCISES",
-          style: {
-            color: "#271949",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "PatrickHand-Regular",
-          },
-        }}
-        rightComponent={
-          <View style={styles.headerRight}>
-            <TouchableOpacity onPress={() => handleNavigate("/settings")}>
-              <Icon name="settings" type="feather" color="#150b01" />
-            </TouchableOpacity>
-          </View>
-        }
-      />
+      <View style={styles.container}>
+        <LottieView
+          source={require("../assets/animations/exercise.json")}
+          autoPlay
+          loop
+          style={{ width: "100%", height: 200 }}
+        />
+        <Card style={styles.card} mode="contained">
+          <Card.Title title="🏋️ Log Your Movemen" titleStyle={styles.title} />
+          <Card.Content>
+            <Text style={styles.label}>What kind of movement did you do?</Text>
+            <TextInput
+              placeholder="e.g. 30 minutes yoga, 15 minutes walking..."
+              value={exerciseText}
+              onChangeText={(text) => setExerciseText(text.slice(0, 300))}
+              style={styles.input}
+              placeholderTextColor="#999"
+              multiline
+            />
 
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-          <Card style={styles.card}>
-            <Card.Title title="Log Movement" titleStyle={styles.title} />
-            <Card.Content>
-              <Text style={styles.label}>
-                What kind of movement did you do?
-              </Text>
-              <TextInput
-                placeholder="e.g. 30 minutes yoga, 15 minutes walking..."
-                value={exerciseText}
-                onChangeText={setExerciseText}
-                style={styles.input}
-                placeholderTextColor="#999"
-                multiline
-              />
-
-              <View style={styles.section}>
-                <Text style={styles.label}>How did you feel after moving?</Text>
-                <View style={styles.ratingRow}>
-                  {moodOptions.map((option, index) => (
-                    <TouchableOpacity
-                      key={index}
-                      onPress={() => setMoodAfter(option.label)}
-                      style={
-                        moodAfter === option.label
-                          ? styles.selectedMood
-                          : styles.moodOption
-                      }
+            <View style={styles.section}>
+              <Text style={styles.label}>How did you feel after moving?</Text>
+              <View style={styles.ratingRow}>
+                {moodOptions.map((option, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    accessibilityLabel={`Select mood: ${option.label}`}
+                    onPress={() => {
+                      setMoodAfter(option.label);
+                      Animated.sequence([
+                        Animated.timing(animation, {
+                          toValue: 1.3, 
+                          duration: 150,
+                          useNativeDriver: true,
+                        }),
+                        Animated.timing(animation, {
+                          toValue: 1, // Back to normal
+                          duration: 150,
+                          useNativeDriver: true,
+                        }),
+                      ]).start();
+                    }}
+                    style={
+                      moodAfter === option.label
+                        ? styles.selectedMood
+                        : styles.moodOption
+                    }
+                  >
+                    <Animated.View
+                      style={{
+                        transform: [
+                          { scale: moodAfter === option.label ? animation : 1 },
+                        ],
+                      }}
                     >
                       <Image source={option.image} style={styles.moodImage} />
-                    </TouchableOpacity>
-                  ))}
-                </View>
-
-                {moodAfter && (
-                  <View style={styles.selectedMoodBox}>
-                    <Text style={styles.selectedMoodText}>{moodAfter}</Text>
-                  </View>
-                )}
+                    </Animated.View>
+                  </TouchableOpacity>
+                ))}
               </View>
 
-              <Button
-                mode="contained"
-                onPress={handleSubmit}
-                disabled={submitting}
-                style={styles.button}
-              >
-                {submitting ? "Saving..." : "Save Log"}
-              </Button>
-            </Card.Content>
-          </Card>
-        </SafeAreaView>
+              {moodAfter && (
+                <View style={styles.selectedMoodBox}>
+                  <Text style={styles.selectedMoodText}>{moodAfter}</Text>
+                </View>
+              )}
+            </View>
 
+            <Button
+              mode="contained"
+              onPress={handleSubmit}
+              disabled={submitting}
+              style={styles.button}
+            >
+              {submitting ? "Saving..." : "Save Log"}
+            </Button>
+            <Button
+              mode="contained"
+              onPress={() => router.replace("/fitness/(tabs)/explore")}
+              textColor="#000"
+              style={[styles.button, { width: "40%", margin: "auto" }]}
+            >
+              Back
+            </Button>
+          </Card.Content>
+        </Card>
+      </View>
     </>
   );
 }
-
+const { width, height } = Dimensions.get("window");
 const styles = StyleSheet.create({
+  container: {
+    // flex: 1,
+    backgroundColor: "#ffffff",
+    height: height * 0.9,
+    width: width,
+
+    justifyContent: "center",
+    alignItems: "center",
+    margin: 0,
+  },
   card: {
-    margin: 16,
+    // margin: 16,
     padding: 10,
-    backgroundColor: "#fff3f3",
+    backgroundColor: "#ffffff",
+    // height: height * 0.5,
+    justifyContent: "center",
+    alignItems: "center",
   },
   selectedMoodBox: {
     // marginTop: 12,
@@ -239,7 +263,9 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 20,
-    backgroundColor: "#f4cac4",
+    width: "80%",
+    alignSelf: "center",
+    backgroundColor: "#FAE1DD",
   },
   section: {
     marginBottom: 15,

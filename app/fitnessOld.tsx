@@ -334,7 +334,7 @@
                       labelStyle={{ fontSize: 14 }}
                       textColor="#271949"
                       style={[{ width: 150 }, styles.button]}
-                      onPress={() => router.push("/findExercises")}
+                      onPress={() => router.push("/")}
                     >
                       Explore More
                     </Button>

@@ -8,6 +8,12 @@ import {
   FlatList,
   Dimensions,
 } from "react-native";
+import Toast from "react-native-toast-message";
+
+import {
+  fetchFavoriteExercises,
+  deleteFavoriteExercise,
+} from "@/utils/saveFavoriteExercises";
 import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import {
@@ -24,7 +30,11 @@ import {
   fetchExerciseData,
   ExerciseProps,
 } from "@/utils/api/fetchExerciseData";
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { db, auth } from "@/config/firebaseConfig";
 import { useRouter } from "expo-router";
+import { saveFavoriteExercise } from "@/utils/saveFavoriteExercises";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 export const screenOptions = {
   animation: "slide_from_right", // Other options: "fade", "none", etc.
 };
@@ -41,9 +51,16 @@ export default function FitnessScreen() {
   const [muscle, setMuscle] = useState("");
   const [difficulty, setDifficulty] = useState("");
   const [type, setType] = useState("");
+  const [favorites, setFavorites] = useState<ExerciseProps[]>([]);
+
   const formatLabel = (text: string) =>
     text.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 
+  const loadFavoriteNamesFromFirestore = async () => {
+    const favorites = await fetchFavoriteExercises();
+    setFavorites(favorites);
+  };
+  
   const muscleOptions = [
     "abdominals",
     "biceps",
@@ -64,6 +81,40 @@ export default function FitnessScreen() {
     "powerlifting",
     "plyometrics",
   ];
+
+
+  useEffect(() => {
+    loadFavoriteNamesFromFirestore();
+  }, []);
+
+  const isFavorite = (exerciseName: string) => {
+    const exerciseId = exerciseName.replace(/\s+/g, "_").toLowerCase();
+    return favorites.some((fav) => fav.id === exerciseId);
+  };
+  
+  const toggleFavorite = async (exercise: ExerciseProps) => {
+    const exerciseId = exercise.name.replace(/\s+/g, "_").toLowerCase();
+  
+    if (favorites.some((fav) => fav.id === exerciseId)) {
+      await deleteFavoriteExercise(exercise.name);
+      Toast.show({
+        type: "info",
+        text1: "Removed from Favorites 💔",
+        position: "bottom",
+      });
+      setFavorites((prev) => prev.filter((fav) => fav.id !== exerciseId));
+    } else {
+      await saveFavoriteExercise(exercise);
+      Toast.show({
+        type: "success",
+        text1: "Added to Favorites ❤️",
+        position: "bottom",
+      });
+      setFavorites((prev) => [...prev, { id: exerciseId, ...exercise }]);
+    }
+  };
+  
+  
 
   const difficultyOptions = ["beginner", "intermediate", "expert"];
 
@@ -141,34 +192,6 @@ export default function FitnessScreen() {
     router.push(route);
   return (
     <>
-      <HeaderRNE
-        containerStyle={{
-          backgroundColor: "#f8edeb",
-          borderBottomWidth: 0,
-          paddingTop: 10,
-        }}
-        leftComponent={
-          <TouchableOpacity onPress={handleBackPress}>
-            <Icon name="arrow-back" size={25} type="ionicon" color="#271949" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "FIND EXERCISES",
-          style: {
-            color: "#271949",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "PatrickHand-Regular",
-          },
-        }}
-        rightComponent={
-          <View style={styles.headerRight}>
-            <TouchableOpacity onPress={() => handleNavigate("/settings")}>
-              <Icon name="settings" type="feather" color="#150b01" />
-            </TouchableOpacity>
-          </View>
-        }
-      />
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.filterLabel}>Muscle Group</Text>
         <View style={styles.chipContainer}>
@@ -209,10 +232,6 @@ export default function FitnessScreen() {
             </Chip>
           ))}
         </View>
-
-        <Text style={{ fontStyle: "italic", color: "#666", marginBottom: 10 }}>
-          Based on your physical health, we've suggested {difficulty} exercises.
-        </Text>
 
         <Text style={styles.filterLabel}>Difficulty</Text>
         <View style={styles.chipContainer}>
@@ -265,6 +284,20 @@ export default function FitnessScreen() {
                     subtitle={formatLabel(item.type)}
                     titleStyle={styles.cardTitle}
                     subtitleStyle={styles.cardSubtitle}
+                    right={(props) => (
+                      <TouchableOpacity
+                        {...props}
+                        onPress={() => toggleFavorite(item)}
+                        style={{ marginRight: 10 }}
+                      >
+                        <MaterialCommunityIcons
+                          name={isFavorite(item.name) ? "heart" : "heart-outline"}
+                          size={24}
+                          color={isFavorite(item.name) ? "#ff6b81" : "#aaa"}
+                        />
+                      </TouchableOpacity>
+                    )}
+                    
                   />
                   <Card.Content>
                     <Text style={styles.label}>Muscle:</Text>
@@ -304,6 +337,16 @@ export default function FitnessScreen() {
                   <Text style={styles.label}>Full Instructions:</Text>
                   <Text>{selectedExercise.instructions}</Text>
                   <Button
+                    onPress={() => {
+                      toggleFavorite(selectedExercise);
+                      setModalVisible(false);
+                    }}
+                    
+                    style={styles.button}
+                  >
+                    Save to Favorites
+                  </Button>
+                  <Button
                     onPress={() => setModalVisible(false)}
                     style={styles.button}
                   >
@@ -318,7 +361,7 @@ export default function FitnessScreen() {
     </>
   );
 }
-const height= Dimensions.get("window").height;
+const height = Dimensions.get("window").height;
 const styles = StyleSheet.create({
   container: {
     padding: 20,
@@ -355,7 +398,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     backgroundColor: "#ffffff",
   },
- 
+
   label: {
     fontWeight: "600",
     marginTop: 8,
@@ -377,9 +420,14 @@ const styles = StyleSheet.create({
   modal: {
     backgroundColor: "#fff",
     padding: 20,
-    margin: 20,
+    marginHorizontal: 20,
     borderRadius: 12,
-    height: height * 0.7,
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+    width: "80%",
+    maxWidth: 400,
+    height: height * 0.3,
   },
   sectionTitle: {
     fontSize: 22,

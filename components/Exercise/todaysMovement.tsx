@@ -114,7 +114,8 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     backgroundColor: "#f8f9fa",
     borderRadius: 12,
-    width: width * 0.8,
+    width: width * 0.91,
+    alignSelf: "center",
   },
   title: {
     fontSize: 20,
