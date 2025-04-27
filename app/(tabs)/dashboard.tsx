@@ -86,12 +86,12 @@ import { useCheckInContext } from "@/context/checkInContext";
 const STORAGE_KEY = "@enabledWidgets";
 const dashboardSections = [
   { key: "greeting" },
-  { key: "quote" },
+  // { key: "quote" },
   { key: "checkinCard" },
   { key: "logMood" },
   { key: "quiz" },
   { key: "pinnedWidgets" },
-  { key: "actions" },
+  // { key: "actions" },
 ];
 const greetings = [
   "Wishing you a calm and kind day 🌸",

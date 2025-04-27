@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from "react-native";
 import Slider from "@react-native-community/slider"; // 🟣 Add slider
-
+import Header from "@/components/header";
 interface BreathingExerciseProps {
   onBack: () => void;
 }
@@ -16,34 +16,45 @@ export default function BreathingExercise({ onBack }: BreathingExerciseProps) {
   const [exhaleDuration, setExhaleDuration] = useState(4);
 
   useEffect(() => {
-    const startBreathing = () => {
-      Animated.sequence([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: inhaleDuration * 1000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: holdDuration * 1000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 0,
-          duration: exhaleDuration * 1000,
-          useNativeDriver: true,
-        }),
-      ]).start(({ finished }) => {
-        if (finished) {
-          cyclePhases();
-          startBreathing();
-        }
-      });
+    let timeout1: NodeJS.Timeout;
+    let timeout2: NodeJS.Timeout;
+    let timeout3: NodeJS.Timeout;
+  
+    const startBreathingCycle = () => {
+      setPhase("Inhale");
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: inhaleDuration * 1000,
+        useNativeDriver: true,
+      }).start();
+  
+      timeout1 = setTimeout(() => {
+        setPhase("Hold");
+        timeout2 = setTimeout(() => {
+          setPhase("Exhale");
+          Animated.timing(fadeAnim, {
+            toValue: 0,
+            duration: exhaleDuration * 1000,
+            useNativeDriver: true,
+          }).start();
+  
+          timeout3 = setTimeout(() => {
+            startBreathingCycle(); // restart the whole cycle
+          }, exhaleDuration * 1000);
+        }, holdDuration * 1000);
+      }, inhaleDuration * 1000);
     };
-
-    startBreathing();
-  }, [inhaleDuration, holdDuration, exhaleDuration]); // ✅ re-run if user changes durations!
-
+  
+    startBreathingCycle();
+  
+    return () => {
+      clearTimeout(timeout1);
+      clearTimeout(timeout2);
+      clearTimeout(timeout3);
+      fadeAnim.stopAnimation();
+    };
+  }, [inhaleDuration, holdDuration, exhaleDuration]);
+  
   const cyclePhases = () => {
     setPhase((prev) => {
       if (prev === "Inhale") return "Hold";
@@ -53,13 +64,12 @@ export default function BreathingExercise({ onBack }: BreathingExerciseProps) {
   };
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={onBack}>
-        <Text style={styles.backButtonText}>← Back</Text>
-      </TouchableOpacity>
-
+    <>
+    <Header title="Breathing Exercise" backPath="/mindfulness" />
+      <View style={styles.container}>
+  
       <View style={styles.breathingContainer}>
-        <Animated.View style={[styles.circle, { opacity: fadeAnim }]} />
+        <Animated.View style={[styles.circle, { opacity: fadeAnim  }]} />
       </View>
 
       <Text style={styles.instruction}>
@@ -102,6 +112,8 @@ export default function BreathingExercise({ onBack }: BreathingExerciseProps) {
         />
       </View>
     </View>
+    </>
+  
   );
 }
 

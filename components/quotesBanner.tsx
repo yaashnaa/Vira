@@ -39,7 +39,7 @@ export default function QuoteBanner() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#f9f5ff",
+    backgroundColor: "#fff0f4",
     paddingVertical: 20,
     paddingHorizontal: 24,
     borderRadius: 20,
