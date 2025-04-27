@@ -17,7 +17,7 @@ import {
   updateEmail,
 } from "firebase/auth";
 import { Ionicons } from "@expo/vector-icons";
-
+import Header from "@/components/header";
 import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import { auth, db } from "@/config/firebaseConfig";
 import { deleteAccount, logoutUser } from "@/utils/auth";
@@ -112,23 +112,7 @@ export default function AccountSettingsSection() {
 
   return (
     <>
-      <HeaderRNE
-        containerStyle={{ backgroundColor: "#f8edeb", borderBottomWidth: 0 }}
-        leftComponent={
-          <TouchableOpacity onPress={() => router.back()}>
-            <Icon name="arrow-back" type="ionicon" color="#190028" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "ACCOUNT SETTINGS",
-          style: {
-            color: "#271949",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "PatrickHand-Regular",
-          },
-        }}
-      />
+<Header title="Account"/>
       <View style={styles.section}>
         <Text style={styles.nameLabel}> Welcome, {userPreferences.name}</Text>
         <TouchableOpacity
@@ -147,7 +131,7 @@ export default function AccountSettingsSection() {
           <>
             <Text style={styles.label}>
               Current email:
-              <Text style={{ marginBottom: 10}}>{user?.email}</Text>
+              <Text style={{ marginBottom: 15}}>{user?.email}</Text>
             </Text>
             <TextInput
               style={styles.input}
@@ -192,7 +176,7 @@ export default function AccountSettingsSection() {
         {showPasswordSection && (
           <>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { marginTop: 10 }]}
               placeholder="Current password"
               value={currentPassword}
               onChangeText={setCurrentPassword}
@@ -254,6 +238,7 @@ const styles = StyleSheet.create({
     // marginTop: 24,
     backgroundColor: "#fff",
     height: height,
+    marginBottom: 75
   },
   sectionHeading: {
     fontSize: 20,
@@ -275,8 +260,8 @@ const styles = StyleSheet.create({
     // fontFamily: Platform.select({ ios: "Helvetica", android: "Roboto" }),
   },
   label: {
-    fontWeight: "500",
-    marginTop: 18,
+    // fontWeight: "500",
+    marginTop: 10,
     marginBottom: 6,
     color: "#333",
   },

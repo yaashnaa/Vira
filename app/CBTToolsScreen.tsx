@@ -16,6 +16,7 @@ import { db, auth } from "@/config/firebaseConfig";
 import { useRouter } from "expo-router";
 import CBTExplanationSection from "@/components/CBTExplanation";
 import Toast from "react-native-toast-message";
+import { Alert } from "react-native"; // at the top
 export default function CBTToolsScreen() {
   const router = useRouter();
   const [situation, setSituation] = useState("");
@@ -29,6 +30,10 @@ export default function CBTToolsScreen() {
 
   const handleSave = async () => {
     try {
+      if (!situation.trim()) {
+        Alert.alert("Missing Information", "Please describe the situation.");
+        return;
+      }
       const userId = auth.currentUser?.uid;
       if (!userId) return;
 

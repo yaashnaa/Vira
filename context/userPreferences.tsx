@@ -47,9 +47,12 @@ export interface UserPreferences {
   contentAvoidance: string;
   copingToolsConsent: string;
   userNotes: string;
-  notificationTime?: string; // Optional field for notification time
-  notificationSound?: string; // Optional field for notification sound
-  encouragementNotifications?: string; // Optional field for encouragement notifications
+  notificationTime?: string;
+  notificationSound?: string; 
+  encouragementNotifications?: string; 
+  waterReminderEnabled?: boolean; 
+  waterReminderFrequency?: number;
+  macroUnit?: string; 
 
 }
 
@@ -86,6 +89,9 @@ export const DEFAULT_PREFS: UserPreferences = {
   contentAvoidance: "None",
   copingToolsConsent: "Yes, always",
   userNotes: "",
+  waterReminderEnabled: false,
+  waterReminderFrequency: 3, 
+  macroUnit: "percent", 
 };
 
 interface UserPreferencesContextProps {

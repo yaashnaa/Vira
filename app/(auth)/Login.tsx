@@ -6,6 +6,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { auth } from "../../config/firebaseConfig";
 import * as AuthSession from "expo-auth-session";
+import Toast from "react-native-toast-message";
 import {
   StyleSheet,
   Text,
@@ -19,7 +20,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
-  Platform,
+  Platform, ActivityIndicator
 } from "react-native";
 import { Button } from "react-native-paper";
 import { useRouter } from "expo-router";
@@ -36,18 +37,26 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const { promptAsync, request } = useGoogleAuth();
   const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
 
   const { updatePreferences, updatePreferencesFromFirestore } =
     useUserPreferences();
 
   const handleLogin = async () => {
-    setErrorMessage(""); // Clear previous error
+    setErrorMessage("");
+    setIsLoading(true); // Start spinner
+
     try {
       await loginUser(email, password);
 
       const currentUser = auth.currentUser;
       if (!currentUser) {
-        setErrorMessage("User not found.");
+        Toast.show({
+          type: "error",
+          text1: "User not found",
+          visibilityTime: 2000,
+        });
         return;
       }
 
@@ -61,16 +70,27 @@ export default function LoginScreen() {
     } catch (error) {
       const message = (error as Error).message;
 
-      // Optionally match known Firebase error codes
       if (message.includes("auth/wrong-password")) {
-        setErrorMessage("Invalid password. Please try again.");
+        Toast.show({
+          type: "error",
+          text1: "Invalid password. Please try again.",
+          visibilityTime: 2000,
+        });
       } else if (message.includes("auth/user-not-found")) {
-        setErrorMessage("No account found with this email.");
+        Toast.show({
+          type: "error",
+          text1: "No account found with this email.",
+          visibilityTime: 2000,
+        });
       } else {
-        setErrorMessage(
-          "Login failed. Please check your details and try again."
-        );
+        Toast.show({
+          type: "error",
+          text1: "Login failed. Please check your details.",
+          visibilityTime: 2000,
+        });
       }
+    } finally {
+      setIsLoading(false); // Always stop spinner
     }
   };
 
@@ -82,10 +102,6 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <Image
-        style={styles.image}
-        source={require("../../assets/images/Vira.png")}
-      />
       <StatusBar style="auto" />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -93,14 +109,34 @@ export default function LoginScreen() {
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <ScrollView
-            contentContainerStyle={{
-              // flexGrow: 1,
-              justifyContent: "center",
-              padding: 20,
-            }}
+            contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
             keyboardShouldPersistTaps="handled"
           >
+            <View style={{ position: "relative", width: 350, height: 300 }}>
+              {imageLoading && (
+                <ActivityIndicator
+                  size="large"
+                  color="#86508f"
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    marginLeft: -25,
+                    marginTop: -25,
+                  }}
+                />
+              )}
+              <Image
+                style={styles.image}
+                source={require("../../assets/images/Vira.png")}
+                onLoadEnd={() => setImageLoading(false)} // hide loader once loaded
+              />
+            </View>
+
             <View style={styles.insideCont}>
+              {errorMessage !== "" && (
+                <Text style={styles.errorText}>{errorMessage}</Text>
+              )}
               <View style={styles.inputs}>
                 <View style={styles.inputView}>
                   <AntDesign
@@ -134,13 +170,20 @@ export default function LoginScreen() {
                   />
                 </View>
               </View>
-              {errorMessage !== "" && (
-                <Text style={styles.errorText}>{errorMessage}</Text>
-              )}
 
               <TouchableOpacity>
                 <Text style={styles.forgot_button}>Forgot Password?</Text>
               </TouchableOpacity>
+              <Button
+                mode="contained-tonal"
+                buttonColor="#86508f"
+                textColor="#fefefe"
+                onPress={handleLogin}
+                loading={isLoading} // ✨ This will show spinner!
+                disabled={isLoading} // Optional: disable while loading
+              >
+                LOGIN
+              </Button>
               {/* <Button style={{ marginTop: 50 }} onPress={() => promptAsync()}>
                 Log in with google
               </Button> */}
@@ -148,22 +191,12 @@ export default function LoginScreen() {
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
-      <View style={styles.button}>
-        <Button
-          mode="contained-tonal"
-          buttonColor="#86508f"
-          textColor="#fefefe"
-          onPress={handleLogin}
-        >
-          <Text style={styles.loginText}>LOGIN</Text>
-        </Button>
-      </View>
 
-      {/* <View style={styles.link}>
+      <View style={styles.link}>
         <TouchableOpacity onPress={() => router.push("/(auth)/signup")}>
           <Text style={styles.signupText}>Don't have an account? Sign up</Text>
         </TouchableOpacity>
-      </View> */}
+      </View>
     </View>
   );
 }
@@ -184,21 +217,22 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   button: {
-    bottom: 120,
+    // bottom: 120,
   },
   insideCont: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    top: 50,
+    // top: 50,
+    alignSelf: "center",
     bottom: 0,
     width: width * 0.7,
   },
   image: {
-    height: 400,
-    width: 400,
-    top: 40,
+    height: 300,
+    width: 350,
+    bottom: 80,
     marginBottom: 10,
   },
 
@@ -229,17 +263,16 @@ const styles = StyleSheet.create({
   },
   forgot_button: {
     height: 30,
-    marginBottom: 30,
+    // marginBottom: 30,
     color: "#003f5c",
   },
   errorText: {
     color: "red",
     fontSize: 14,
-    marginTop: 12,
+    // marginTop: 12,
     fontFamily: "Main-font",
     textAlign: "center",
-  }
-,  
+  },
   inputs: {
     display: "flex",
     gap: 20,

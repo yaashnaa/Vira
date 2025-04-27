@@ -25,6 +25,11 @@ export default function NutritionTabsLayout() {
               <Ionicons name="arrow-back" size={24} color="#5a3e9b" />
             </Pressable>
           ),
+          headerRight: () => (
+            <Pressable onPress={() => router.replace('/settings/nutritionMovement')} style={{ marginRight: 15 }}>
+              <Ionicons name="settings" size={24} color="#5a3e9b" />
+            </Pressable>
+          ),
         }}
       />
 
@@ -39,6 +44,11 @@ export default function NutritionTabsLayout() {
           headerLeft: () => (
             <Pressable onPress={() => router.replace('/dashboard')} style={{ marginLeft: 15 }}>
               <Ionicons name="arrow-back" size={24} color="#5a3e9b" />
+            </Pressable>
+          ),
+          headerRight: () => (
+            <Pressable onPress={() => router.replace('/settings/nutritionMovement')} style={{ marginRight: 15 }}>
+              <Ionicons name="settings" size={24} color="#5a3e9b" />
             </Pressable>
           ),
         }}
@@ -57,6 +67,11 @@ export default function NutritionTabsLayout() {
               <Ionicons name="arrow-back" size={24} color="#5a3e9b" />
             </Pressable>
           ),
+          headerRight: () => (
+            <Pressable onPress={() => router.replace('/settings/nutritionMovement')} style={{ marginRight: 15 }}>
+              <Ionicons name="settings" size={24} color="#5a3e9b" />
+            </Pressable>
+          ),
         }}
       />
 
@@ -71,6 +86,11 @@ export default function NutritionTabsLayout() {
           headerLeft: () => (
             <Pressable onPress={() => router.replace('/dashboard')} style={{ marginLeft: 15 }}>
               <Ionicons name="arrow-back" size={24} color="#5a3e9b" />
+            </Pressable>
+          ),
+          headerRight: () => (
+            <Pressable onPress={() => router.replace('/settings/nutritionMovement')} style={{ marginRight: 15 }}>
+              <Ionicons name="settings" size={24} color="#5a3e9b" />
             </Pressable>
           ),
         }}

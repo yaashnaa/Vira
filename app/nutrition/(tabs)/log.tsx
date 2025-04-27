@@ -5,7 +5,8 @@ import {
   TextInput,
   Image,
   StyleSheet,
-  TouchableOpacity, Dimensions,
+  TouchableOpacity,
+  Dimensions,
 } from "react-native";
 import {
   Modal,
@@ -70,7 +71,7 @@ export default function LogMealCardModal({ onLog }: LogMealCardModalProps) {
   const [descriptionError, setDescriptionError] = useState(false);
   const [imageUri, setImageUri] = useState<string | null>(null);
   const router = useRouter();
-  const {triggerRefresh} = useMealLog();
+  const { triggerRefresh } = useMealLog();
   const [loading, setLoading] = useState(false);
 
   const pickImage = async () => {
@@ -140,7 +141,7 @@ export default function LogMealCardModal({ onLog }: LogMealCardModalProps) {
       onLog?.({ nutrition, mood, name: mealDescription });
       triggerRefresh();
 
-     Toast.show({
+      Toast.show({
         type: "success",
         text1: "Meal logged! 🍽️",
         text2: "Your meal has been successfully logged.",
@@ -179,7 +180,7 @@ export default function LogMealCardModal({ onLog }: LogMealCardModalProps) {
           setMealDescription(text);
           if (text.trim()) setDescriptionError(false);
         }}
-        placeholder="Log your meal (e.g., '1 cup pasta with tomato sauce')"
+        placeholder="e.g., '1 cup pasta with tomato sauce' "
       />
       {descriptionError && (
         <Text style={styles.errorText}>Please describe your meal.</Text>
@@ -229,6 +230,7 @@ export default function LogMealCardModal({ onLog }: LogMealCardModalProps) {
             </TouchableOpacity>
           ))}
         </View>
+        {mood && <Text style={styles.selectedMoodLabel}>{mood}</Text>}
       </View>
       {/* 
           <View style={styles.section}>
@@ -247,7 +249,7 @@ export default function LogMealCardModal({ onLog }: LogMealCardModalProps) {
     </View>
   );
 }
-const height= Dimensions.get("window").height;
+const height = Dimensions.get("window").height;
 const styles = StyleSheet.create({
   modal: {
     backgroundColor: "white",
@@ -259,6 +261,15 @@ const styles = StyleSheet.create({
     // alignItems: "center",
     justifyContent: "center",
     margin: "auto",
+  },
+  selectedMoodLabel: {
+    marginTop: 10,
+    fontSize: 16,
+    fontFamily: "Main-font",
+    // fontWeight: "600",
+    color: "#555",
+    textAlign: "center",
+
   },
   title: {
     fontSize: 20,

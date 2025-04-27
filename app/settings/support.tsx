@@ -31,7 +31,7 @@ export default function SupportScreen() {
 
   return (
     <>
-      <Header title="Need Support?" />
+      <Header title="Need Support?" backPath="/settings"/>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.introText}>
           If you're feeling overwhelmed, confused, or need help with the app,

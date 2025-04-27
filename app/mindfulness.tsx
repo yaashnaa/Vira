@@ -1,102 +1,38 @@
-import React from "react";
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
-import LottieView from "lottie-react-native";
-import { useRouter } from "expo-router";
-import { Header as HeaderRNE, Icon } from "@rneui/themed";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import BreathingExercise from "@/components/mindfullness/BreathingExercise";
+import BodyScanExercise from "@/components/mindfullness/BodyScanExercise";
+import FiveSensesExercise from "@/components/mindfullness/FiveSensesExercise";
 
-const width = Dimensions.get("window").width;
-const height = Dimensions.get("window").height;
-export default function Mindfullness() {
-  const router = useRouter();
-  const mindfullnessLottie = require("../assets/animations/underConstruction.json");
-  const handleBackPress = () => {
-    router.replace("/dashboard");
-  };
+export default function MindfulnessScreen() {
+  const [selectedTechnique, setSelectedTechnique] = useState<string | null>(null);
+
+  if (selectedTechnique === "Breathing") return <BreathingExercise onBack={() => setSelectedTechnique(null)} />;
+  if (selectedTechnique === "BodyScan") return <BodyScanExercise onBack={() => setSelectedTechnique(null)} />;
+  if (selectedTechnique === "FiveSenses") return <FiveSensesExercise onBack={() => setSelectedTechnique(null)} />;
+
   return (
-    <>
-      <HeaderRNE
-        containerStyle={{
-          backgroundColor: "#f8edeb",
-          borderBottomWidth: 0,
-          paddingTop: 10,
-        }}
-        leftComponent={
-          <TouchableOpacity onPress={handleBackPress}>
-            <Icon name="arrow-back" size={25} type="ionicon" color="#271949" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "MINDFULLNESS",
-          style: {
-            color: "#271949",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "PatrickHand-Regular",
-          },
-        }}
-        rightComponent={
-          <View style={styles.headerRight}>
-            <TouchableOpacity
-              style={{ marginLeft: 12 }}
-              onPress={handleBackPress}
-            >
-              <Icon name="settings" size={25} type="feather" color="#271949" />
-            </TouchableOpacity>
-          </View>
-        }
-      />
-      <Text style={styles.title}> We are currently under construction 🚧</Text>
-      <Text style={styles.subtitle}> Check back again soon!</Text>
-      <View style={styles.container}>
-        <LottieView
-          source={mindfullnessLottie}
-          autoPlay
-          loop
-          style={{
-            width: width *1.2,
-            height: height ,
-            marginLeft: 10,
-            marginBottom: 20,
-          }}
-        />
-      </View>
-    </>
+    <View style={styles.container}>
+      <Text style={styles.title}>🧘 Mindfulness Exercises</Text>
+
+      <TouchableOpacity style={styles.button} onPress={() => setSelectedTechnique("Breathing")}>
+        <Text style={styles.buttonText}>🌬️ Breathing Exercise</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.button} onPress={() => setSelectedTechnique("BodyScan")}>
+        <Text style={styles.buttonText}>🛌 Body Scan</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.button} onPress={() => setSelectedTechnique("FiveSenses")}>
+        <Text style={styles.buttonText}>👁️ Five Senses</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    // backgroundColor: "#f5f5f5",
-    display: "flex",
-    margin:"auto",
-  },
-  text: {
-    fontSize: 18,
-    top: 60,
-    color: "#333",
-  },
-  headerRight: {
-    flexDirection: "row",
-    marginTop: 5,
-  },
-  title: {
-    fontSize: 28,
-    top: 60,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 10,
-    fontFamily: "PatrickHand-Regular",
-  },
-  subtitle:{
-    top: 60,
-    fontSize: 22,
-    textAlign: "center",
-    marginBottom: 20,
-    fontFamily: "PatrickHand-Regular",
-    color: "#666",
-  }
+  container: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20, backgroundColor: "#fff" },
+  title: { fontSize: 28, fontWeight: "bold", marginBottom: 30, fontFamily: "PatrickHand-Regular" },
+  button: { backgroundColor: "#D6C7F7", padding: 15, marginVertical: 10, borderRadius: 12, width: "80%", alignItems: "center" },
+  buttonText: { fontSize: 18, color: "#432371", fontFamily: "Main-font" },
 });
-

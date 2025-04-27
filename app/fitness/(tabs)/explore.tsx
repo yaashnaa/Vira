@@ -12,13 +12,14 @@ import {
   Image,
 } from "react-native";
 import LottieView from "lottie-react-native";
-
+import Header from "@/components/header";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import { Button, Card, Modal, Portal, Provider } from "react-native-paper";
 import { useMoodContext } from "@/context/moodContext";
 import { useUserPreferences } from "@/context/userPreferences";
-import LogExercise from "@/app/logExercise";
+import LogExercise from "@/components/Exercise/logExercise";
+import { useCheckInContext } from "@/context/checkInContext";
 import TodaysMovementCard from "@/components/Exercise/todaysMovement";
 // import FitnessScreen from "./findExercises";
 import {
@@ -30,7 +31,7 @@ import ExerciseHistoryScreen from "@/app/exerciseHistoryScreen";
 
 export default function Explore() {
   const { userPreferences } = useUserPreferences();
-  const { mood } = useMoodContext();
+  const { moodLabel } = useCheckInContext();
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
@@ -49,36 +50,31 @@ export default function Explore() {
     const health = userPreferences?.physicalHealth?.toLowerCase();
     const activity = userPreferences?.activityLevel?.toLowerCase();
     const goal = userPreferences?.primaryGoals?.[0]?.toLowerCase() || "";
-    // console.log(mood)
-    if (mood !== null) {
-      if (mood >= 75) {
+
+    if (moodLabel) {
+      if (moodLabel === "Having a Tough Day" || moodLabel === "Not My Best") {
         setType("stretching");
         setDifficulty("beginner");
         setReasonText(
           "You indicated you’re really not feeling well today. Here’s a calming stretch to help you reconnect gently. 🧘‍♀️"
         );
-      } else if (mood >= 50) {
+      } else if (moodLabel === "Hanging in There") {
         setType("cardio");
         setDifficulty("beginner");
         setReasonText(
           "You indicated you're feeling a bit low. Try this gentle cardio to shake off some of that heaviness and reset. 💜"
         );
+      } else if (moodLabel === "Pretty Good") {
         setType("strength");
         setDifficulty("intermediate");
         setReasonText(
           "You indicated you're feeling okay today. Here's a steady movement to help lift your mood and build consistency. 🌿"
         );
-      } else if (mood >= 25) {
-        setType("strength");
-        setDifficulty("intermediate");
-        setReasonText(
-          "You indicated you're feeling okay today. Here's a steady movement to help lift your mood and build consistency. 🌿"
-        );
-      } else {
+      } else if (moodLabel === "Feeling Great") {
         setType("strength");
         setDifficulty("expert");
         setReasonText(
-          "You're indicated you're feeling great today! Here's a strong and empowering movement to channel that positive energy. 💪"
+          "You're feeling great today! Here's a strong and empowering movement to channel that positive energy. 💪"
         );
       }
     }
@@ -101,7 +97,7 @@ export default function Explore() {
       setType("stretching");
       setDifficulty("beginner");
     }
-  }, [mood, userPreferences]);
+  }, [moodLabel, userPreferences]);
 
   const fetchExercises = async () => {
     setLoading(true);
@@ -311,6 +307,7 @@ export default function Explore() {
                 <Button
                   onPress={() => setModalVisible(false)}
                   style={styles.button}
+                  textColor="#271949"
                 >
                   Close
                 </Button>
@@ -318,7 +315,6 @@ export default function Explore() {
             )}
           </Modal>
         </Portal>
-    
       </Provider>
     </>
   );

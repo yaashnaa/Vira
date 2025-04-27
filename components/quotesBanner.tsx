@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     width: width * 0.9,
     alignSelf: "center",
-    alignItems: "center",
+    // alignItems: "center",
     shadowColor: "#cbbcf6",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -55,9 +55,10 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   title:{
-    fontSize: 28,
-    fontFamily: "Cookie-Regular",
+    fontSize: 25,
+    fontFamily: "PatrickHand-Regular",
     marginBottom: 15,
+    textAlign: "center",
   },
   quoteText: {
     fontSize: 18,
@@ -71,7 +72,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     // marginTop: 12,
     color: "#7b4ca0",
-    textAlign: "center",
+    textAlign: "right",
     fontFamily: "Main-font",
   },
 });

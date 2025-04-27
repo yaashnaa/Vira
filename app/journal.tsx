@@ -31,8 +31,7 @@ import CBTPromptSelector from "@/components/Journal/CBTPromptSelector";
 import LottieView from "lottie-react-native";
 import { saveJournalEntry } from "@/utils/journalHelper";
 import Header from "@/components/header";
-
-
+import DailyPrompt from "@/components/Journal/dailyPrompt";
 
 export default function Journal() {
   const { userPreferences } = useUserPreferences();
@@ -57,11 +56,11 @@ export default function Journal() {
 
   const entryOptions = [
     { value: "free", label: "Free Write" },
-    { value: "prompt", label: "Prompt-Based" },
+    { value: "prompt", label: "Prompts" },
   ];
 
   if (shouldShowMoodOption) {
-    entryOptions.push({ value: "mood", label: "Mood-Based" });
+    entryOptions.push({ value: "mood", label: "Mood" });
   }
 
   const fetchEntries = async () => {
@@ -166,11 +165,14 @@ export default function Journal() {
               <Text style={styles.sectionTitle}>
                 What kind of journaling today?
               </Text>
-              <SegmentedButtons
-                value={entryType}
-                onValueChange={setEntryType}
-                buttons={entryOptions}
-              />
+   
+                <SegmentedButtons
+                  value={entryType}
+                  onValueChange={setEntryType}
+                  buttons={entryOptions}
+                  style={{ flexWrap: "wrap", width:"100%" }}
+                />
+
               <Text style={styles.modeDescription}>
                 {entryType === "free" &&
                   "Write freely about anything on your mind."}
@@ -179,7 +181,7 @@ export default function Journal() {
                 {entryType === "mood" &&
                   "Get suggestions based on how you're feeling today."}
               </Text>
-
+              {entryType === "free" && <DailyPrompt />}
               {/* Conditional: If mood mode selected but no check-in */}
               {entryType === "mood" && !hasLoggedToday ? (
                 <View style={styles.checkInNotice}>
@@ -234,6 +236,13 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#ffffff",
     flexGrow: 1,
+  },
+  segmentedContainer: {
+    flexDirection: "row",
+    // flexWrap: "wrap",
+    // justifyContent: "center",
+    marginBottom: 10,
+    // width:'100%'
   },
   heading: {
     fontSize: 26,

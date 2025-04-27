@@ -1,19 +1,18 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  TextInput,
-  StyleSheet,
   ScrollView,
+  StyleSheet,
   KeyboardAvoidingView,
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  Alert,
 } from "react-native";
 import { Button, Card, Divider, Provider } from "react-native-paper";
 import { useUserPreferences } from "@/context/userPreferences";
-import { useMoodContext } from "@/context/moodContext";
+import { useCheckInContext } from "@/context/checkInContext";
+
 import { auth, db } from "@/config/firebaseConfig";
 import {
   addDoc,
@@ -23,10 +22,11 @@ import {
   orderBy,
   getDocs,
   updateDoc,
-  doc, limit
+  doc,
+  limit,
 } from "firebase/firestore";
 import Toast from "react-native-toast-message";
-import { useRouter, useFocusEffect } from "expo-router";
+import { useRouter } from "expo-router";
 import dayjs from "dayjs";
 import Header from "@/components/header";
 import ImageSelector from "@/components/imageSelector";
@@ -48,16 +48,16 @@ const energyOptions = [
 ];
 
 const moodOptions = [
-  { label: "Having a Tough Day", value: 1, image: require("../assets/images/mood/vsad.png") },
-  { label: "Not My Best", value: 2, image: require("../assets/images/mood/sad.png") },
-  { label: "Hanging in There", value: 3, image: require("../assets/images/mood/neutral.png") },
-  { label: "Pretty Good", value: 4, image: require("../assets/images/mood/happy.png") },
-  { label: "Feeling Great", value: 5, image: require("../assets/images/mood/vhappy.png") },
+  { label: "Having a Tough Day", value: 100, image: require("../assets/images/mood/vsad.png") },
+  { label: "Not My Best", value: 75, image: require("../assets/images/mood/sad.png") },
+  { label: "Hanging in There", value: 50, image: require("../assets/images/mood/neutral.png") },
+  { label: "Pretty Good", value: 25, image: require("../assets/images/mood/happy.png") },
+  { label: "Feeling Great", value: 0, image: require("../assets/images/mood/vhappy.png") },
 ];
 
 export default function CheckInScreen() {
   const { userPreferences } = useUserPreferences();
-  const { logMood, fetchTodaysMood } = useMoodContext();
+  const { logMood, refreshCheckIn } = useCheckInContext(); // updated
   const today = dayjs().format("YYYY-MM-DD");
   const router = useRouter();
 
@@ -67,7 +67,7 @@ export default function CheckInScreen() {
   const [checkInId, setCheckInId] = useState<string | null>(null);
   const start = dayjs().startOf("day").toDate();
   const end = dayjs().endOf("day").toDate();
-  
+
   useEffect(() => {
     const fetchCheckIn = async () => {
       const uid = auth.currentUser?.uid;
@@ -88,7 +88,7 @@ export default function CheckInScreen() {
         setMood(data.mood || "");
         setSleep(data.sleep || "");
         setEnergy(data.energy || "");
-        setCheckInId(docData.id); // Save for later update
+        setCheckInId(docData.id);
       }
     };
 
@@ -99,15 +99,15 @@ export default function CheckInScreen() {
     try {
       const userId = auth.currentUser?.uid;
       if (!userId) return;
-
+  
       const data = {
         mood,
         sleep,
         energy,
-        date: dayjs().format("YYYY-MM-DD"),
+        date: today,
         timestamp: new Date(),
       };
-
+  
       if (checkInId) {
         const docRef = doc(db, "users", userId, "checkins", checkInId);
         await updateDoc(docRef, data);
@@ -115,19 +115,22 @@ export default function CheckInScreen() {
         const newDoc = await addDoc(collection(db, "users", userId, "checkins"), data);
         setCheckInId(newDoc.id);
       }
-
-      const moodValue = moodOptions.find(option => option.label === mood)?.value;
-      if (moodValue !== undefined) {
-        await logMood(moodValue);
-      }
-
+  
+      // ❌ DO NOT call logMood() here anymore
+      // const moodValue = moodOptions.find(option => option.label === mood)?.value;
+      // if (moodValue !== undefined) {
+      //   await logMood(moodValue);
+      // }
+  
       Toast.show({
         type: "success",
         text1: "Check-in saved! 🌿",
         visibilityTime: 3000,
       });
-      
+  
+      await refreshCheckIn(); 
       router.replace("/dashboard?refresh=true");
+  
     } catch (err) {
       console.error(err);
       Toast.show({
@@ -135,9 +138,9 @@ export default function CheckInScreen() {
         text1: "Something went wrong",
         text2: "Unable to save your check-in 😞",
       });
-      
     }
   };
+  
 
   return (
     <>
@@ -148,29 +151,54 @@ export default function CheckInScreen() {
           style={{ flex: 1 }}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1, justifyContent: "center", alignItems: "center", margin: "auto" }}>
+            <ScrollView
+              style={styles.container}
+              contentContainerStyle={{
+                flexGrow: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
               <Card style={styles.card} elevation={0} mode="elevated">
                 <Card.Content>
                   <Text style={styles.sectionTitle}>Mood Check-In</Text>
                   <Text style={styles.helperText}>How are you feeling today?</Text>
-                  <ImageSelector options={moodOptions} selectedOption={mood} onSelect={setMood} />
+                  <ImageSelector
+                    options={moodOptions}
+                    selectedOption={mood}
+                    onSelect={setMood}
+                  />
                   {mood && <Text style={styles.selectionLabel}>{mood}</Text>}
 
                   <Divider style={styles.divider} />
 
                   <Text style={styles.sectionTitle}>Sleep Check-In</Text>
-                  <ImageSelector options={sleepOptions} selectedOption={sleep} onSelect={setSleep} />
+                  <ImageSelector
+                    options={sleepOptions}
+                    selectedOption={sleep}
+                    onSelect={setSleep}
+                  />
                   {sleep && <Text style={styles.selectionLabel}>{sleep}</Text>}
 
                   <Divider style={styles.divider} />
 
                   <Text style={styles.sectionTitle}>Energy Check-In</Text>
-                  <ImageSelector options={energyOptions} selectedOption={energy} onSelect={setEnergy} />
+                  <ImageSelector
+                    options={energyOptions}
+                    selectedOption={energy}
+                    onSelect={setEnergy}
+                  />
                   {energy && <Text style={styles.selectionLabel}>{energy}</Text>}
 
                   <Divider style={styles.divider} />
 
-                  <Button mode="contained" icon="check" onPress={handleSaveCheckIn} textColor="#3b0f04" style={styles.button}>
+                  <Button
+                    mode="contained"
+                    icon="check"
+                    onPress={handleSaveCheckIn}
+                    textColor="#3b0f04"
+                    style={styles.button}
+                  >
                     {checkInId ? "Update Check-In" : "Complete Check-In"}
                   </Button>
                 </Card.Content>
@@ -189,15 +217,11 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     width: "100%",
-    // alignItems: "center",
-    // justifyContent: "center",
-    // margin:"auto",
   },
   card: {
     backgroundColor: "#ffffff",
     marginBottom: 24,
     borderRadius: 12,
-    padding: 0,
   },
   sectionTitle: {
     fontSize: 18,

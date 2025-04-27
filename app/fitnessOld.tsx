@@ -18,7 +18,7 @@
   import { Button, Card, Modal, Portal, Provider } from "react-native-paper";
   import { useMoodContext } from "@/context/moodContext";
   import { useUserPreferences } from "@/context/userPreferences";
-  import LogExercise from "@/app/logExercise";
+  import LogExercise from "@/components/Exercise/logExercise";
   import TodaysMovementCard from "@/components/Exercise/todaysMovement";
   // import FitnessScreen from "./findExercises";
   import {
@@ -26,6 +26,7 @@
     ExerciseProps,
   } from "@/utils/api/fetchExerciseData";
   import { useRouter } from "expo-router";
+import Header from "@/components/header";
 
 
   export default function FitnessScreen() {
@@ -124,40 +125,9 @@
 
     return (
       <>
+      <Header title="Fitness"/>
         <Provider>
-          <HeaderRNE
-            containerStyle={{
-              backgroundColor: "#f8edeb",
-              borderBottomWidth: 0,
-              paddingTop: 10,
-            }}
-            leftComponent={
-              <TouchableOpacity onPress={handleBackPress}>
-                <Icon
-                  name="arrow-back"
-                  size={25}
-                  type="ionicon"
-                  color="#271949"
-                />
-              </TouchableOpacity>
-            }
-            centerComponent={{
-              text: "MOVEMENT",
-              style: {
-                color: "#271949",
-                fontSize: 20,
-                fontWeight: "bold",
-                fontFamily: "PatrickHand-Regular",
-              },
-            }}
-            rightComponent={
-              <View style={styles.headerRight}>
-                <TouchableOpacity onPress={() => handleNavigate("/settings")}>
-                  <Icon name="settings" type="feather" color="#150b01" />
-                </TouchableOpacity>
-              </View>
-            }
-          />
+         
 
           <ScrollView contentContainerStyle={styles.container}>
             <Text style={styles.introText}>

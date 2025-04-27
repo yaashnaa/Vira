@@ -5,6 +5,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { auth } from "../../config/firebaseConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from "react-native-toast-message"; // ✨ Added
 import {
   StyleSheet,
   Text,
@@ -12,52 +13,83 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
-  Alert,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
   Platform,
+  ActivityIndicator, // ✨ Added
   Dimensions,
 } from "react-native";
 import { Button } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { registerUser } from "../../utils/auth"; // Firebase authentication function
+import { registerUser } from "../../utils/auth";
 
 export default function SignupScreen() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // ✨
+  const [imageLoading, setImageLoading] = useState(true); // ✨
 
   const handleSignup = async () => {
     if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match");
+      Toast.show({
+        type: "error",
+        text1: "Passwords do not match",
+        visibilityTime: 2000,
+      });
       return;
     }
+
+    setIsLoading(true);
+
     try {
       await registerUser(email, password);
       const currentUser = auth.currentUser;
-      if (currentUser) {
-        await AsyncStorage.setItem("@currentUserId", currentUser.uid);
-      }
 
-      Alert.alert("Signup Successful!");
-      router.replace("/quizzes/basic"); // Redirect to Home Screen
-    } catch (error) {
-      Alert.alert("Signup Failed", (error as Error).message);
+      Toast.show({
+        type: "success",
+        text1: "Signup Successful!",
+        visibilityTime: 2000,
+      });
+
+      router.replace("/quizzes/basic"); // Redirect to Quiz
+    } catch (error: any) {
+      const message = error.message ?? "";
+
+      if (error.code === "auth/email-already-in-use") {
+        Toast.show({
+          type: "error",
+          text1: "Account already exists",
+          text2: "Please login instead or use another email.",
+          visibilityTime: 2000,
+        });
+      } else if (error.code === "auth/weak-password") {
+        Toast.show({
+          type: "error",
+          text1: "Password too short",
+          text2: "Please enter at least 6 characters.",
+          visibilityTime: 2000,
+        });
+      } else {
+        Toast.show({
+          type: "error",
+          text1: "Signup Failed",
+
+          visibilityTime: 2000,
+        });
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
+
   return (
     <View style={styles.container}>
-
-      <Image
-        style={styles.image}
-        source={require("../../assets/images/Vira.png")}
-      />
       <StatusBar style="auto" />
+
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
@@ -65,12 +97,33 @@ export default function SignupScreen() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <ScrollView
             contentContainerStyle={{
-              // flexGrow: 1,
+              flexGrow: 1,
               justifyContent: "center",
-              padding: 20,
+              alignItems: "center",
             }}
             keyboardShouldPersistTaps="handled"
           >
+            <View style={{ position: "relative", width: 350, height: 300 }}>
+              {imageLoading && (
+                <ActivityIndicator
+                  size="large"
+                  color="#86508f"
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    marginLeft: -25,
+                    marginTop: -25,
+                  }}
+                />
+              )}
+              <Image
+                style={styles.image}
+                source={require("../../assets/images/Vira.png")}
+                onLoadEnd={() => setImageLoading(false)} // ✨
+              />
+            </View>
+
             <View style={styles.insideCont}>
               <View style={styles.inputs}>
                 <View style={styles.inputView}>
@@ -89,7 +142,6 @@ export default function SignupScreen() {
                   />
                 </View>
 
-      
                 <View style={styles.inputView}>
                   <MaterialIcons
                     name="password"
@@ -105,20 +157,20 @@ export default function SignupScreen() {
                     onChangeText={(text) => setPassword(text)}
                   />
                 </View>
-        
+
                 <View style={styles.inputView}>
                   <MaterialIcons
-                  name="password"
-                  size={24}
-                  color="black"
-                  style={{ marginLeft: 10 }}
+                    name="password"
+                    size={24}
+                    color="black"
+                    style={{ marginLeft: 10 }}
                   />
                   <TextInput
-                  style={styles.TextInput}
-                  placeholder="Confirm Password"
-                  placeholderTextColor="#003f5c"
-                  secureTextEntry
-                  onChangeText={(text) => setConfirmPassword(text)}
+                    style={styles.TextInput}
+                    placeholder="Confirm Password"
+                    placeholderTextColor="#003f5c"
+                    secureTextEntry
+                    onChangeText={(text) => setConfirmPassword(text)}
                   />
                 </View>
               </View>
@@ -128,23 +180,29 @@ export default function SignupScreen() {
                 buttonColor="#86508f"
                 textColor="#fffdfb"
                 onPress={handleSignup}
+                loading={isLoading} // ✨ shows spinner inside
+                disabled={isLoading} // optional disable during loading
               >
-                <Text style={styles.loginText}>SIGN UP</Text>
+                SIGN UP
               </Button>
+            </View>
+
+            <View style={styles.link}>
+              <TouchableOpacity onPress={() => router.push("/(auth)/login")}>
+                <Text style={styles.signupText}>
+                  Already have an account? Login
+                </Text>
+              </TouchableOpacity>
             </View>
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
-      <View style={styles.link}>
-        <TouchableOpacity onPress={() => router.push("/(auth)/login")}>
-          <Text style={styles.signupText}>Already have an account? Login</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }
 
 const width = Dimensions.get("window").width;
+
 const styles = StyleSheet.create({
   container: {
     display: "flex",
@@ -160,32 +218,22 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    top: 0,
-    bottom: 0,
     width: width * 0.7,
+    marginTop: 10,
   },
   link: {
-    bottom: 105,
-    position: "absolute",
+    marginTop: 30,
   },
   image: {
-    height: 400,
-    width: 400,
-    top: 40,
-    marginBottom: 10,
-  },
-
-  mainText: {
-    color: "#000000",
-    marginBottom: 10,
+    height: 300,
+    width: 350,
   },
   inputView: {
     display: "flex",
     borderRadius: 20,
     width: "100%",
-    height: 40,
+    height: 50,
     marginBottom: 20,
-
     alignItems: "center",
     flexDirection: "row",
     gap: 1,
@@ -200,19 +248,12 @@ const styles = StyleSheet.create({
     width: "100%",
     color: "black",
   },
-  forgot_button: {
-    height: 30,
-    marginBottom: 30,
-    color: "#003f5c",
-  },
   inputs: {
     display: "flex",
     gap: 20,
     color: "black",
     width: "100%",
     alignItems: "center",
-    // justifyContent: "center",
-    // position: "absolute",
   },
   signupBtn: {
     width: "40%",
@@ -225,7 +266,6 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: "#000000",
     borderStyle: "solid",
-    // backgroundColor: lightTheme.accent, // Use secondary color for the button
   },
   loginText: {
     color: "#f8f5fa",

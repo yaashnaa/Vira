@@ -24,7 +24,9 @@ interface MoodContextType {
   fetchAllCheckIns: () => Promise<
     { date: string; mood: number; energy: string; sleep: string }[]
   >;
+  refreshMoodContext: () => Promise<void>; // <<< ADD THIS
 }
+
 const MoodContext = createContext<MoodContextType | undefined>(undefined);
 
 export function MoodProvider({ children }: { children: React.ReactNode }) {
@@ -34,7 +36,10 @@ export function MoodProvider({ children }: { children: React.ReactNode }) {
 
   const today = dayjs().format("YYYY-MM-DD");
   const hasLoggedToday = lastLoggedDate === today;
-
+  const refreshMoodContext = async () => {
+    await fetchTodaysMood();
+  };
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -194,7 +199,9 @@ export function MoodProvider({ children }: { children: React.ReactNode }) {
     fetchTodaysMood,
     fetchAllMoods,
     fetchAllCheckIns,
+    refreshMoodContext, // <<< ADD THIS
   };
+  
 
   return <MoodContext.Provider value={value}>{children}</MoodContext.Provider>;
 }

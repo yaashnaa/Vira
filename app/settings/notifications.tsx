@@ -17,24 +17,44 @@ import { db, auth } from "@/config/firebaseConfig";
 import { useRouter } from "expo-router";
 import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import Toast from "react-native-toast-message";
+import Header from "@/components/header";
+import { scheduleWaterReminders } from "@/utils/waterReminderScheduler";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { scheduleUserNotifications } from "@/utils/notificationScheduler";
 import { checkAndScheduleDailyReminder } from "@/utils/checkAndScheduleReminder";
+const encouragementOptions = [
+  "Gentle & Kind",
+  "Cheerful & Motivating",
+  "Minimal",
+  "None",
+] as const;
+
+type EncouragementType = (typeof encouragementOptions)[number];
 export default function NotificationsScreen() {
   const { userPreferences, updatePreferences } = useUserPreferences();
   const router = useRouter();
+  const [waterReminderFrequency, setWaterReminderFrequency] = useState<number>(
+    userPreferences.waterReminderFrequency ?? 3
+  );
 
   const [remindersFrequency, setRemindersFrequency] = useState(
     userPreferences.remindersFrequency ?? ""
   );
-  const [encouragement, setEncouragement] = useState(
-    userPreferences.encouragementNotifications ?? ""
-  );
+  const [encouragement, setEncouragement] =
+    useState<EncouragementType>("Gentle & Kind");
+
   const [soundPreference, setSoundPreference] = useState(
     userPreferences.notificationSound ?? ""
   );
 
   const [showReminderMenu, setShowReminderMenu] = useState(false);
   const [showSoundMenu, setShowSoundMenu] = useState(false);
+  const [waterReminderEnabled, setWaterReminderEnabled] = useState<boolean>(
+    userPreferences.waterReminderEnabled ?? false
+  );
+
+  const [showWaterFrequencyMenu, setShowWaterFrequencyMenu] = useState(false);
+
   const [showEncourageMenu, setShowEncourageMenu] = useState(false);
   const [selectedTime, setSelectedTime] = useState<Date>(
     userPreferences.notificationTime
@@ -59,12 +79,19 @@ export default function NotificationsScreen() {
         ...userPreferences,
         remindersFrequency,
         notificationTime: selectedTime.toISOString(),
+        waterReminderEnabled,
+        waterReminderFrequency,
       };
+      if (waterReminderEnabled) {
+        await scheduleWaterReminders(waterReminderFrequency);
+      }
 
       await setDoc(doc(db, "users", uid, "preferences", "main"), updated, {
         merge: true,
       });
       updatePreferences(updated);
+      await scheduleUserNotifications(remindersFrequency, encouragement); // 💬 ✨ added here!
+
       await checkAndScheduleDailyReminder(selectedTime);
 
       showToast("Notification settings saved.");
@@ -84,31 +111,14 @@ export default function NotificationsScreen() {
   };
 
   return (
-    <Provider>
-      <HeaderRNE
-        containerStyle={{ backgroundColor: "#f8edeb", borderBottomWidth: 0 }}
-        leftComponent={
-          <TouchableOpacity onPress={() => router.back()}>
-            <Icon name="arrow-back" type="ionicon" color="#190028" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "NOTIFICATIONS SETTINGS",
-          style: {
-            color: "#271949",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "PatrickHand-Regular",
-          },
-        }}
-      />
-      <SafeAreaView style={styles.container}>
-        <ScrollView>
-          
+    <>
+      <Header title="Notifications" backPath="/settings" />
 
-          {/* Reminder Frequency */}
+      <View style={styles.container}>
+        <View style={{ position: "relative", zIndex: 10 }}>
           <Text style={styles.label}>Reminder Frequency</Text>
           <Menu
+            contentStyle={{ backgroundColor: "#fefdff" }}
             visible={showReminderMenu}
             onDismiss={() => setShowReminderMenu(false)}
             anchor={
@@ -124,6 +134,7 @@ export default function NotificationsScreen() {
                 </View>
               </TouchableOpacity>
             }
+            anchorPosition="bottom"
           >
             {[
               "None",
@@ -134,7 +145,7 @@ export default function NotificationsScreen() {
               <Menu.Item
                 key={option}
                 title={option}
-                titleStyle={styles.menuText}
+                titleStyle={{ color: "#6b4c9a", fontSize: 14 }}
                 onPress={() => {
                   setRemindersFrequency(option);
                   setShowReminderMenu(false);
@@ -142,117 +153,158 @@ export default function NotificationsScreen() {
               />
             ))}
           </Menu>
-          <Text style={styles.label}>Daily Reminder Time</Text>
-          <TouchableOpacity
-            style={styles.dropdown}
-            onPress={() => setShowTimePicker(true)}
-          >
-            <View style={styles.dropdownRow}>
-              <Text style={styles.dropdownText}>
-                {selectedTime
-                  ? selectedTime.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })
-                  : "Select a time"}
-              </Text>
-              <Ionicons name="time" size={18} color="#2d2d2d" />
-            </View>
-          </TouchableOpacity>
+        </View>
 
-          {showTimePicker && (
-            <DateTimePicker
-              mode="time"
-              value={selectedTime}
-              is24Hour={false}
-              display="spinner"
-              onChange={handleTimeChange}
-              textColor="#0f0a1b" // Change this to your desired color
-            />
+        <Text style={styles.label}>Daily Reminder Time</Text>
+        <TouchableOpacity
+          style={styles.dropdown}
+          onPress={() => setShowTimePicker(true)}
+        >
+          <View style={styles.dropdownRow}>
+            <Text style={styles.dropdownText}>
+              {selectedTime
+                ? selectedTime.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "Select a time"}
+            </Text>
+            <Ionicons name="time" size={18} color="#2d2d2d" />
+          </View>
+        </TouchableOpacity>
+
+        {showTimePicker && (
+          <DateTimePicker
+            mode="time"
+            value={selectedTime}
+            is24Hour={false}
+            display="spinner"
+            onChange={handleTimeChange}
+            textColor="#0f0a1b" // Change this to your desired color
+          />
+        )}
+
+        <Text style={styles.label}>Encouragement Style</Text>
+        <Menu
+          visible={showEncourageMenu}
+          contentStyle={{ backgroundColor: "#fefdff" }}
+          anchorPosition="bottom"
+          onDismiss={() => setShowEncourageMenu(false)}
+          anchor={
+            <TouchableOpacity
+              style={styles.dropdown}
+              onPress={() => setShowEncourageMenu(true)}
+            >
+              <View style={styles.dropdownRow}>
+                <Text style={styles.dropdownText}>
+                  {encouragement || "Select encouragement tone"}
+                </Text>
+                <Ionicons name="chevron-down" size={18} color="#5a5a5a" />
+              </View>
+            </TouchableOpacity>
+          }
+        >
+          {["Gentle & Kind", "Cheerful & Motivating", "Minimal", "None"].map(
+            (option) => (
+              <Menu.Item
+                key={option}
+                title={option}
+                titleStyle={{ color: "#6b4c9a", fontSize: 14 }}
+                onPress={() => {
+                  setEncouragement(option as EncouragementType);
+
+                  setShowEncourageMenu(false);
+                }}
+              />
+            )
           )}
+        </Menu>
+        <Text style={styles.label}>Enable Water Reminders</Text>
+        <TouchableOpacity
+          style={styles.checkboxRow}
+          onPress={() => setWaterReminderEnabled(!waterReminderEnabled)}
+        >
+          <Ionicons
+            name={waterReminderEnabled ? "checkbox" : "square-outline"}
+            size={24}
+            color="#5a5a5a"
+          />
+          <Text style={styles.checkboxLabel}>
+            {waterReminderEnabled ? "Enabled" : "Disabled"}
+          </Text>
+        </TouchableOpacity>
 
-          {/* Sound */}
-          <Text style={styles.label}>Notification Sound</Text>
+        <Text style={styles.label}>Enable Water Reminders</Text>
+        <TouchableOpacity
+          style={styles.checkboxRow}
+          onPress={() => setWaterReminderEnabled(!waterReminderEnabled)}
+        >
+          {/* checkbox UI */}
+        </TouchableOpacity>
+
+        {!waterReminderEnabled && (
+          <Text style={styles.helperText}>
+            Enable Water Reminders to set frequency.
+          </Text>
+        )}
+
+        {/* Wrap the water‐frequency menu in its own zIndex layer */}
+        <View style={{ position: "relative", zIndex: 10 }}>
+          <Text style={styles.label}>Water Reminder Frequency</Text>
           <Menu
-            visible={showSoundMenu}
-            onDismiss={() => setShowSoundMenu(false)}
+            visible={showWaterFrequencyMenu}
+            anchorPosition="top"
+            onDismiss={() => setShowWaterFrequencyMenu(false)}
             anchor={
               <TouchableOpacity
-                style={styles.dropdown}
-                onPress={() => setShowSoundMenu(true)}
+                style={[
+                  styles.dropdown,
+                  !waterReminderEnabled && { opacity: 0.5 },
+                ]}
+                onPress={() => setShowWaterFrequencyMenu(true)}
+                disabled={!waterReminderEnabled}
               >
                 <View style={styles.dropdownRow}>
                   <Text style={styles.dropdownText}>
-                    {soundPreference || "Select sound style"}
+                    {waterReminderFrequency
+                      ? `Every ${waterReminderFrequency} hours`
+                      : "Set reminder frequency"}
                   </Text>
                   <Ionicons name="chevron-down" size={18} color="#5a5a5a" />
                 </View>
               </TouchableOpacity>
             }
+       
+            contentStyle={{ backgroundColor: "#fefdff" }}
           >
-            {["Default", "Chime", "Soft Bell", "Silent"].map((option) => (
+            {[2, 3, 4].map((hours) => (
               <Menu.Item
-                key={option}
-                title={option}
-                titleStyle={styles.menuText}
+                key={hours}
+                titleStyle={{ color: '#6b4c9a', fontSize: 14 }}
+                title={`Every ${hours} hours`}
                 onPress={() => {
-                  setSoundPreference(option);
-                  setShowSoundMenu(false);
+                  setWaterReminderFrequency(hours);
+                  setShowWaterFrequencyMenu(false);
                 }}
               />
             ))}
           </Menu>
-
-          {/* Encouragement Style */}
-          <Text style={styles.label}>Encouragement Style</Text>
-          <Menu
-            visible={showEncourageMenu}
-            onDismiss={() => setShowEncourageMenu(false)}
-            anchor={
-              <TouchableOpacity
-                style={styles.dropdown}
-                onPress={() => setShowEncourageMenu(true)}
-              >
-                <View style={styles.dropdownRow}>
-                  <Text style={styles.dropdownText}>
-                    {encouragement || "Select encouragement tone"}
-                  </Text>
-                  <Ionicons name="chevron-down" size={18} color="#5a5a5a" />
-                </View>
-              </TouchableOpacity>
-            }
-          >
-            {["Gentle & Kind", "Cheerful & Motivating", "Minimal", "None"].map(
-              (option) => (
-                <Menu.Item
-                  key={option}
-                  title={option}
-                  titleStyle={styles.menuText}
-                  onPress={() => {
-                    setEncouragement(option);
-                    setShowEncourageMenu(false);
-                  }}
-                />
-              )
-            )}
-          </Menu>
-
-          <Button
-            mode="contained"
-            onPress={handleSave}
-            style={styles.saveButton}
-            contentStyle={{ paddingVertical: 6 }}
-            labelStyle={{
-              fontFamily: "Main-font",
-              color: "#fff",
-              fontSize: 16,
-            }}
-          >
-            Save Preferences
-          </Button>
-        </ScrollView>
-      </SafeAreaView>
-    </Provider>
+        </View>
+        <Button
+          mode="contained"
+          onPress={handleSave}
+          style={styles.saveButton}
+          contentStyle={{ paddingVertical: 6 }}
+          labelStyle={{
+            fontFamily: "Main-font",
+            color: "#fff",
+            fontSize: 16,
+          }}
+        >
+          Save Preferences
+        </Button>
+      </View>
+    </>
   );
 }
 
@@ -280,6 +332,14 @@ const styles = StyleSheet.create({
     borderColor: "#ddd",
     marginBottom: 8,
   },
+  helperText: {
+    fontSize: 12,
+    color: "#888",
+    marginTop: 4,
+    marginBottom: 8,
+    fontFamily: "Main-font",
+  },
+
   dropdownText: {
     fontFamily: "Main-font",
     color: "#2a2a2a",
@@ -299,5 +359,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#865dff",
     marginTop: 24,
     borderRadius: 8,
+  },
+  checkboxRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+
+  checkboxLabel: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: "#2a2a2a",
+    fontFamily: "Main-font",
   },
 });

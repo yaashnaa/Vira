@@ -9,6 +9,9 @@ import {
   SafeAreaView,
   Dimensions,
   ScrollView,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Header as HeaderRNE, Icon } from "@rneui/themed";
@@ -21,32 +24,32 @@ import * as ImagePicker from "expo-image-picker";
 import Toast from "react-native-toast-message";
 import LottieView from "lottie-react-native";
 import { Animated } from "react-native";
-
+import Header from "@/components/header";
 const moodOptions = [
   {
     label: "Low Energy",
     value: 100,
-    image: require("../assets/images/exerciseMood/1.png"),
+    image: require("../../assets/images/exerciseMood/1.png"),
   },
   {
     label: "A Bit Drained",
     value: 75,
-    image: require("../assets/images/exerciseMood/2.png"),
+    image: require("../../assets/images/exerciseMood/2.png"),
   },
   {
     label: "Balanced & Okay",
     value: 50,
-    image: require("../assets/images/exerciseMood/3.png"),
+    image: require("../../assets/images/exerciseMood/3.png"),
   },
   {
     label: "Refreshed & Content",
     value: 25,
-    image: require("../assets/images/exerciseMood/4.png"),
+    image: require("../../assets/images/exerciseMood/4.png"),
   },
   {
     label: "Energized & Uplifted",
     value: 0,
-    image: require("../assets/images/exerciseMood/5.png"),
+    image: require("../../assets/images/exerciseMood/5.png"),
   },
 ];
 
@@ -83,7 +86,7 @@ export default function LogExercise() {
 
       setExerciseText("");
       setMoodAfter("Balanced & Okay"); // ✅ Reset to default after save
-      router.back(); // ✅ Auto-close modal
+      router.replace("/fitness/(tabs)/explore");
     } catch (err) {
       Toast.show({
         type: "error",
@@ -96,102 +99,104 @@ export default function LogExercise() {
     }
   };
 
-  const handleBackPress = () => {
-    router.replace("/fitness/(tabs)/explore");
-  };
-
-  const handleNavigate = (route: Parameters<typeof router.push>[0]): void =>
-    router.push(route);
-
   return (
     <>
-      <View style={styles.container}>
-        <LottieView
-          source={require("../assets/animations/exercise.json")}
-          autoPlay
-          loop
-          style={{ width: "100%", height: 200 }}
-        />
-        <Card style={styles.card} mode="contained">
-          <Card.Title title="🏋️ Log Your Movemen" titleStyle={styles.title} />
-          <Card.Content>
-            <Text style={styles.label}>What kind of movement did you do?</Text>
-            <TextInput
-              placeholder="e.g. 30 minutes yoga, 15 minutes walking..."
-              value={exerciseText}
-              onChangeText={(text) => setExerciseText(text.slice(0, 300))}
-              style={styles.input}
-              placeholderTextColor="#999"
-              multiline
-            />
+      <Header title="" backPath="/fitness/(tabs)/explore" />
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={styles.container}>
+          <LottieView
+            source={require("../../assets/animations/exercise.json")}
+            autoPlay
+            loop
+            style={{ width: "100%", height: 200 }}
+          />
+          <Card style={styles.card} mode="contained">
+            <Card.Title title="🏋️ Log Your Movement" titleStyle={styles.title} />
+            <Card.Content>
+              <Text style={styles.label}>
+                What kind of movement did you do?
+              </Text>
+              <TextInput
+                placeholder="e.g. 30 minutes yoga, 15 minutes walking..."
+                value={exerciseText}
+                onChangeText={(text) => setExerciseText(text.slice(0, 300))}
+                style={styles.input}
+                placeholderTextColor="#999"
+                multiline
+              />
 
-            <View style={styles.section}>
-              <Text style={styles.label}>How did you feel after moving?</Text>
-              <View style={styles.ratingRow}>
-                {moodOptions.map((option, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    accessibilityLabel={`Select mood: ${option.label}`}
-                    onPress={() => {
-                      setMoodAfter(option.label);
-                      Animated.sequence([
-                        Animated.timing(animation, {
-                          toValue: 1.3, 
-                          duration: 150,
-                          useNativeDriver: true,
-                        }),
-                        Animated.timing(animation, {
-                          toValue: 1, // Back to normal
-                          duration: 150,
-                          useNativeDriver: true,
-                        }),
-                      ]).start();
-                    }}
-                    style={
-                      moodAfter === option.label
-                        ? styles.selectedMood
-                        : styles.moodOption
-                    }
-                  >
-                    <Animated.View
-                      style={{
-                        transform: [
-                          { scale: moodAfter === option.label ? animation : 1 },
-                        ],
+              <View style={styles.section}>
+                <Text style={styles.label}>How did you feel after moving?</Text>
+                <View style={styles.ratingRow}>
+                  {moodOptions.map((option, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      accessibilityLabel={`Select mood: ${option.label}`}
+                      onPress={() => {
+                        setMoodAfter(option.label);
+                        Animated.sequence([
+                          Animated.timing(animation, {
+                            toValue: 1.3,
+                            duration: 150,
+                            useNativeDriver: true,
+                          }),
+                          Animated.timing(animation, {
+                            toValue: 1, // Back to normal
+                            duration: 150,
+                            useNativeDriver: true,
+                          }),
+                        ]).start();
                       }}
+                      style={
+                        moodAfter === option.label
+                          ? styles.selectedMood
+                          : styles.moodOption
+                      }
                     >
                       <Image source={option.image} style={styles.moodImage} />
-                    </Animated.View>
-                  </TouchableOpacity>
-                ))}
+                      {/* <Animated.View
+                        style={{
+                          transform: [
+                            {
+                              scale: moodAfter === option.label ? animation : 1,
+                            },
+                          ],
+                        }}
+                      >
+                        <Image source={option.image} style={styles.moodImage} />
+                      </Animated.View> */}
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                {moodAfter && (
+                  <View style={styles.selectedMoodBox}>
+                    <Text style={styles.selectedMoodText}>{moodAfter}</Text>
+                  </View>
+                )}
               </View>
 
-              {moodAfter && (
-                <View style={styles.selectedMoodBox}>
-                  <Text style={styles.selectedMoodText}>{moodAfter}</Text>
-                </View>
-              )}
-            </View>
-
-            <Button
-              mode="contained"
-              onPress={handleSubmit}
-              disabled={submitting}
-              style={styles.button}
-            >
-              {submitting ? "Saving..." : "Save Log"}
-            </Button>
-            <Button
-              mode="contained"
-              onPress={() => router.replace("/fitness/(tabs)/explore")}
-              textColor="#000"
-              style={[styles.button, { width: "40%", margin: "auto" }]}
-            >
-              Back
-            </Button>
-          </Card.Content>
-        </Card>
-      </View>
+              <Button
+                mode="contained"
+                onPress={handleSubmit}
+                disabled={submitting}
+                style={styles.button}
+                textColor="#000"
+              >
+                {submitting ? "Saving..." : "Save Log"}
+              </Button>
+              <Button
+                mode="contained"
+                onPress={() => router.replace("/fitness/(tabs)/explore")}
+                textColor="#000"
+                style={[styles.button, { width: "40%", margin: "auto" }]}
+              >
+                Back
+              </Button>
+            </Card.Content>
+          </Card>
+        </View>
+      </TouchableWithoutFeedback>
     </>
   );
 }
@@ -212,6 +217,7 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#ffffff",
     // height: height * 0.5,
+    width: width ,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -241,7 +247,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 20,
+    fontSize: 24,
     color: "#0e0327",
     fontFamily: "PatrickHand-Regular",
   },
@@ -269,12 +275,13 @@ const styles = StyleSheet.create({
   },
   section: {
     marginBottom: 15,
+    width: "100%",
   },
   moodLabel: {
     fontSize: 12,
     marginTop: 6,
     textAlign: "center",
-    maxWidth: 70,
+    // maxWidth: 70,
     color: "#333",
     fontFamily: "Main-font",
   },
@@ -292,8 +299,11 @@ const styles = StyleSheet.create({
 
   ratingRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 12, 
   },
+  
   moodOption: {
     padding: 8,
   },
@@ -307,13 +317,13 @@ const styles = StyleSheet.create({
     fontSize: 28,
   },
   image: {
-    width: "100%",
+    width: width,
     height: 150,
     borderRadius: 10,
     marginTop: 10,
   },
   moodImage: {
-    width: 50,
+    width: 40,
     height: 50,
     borderRadius: 10,
   },

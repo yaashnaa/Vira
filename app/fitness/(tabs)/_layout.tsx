@@ -12,6 +12,24 @@ export default function FitnessTabsLayout() {
         tabBarInactiveTintColor: "#8e8e8e",
       }}
     >
+      <Tabs.Screen
+        name="explore"
+        options={{
+          title: "Explore",
+          tabBarLabel: "Explore",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="home" size={size} color={color} />
+          ),
+          headerLeft: () => (
+            <Pressable
+              onPress={() => router.replace("/dashboard")}
+              style={{ marginLeft: 15 }}
+            >
+              <Ionicons name="arrow-back" size={24} color="#5a3e9b" />
+            </Pressable>
+          ),
+        }}
+        />
     
       <Tabs.Screen
         name="findExercises"

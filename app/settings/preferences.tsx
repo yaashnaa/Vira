@@ -18,7 +18,7 @@ import { doc, setDoc } from "firebase/firestore";
 import { Button } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import Header from "@/components/header";
 export default function EmotionalPreferencesScreen() {
   const { userPreferences, updatePreferences } = useUserPreferences();
   const router = useRouter();
@@ -79,16 +79,9 @@ export default function EmotionalPreferencesScreen() {
 
   return (
     <>
+    <Header title="Emotional Preferences" backPath="/settings" />
       <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={styles.backButton}
-          >
-            <Icon name="arrow-left" type="feather" size={24} color="#292929" />
-          </TouchableOpacity>
-          <Text style={styles.heading}>Emotional Preferences</Text>
-        </View>
+      
         <ScrollView contentContainerStyle={styles.container}>
           <Text style={styles.label}>Preferred App Tone</Text>
           <Menu

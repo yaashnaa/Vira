@@ -2,8 +2,11 @@
     import * as Notifications from "expo-notifications";
     import { Platform } from "react-native";
     import Constants from "expo-constants";
+
+      
     export async function registerForPushNotificationsAsync() {
     let token;
+
 
     try {
         if (!Device.isDevice) {

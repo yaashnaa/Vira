@@ -4,7 +4,7 @@ import { Button, Card } from "react-native-paper";
 import Constants from "expo-constants";
 import * as Application from "expo-application";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Header as HeaderRNE, Icon } from "@rneui/themed";
+import Header from "@/components/header";
 import { useRouter } from "expo-router";
 export default function AppVersionScreen() {
   const appVersion = Application.nativeApplicationVersion || "Unknown";
@@ -19,23 +19,7 @@ export default function AppVersionScreen() {
 
   return (
     <>
-      <HeaderRNE
-        containerStyle={{ backgroundColor: "#f8edeb", borderBottomWidth: 0 }}
-        leftComponent={
-          <TouchableOpacity onPress={() => router.back()}>
-            <Icon name="arrow-back" type="ionicon" color="#190028" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "App Version",
-          style: {
-            color: "#271949",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "PatrickHand-Regular",
-          },
-        }}
-      />
+      <Header title="App Version" backPath="/settings"/>
       <View style={styles.container}>
         {/* <Text style={styles.header}>📱 App Version</Text> */}
         <Card style={styles.card}>
@@ -55,6 +39,7 @@ export default function AppVersionScreen() {
               onPress={handleCheckUpdates}
               style={styles.button}
               icon="update"
+              labelStyle={{ color: "#3e2a6e" }}
             >
               Check for Updates
             </Button>

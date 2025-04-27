@@ -6,7 +6,7 @@ import {
   ScrollView,
   Image,
   Animated,
-  Linking,
+  Linking, Alert
 } from "react-native";
 import { Card, Button, Divider } from "react-native-paper";
 import { auth, db } from "@/config/firebaseConfig";
@@ -122,6 +122,16 @@ export default function CopingSuggestionsScreen() {
   } | null>(null);
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const uid = auth.currentUser?.uid;
+  const handleResourcePress = (url: string) => {
+    Alert.alert(
+      "Leave App?",
+      "You’re about to open an external site. Continue?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Continue", onPress: () => Linking.openURL(url) },
+      ]
+    );
+  };
 
   const getRef = (categoryKey: string) =>
     doc(db, "users", uid!, "copingData", "box");
@@ -139,21 +149,7 @@ export default function CopingSuggestionsScreen() {
       useNativeDriver: true,
     }).start();
   };
-  const handleBackPress = () => {
-    router.back();
-  };
 
-  const saveToBox = async (category: string, tip: string) => {
-    if (!uid || !tip) return;
-    const ref = getRef(category);
-    await setDoc(
-      ref,
-      {
-        [category]: arrayUnion(tip),
-      },
-      { merge: true }
-    );
-  };
 
   return (
     <>
@@ -228,13 +224,14 @@ export default function CopingSuggestionsScreen() {
               <Button
                 icon="play-circle"
                 mode="text"
-                onPress={() => Linking.openURL(cat.resourceLink!)}
+                onPress={() => handleResourcePress(cat.resourceLink!)}
                 textColor="#865dff"
                 style={{ marginBottom: 8 }}
               >
                 Try this resource
               </Button>
             )}
+
 
             <Divider style={styles.divider} />
           </View>
@@ -285,6 +282,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff0f6",
     padding: 20,
+    paddingBottom: 90,
   },
   header: {
     fontSize: 30,

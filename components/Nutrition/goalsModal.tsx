@@ -14,6 +14,7 @@ import { db, auth } from "@/config/firebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
 import { Button } from "react-native-paper";
 import { useUserPreferences } from "@/context/userPreferences";
+import Toast from "react-native-toast-message";
 
 export default function CalorieGoalsModal({
   visible,
@@ -33,6 +34,8 @@ export default function CalorieGoalsModal({
     "I want to eat with intention and joy.",
     "Custom Goal",
   ];
+  const [macroUnit, setMacroUnit] = useState<"percent" | "grams">("percent");
+
   const [selectedGoal, setSelectedGoal] = useState(presetGoals[0]);
   const [customGoal, setCustomGoal] = useState("");
   const [calorieGoal, setCalorieGoal] = useState("2000");
@@ -41,15 +44,28 @@ export default function CalorieGoalsModal({
   const [fat, setFat] = useState("30");
   const [meals, setMeals] = useState("3");
   const [customMindfulGoal, setCustomMindfulGoal] = useState("");
-
   const handleSave = async () => {
     const uid = auth.currentUser?.uid;
     if (!uid) return;
 
+    if (macroUnit === "percent") {
+      const totalPercentage = Number(protein) + Number(carbs) + Number(fat);
+
+      if (totalPercentage !== 100) {
+        Toast.show({
+          type: "error",
+          text1: "Invalid Split",
+          text2: "Your macros must add up to 100%!",
+          position: "top",
+          visibilityTime: 3000,
+        });
+        return; // ❌ prevent saving
+      }
+    }
+
     const docRef = doc(db, "users", uid, "preferences", "nutritionGoals");
 
     if (userPreferences.calorieViewing || userPreferences.macroViewing) {
-      // Save nutrition-related goals
       await setDoc(docRef, {
         calorieGoal: Number(calorieGoal),
         macroSplit: {
@@ -59,15 +75,15 @@ export default function CalorieGoalsModal({
         },
         plannedMeals: Number(meals),
         goal: selectedGoal === "Custom Goal" ? customGoal.trim() : selectedGoal,
+        macroUnit: macroUnit, // ✅ also save the unit
       });
     } else {
-      // Save mindful eating goal
       await setDoc(docRef, {
         mindfulGoal: customMindfulGoal || "Practice mindful eating",
         calorieGoal: null,
         macroSplit: null,
-
         plannedMeals: Number(meals) || 3,
+        macroUnit: null,
       });
     }
 
@@ -76,7 +92,12 @@ export default function CalorieGoalsModal({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      statusBarTranslucent={true}
+    >
       <Pressable
         style={styles.overlay}
         onPress={onClose}
@@ -93,7 +114,7 @@ export default function CalorieGoalsModal({
           >
             <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
               <Text style={styles.title}>
-                🎯{" "}
+                🎯
                 {userPreferences.calorieViewing || userPreferences.macroViewing
                   ? "Set Your Daily Nutrition Goals"
                   : "Set Your Mindful Eating Goal"}
@@ -102,36 +123,88 @@ export default function CalorieGoalsModal({
               {userPreferences.calorieViewing ||
               userPreferences.macroViewing ? (
                 <>
-                  <TextInput
-                    placeholder="Calories (e.g., 2000)"
-                    value={calorieGoal}
-                    keyboardType="numeric"
-                    onChangeText={setCalorieGoal}
-                    style={styles.input}
-                  />
+                  {/* Only if calorie viewing is ON */}
+                  {userPreferences.calorieViewing && (
+                    <>
+                      <TextInput
+                        placeholder="Calories (e.g., 2000)"
+                        value={calorieGoal}
+                        keyboardType="numeric"
+                        onChangeText={setCalorieGoal}
+                        style={styles.input}
+                        placeholderTextColor="#999"
+                      />
+                    </>
+                  )}
 
-                  <Text style={styles.label}>Macronutrient % Split</Text>
-                  <TextInput
-                    placeholder="Protein %"
-                    value={protein}
-                    keyboardType="numeric"
-                    onChangeText={setProtein}
-                    style={styles.input}
-                  />
-                  <TextInput
-                    placeholder="Carbs %"
-                    value={carbs}
-                    keyboardType="numeric"
-                    onChangeText={setCarbs}
-                    style={styles.input}
-                  />
-                  <TextInput
-                    placeholder="Fat %"
-                    value={fat}
-                    keyboardType="numeric"
-                    onChangeText={setFat}
-                    style={styles.input}
-                  />
+                  {/* Always show macros if macroViewing */}
+                  {userPreferences.macroViewing && (
+                    <>
+                      <Text style={styles.label}>Macronutrient Unit</Text>
+                      <View style={styles.toggleContainer}>
+                        <Pressable
+                          style={[
+                            styles.toggleButton,
+                            macroUnit === "percent" && styles.activeToggle,
+                          ]}
+                          onPress={() => setMacroUnit("percent")}
+                        >
+                          <Text
+                            style={[
+                              styles.toggleButtonText,
+                              macroUnit === "percent" &&
+                                styles.activeToggleText,
+                            ]}
+                          >
+                            Percent (%)
+                          </Text>
+                        </Pressable>
+
+                        <Pressable
+                          style={[
+                            styles.toggleButton,
+                            macroUnit === "grams" && styles.activeToggle,
+                          ]}
+                          onPress={() => setMacroUnit("grams")}
+                        >
+                          <Text
+                            style={[
+                              styles.toggleButtonText,
+                              macroUnit === "grams" && styles.activeToggleText,
+                            ]}
+                          >
+                            Grams (g)
+                          </Text>
+                        </Pressable>
+                      </View>
+
+                      <TextInput
+                        placeholder="Protein"
+                        value={protein}
+                        keyboardType="numeric"
+                        onChangeText={setProtein}
+                        style={styles.input}
+                        placeholderTextColor="#999"
+                      />
+
+                      <TextInput
+                        placeholder="Carbs"
+                        value={carbs}
+                        keyboardType="numeric"
+                        onChangeText={setCarbs}
+                        style={styles.input}
+                        placeholderTextColor="#999"
+                      />
+                      <TextInput
+                        placeholder="Fat"
+                        value={fat}
+                        keyboardType="numeric"
+                        onChangeText={setFat}
+                        style={styles.input}
+                        placeholderTextColor="#999"
+                      />
+                    </>
+                  )}
                 </>
               ) : (
                 <>
@@ -158,6 +231,7 @@ export default function CalorieGoalsModal({
                 keyboardType="numeric"
                 onChangeText={setMeals}
                 style={styles.input}
+                placeholderTextColor="#999"
               />
 
               {selectedGoal === "Custom Goal" && (
@@ -256,5 +330,50 @@ const styles = StyleSheet.create({
   goalOptionText: {
     fontSize: 14,
     color: "#333",
+  },
+  toggleContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginVertical: 10,
+    gap: 10,
+  },
+
+  toggleButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 20,
+    backgroundColor: "#f7f7f7",
+  },
+
+  toggleButtonText: {
+    fontSize: 14,
+    fontFamily: "Main-font",
+    color: "#555",
+  },
+
+  activeToggle: {
+    backgroundColor: "#A084DC",
+    borderColor: "#A084DC",
+  },
+
+  activeToggleText: {
+    color: "#fff",
+  },
+
+  unitToggleRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 10,
+    marginBottom: 16,
+    gap: 10,
+  },
+
+  unitButton: {
+    flex: 1,
+    marginHorizontal: 5,
+    borderRadius: 8,
+    backgroundColor: "#e6d8ff", // optional for unselected
   },
 });

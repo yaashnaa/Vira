@@ -7,7 +7,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-  Dimensions,
+  Dimensions, FlatList
 } from "react-native";
 import { Card, SegmentedButtons } from "react-native-paper";
 import { fetchTastyRecipes, TastyRecipe } from "@/utils/api/fetchTastyRecipes";
@@ -52,15 +52,21 @@ export default function RecipeSearchScreen() {
             ))}
           </View>
 
-          <Card.Cover source={{ uri: recipe.thumbnail_url }} style={styles.cover} />
-          <Card.Content>
+          <Card.Cover
+            source={{ uri: recipe.thumbnail_url }}
+            style={styles.cover}
+          />
+          <Card.Content style={{ paddingBottom: 30 }}>
             <Text style={styles.recipeTitle}>{recipe.name}</Text>
             <Text style={styles.recipeDesc}>
               {recipe.description ? recipe.description : ""}
             </Text>
 
             {recipe.video_url && recipe.id === playingVideoId && (
-              <WebView source={{ uri: recipe.video_url }} style={styles.video} />
+              <WebView
+                source={{ uri: recipe.video_url }}
+                style={styles.video}
+              />
             )}
             {recipe.video_url && recipe.id !== playingVideoId && (
               <Text
@@ -78,31 +84,35 @@ export default function RecipeSearchScreen() {
 
   return (
     <>
-    <NutritionTipsModal 
-      visible={true} 
-      onDismiss={() => console.log("Modal dismissed")} 
-    />
-      <View style={styles.container}>
-        <Text style={styles.title}>🔎 Nutrition & Recipe Search</Text>
+      <NutritionTipsModal
+        visible={true}
+        onDismiss={() => console.log("Modal dismissed")}
+      />
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.scrollContainer}
+      >
+        <View style={styles.container}>
+          <Text style={styles.title}>🔎 Nutrition & Recipe Search</Text>
 
-        {/* 🟣 Segmented Buttons */}
-        <SegmentedButtons
-          value={mode}
-          onValueChange={(value) => setMode(value as "recipes" | "nutrition")}
-          buttons={[
-            { value: "recipes", label: "Recipes" },
-            { value: "nutrition", label: "Nutrition Info" },
-          ]}
-          style={{ marginBottom: 20 }}
-        />
+          {/* 🟣 Segmented Buttons */}
+          <SegmentedButtons
+            value={mode}
+            onValueChange={(value) => setMode(value as "recipes" | "nutrition")}
+            buttons={[
+              { value: "recipes", label: "Recipes" },
+              { value: "nutrition", label: "Nutrition Info" },
+            ]}
+            style={{ marginBottom: 20 }}
+          />
 
-        {mode === "nutrition" ? (
-          <>
-            <NutritionSearch />
-          </>
-        ) : (
-          <>
-            <View style={styles.searchContainer}>
+          {mode === "nutrition" ? (
+            <>
+              <NutritionSearch />
+            </>
+          ) : (
+            <>
+              <View style={styles.searchContainer}>
               <TextInput
                 placeholder="Search for a recipe..."
                 value={query}
@@ -110,38 +120,47 @@ export default function RecipeSearchScreen() {
                 style={styles.input}
                 onSubmitEditing={handleSearch}
               />
-              <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+              <TouchableOpacity
+                style={styles.searchButton}
+                onPress={handleSearch}
+              >
                 <Text style={styles.searchButtonText}>Search</Text>
               </TouchableOpacity>
-            </View>
+              </View>
 
-            {loading ? (
-              <ActivityIndicator size="large" color="#A084DC" style={{ marginTop: 20 }} />
-            ) : recipes.length === 0 && query.trim() !== "" ? (
+              {loading ? (
+              <ActivityIndicator
+                size="large"
+                color="#A084DC"
+                style={{ marginTop: 20 }}
+              />
+              ) : recipes.length === 0 && query.trim() !== "" ? (
               <View style={styles.emptyState}>
                 <Text style={styles.emptyText}>
-                  🍳 No recipes found. Try another search!
+                🍳 No recipes found. Try another search!
                 </Text>
               </View>
-            ) : (
-              <ScrollView
+              ) : (
+              <FlatList<TastyRecipe>
+                data={recipes}
+                keyExtractor={(item: TastyRecipe) => item.id.toString()}
+                renderItem={({ item }: { item: TastyRecipe }) => renderCard(item)}
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.scrollView}
-              >
-                {recipes.map((recipe) => renderCard(recipe))}
-              </ScrollView>
-            )}
-          </>
-        )}
-      </View>
+              />
+              )}
+            </>
+          )}
+        </View>
+      </ScrollView>
     </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 40,
+    paddingTop: 10,
     paddingHorizontal: 16,
     backgroundColor: "#fff",
     flex: 1,
@@ -249,5 +268,8 @@ const styles = StyleSheet.create({
     height: 200,
     marginTop: 10,
     borderRadius: 8,
+  },
+  scrollContainer: {
+    paddingBottom: 100,
   },
 });

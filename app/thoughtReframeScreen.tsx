@@ -6,46 +6,42 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Text,
+  ScrollView,
 } from "react-native";
 
-import { SegmentedButtons } from "react-native-paper";
-
+import { SegmentedButtons, Modal, Portal, Card } from "react-native-paper";
 import ChatBot from "@/components/ThoughtReframe/chatbot";
 import ManualReframe from "@/components/ThoughtReframe/manualReframe";
 import Header from "@/components/header";
 import Collapsible from "react-native-collapsible";
 import { Icon } from "react-native-paper";
+import ThoughtReframeHistory from "@/components/ThoughtReframe/history"; // 💡 Assuming you created a ThoughtReframeHistory.tsx component
 
 export default function ThoughtReframeScreen() {
   const [mode, setMode] = useState<"chat" | "manual">("chat");
   const [expanded, setExpanded] = useState(false);
+  const [historyVisible, setHistoryVisible] = useState(false);
 
   return (
     <>
-      <Header
-        title="Thought Reframe"
-        backPath="/dashboard"
-        showSettings={true}
-      />
+      <Header title="Thought Reframe" />
       <SafeAreaView style={styles.container}>
-        <SegmentedButtons
-          value={mode}
-          onValueChange={(value) => setMode(value as "chat" | "manual")}
-          buttons={[
-            {
-              value: "chat",
-              label: "Talk it Out",
-              uncheckedColor: "#888",
-              //   checkedColor: "#271949",
-            },
-            {
-              value: "manual",
-              label: "Reframe Manually",
-              uncheckedColor: "#888",
-            },
-          ]}
-          style={styles.segmentedButtons}
-        />
+        <View style={styles.topRow}>
+          <SegmentedButtons
+            value={mode}
+            onValueChange={(value) => setMode(value as "chat" | "manual")}
+            buttons={[
+              { value: "chat", label: "Talk it Out", uncheckedColor: "#888" },
+              {
+                value: "manual",
+                label: "Reframe Manually",
+                uncheckedColor: "#888",
+              },
+            ]}
+            style={styles.segmentedButtons}
+          />
+        </View>
+
         <TouchableOpacity
           style={styles.header}
           onPress={() => setExpanded(!expanded)}
@@ -66,7 +62,7 @@ export default function ThoughtReframeScreen() {
               ones.
             </Text>
             <Text style={styles.infoText}>
-              Learn more at
+              Learn more at{" "}
               <Text
                 style={styles.link}
                 onPress={() =>
@@ -80,9 +76,28 @@ export default function ThoughtReframeScreen() {
             </Text>
           </View>
         </Collapsible>
+
         <View style={{ flex: 1, marginTop: 0 }}>
           {mode === "chat" ? <ChatBot /> : <ManualReframe />}
         </View>
+
+        {/* ✨ Thought Reframe History Modal */}
+        <Portal>
+          <Modal
+            visible={historyVisible}
+            onDismiss={() => setHistoryVisible(false)}
+            contentContainerStyle={styles.modalContainer}
+          >
+            <Text style={styles.historyTitle}>Your Thought Reframes</Text>
+            <ThoughtReframeHistory />
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setHistoryVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </Modal>
+        </Portal>
       </SafeAreaView>
     </>
   );
@@ -94,19 +109,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     flex: 1,
   },
-  segmentedButtons: {
-    marginBottom: 0,
-    width: "90%",
-    justifyContent: "center",
-    margin: "auto",
-    borderRadius: 0,
-    marginTop: 20,
-    fontFamily: "Comfortaa-Regular",
+  topRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 30,
   },
-  card: {
-    backgroundColor: "#f8f6f4",
-    borderRadius: 12,
-    padding: 10,
+  segmentedButtons: {
+    flex: 1,
+  },
+  historyButton: {
+    marginLeft: 10,
+    backgroundColor: "#f2e8ff",
+    padding: 8,
+    borderRadius: 8,
   },
   header: {
     flexDirection: "row",
@@ -115,13 +131,13 @@ const styles = StyleSheet.create({
     width: "80%",
     margin: "auto",
     marginBottom: 25,
+    marginTop: 30,
   },
   headerText: {
     color: "#622f00",
     fontWeight: "600",
     fontSize: 19,
-    marginTop:30,
-    fontFamily: "patrickHand-regular",
+    fontFamily: "PatrickHand-Regular",
   },
   content: {
     marginBottom: 16,
@@ -131,30 +147,38 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     color: "#555",
     fontFamily: "Main-font",
-    margin: 20
+    margin: 20,
   },
   link: {
     color: "#8652e0",
     textDecorationLine: "underline",
   },
-  label: {
-    fontSize: 16,
-    marginTop: 16,
-    fontWeight: "500",
-    color: "#333",
-    fontFamily: "Main-font",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
+  modalContainer: {
     backgroundColor: "#fff",
-    marginTop: 8,
-    textAlignVertical: "top",
+    padding: 20,
+    margin: 20,
+    borderRadius: 20,
+    maxHeight: "80%",
   },
-  button: {
+  historyTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 10,
+    fontFamily: "PatrickHand-Regular",
+    color: "#6b4c9a",
+  },
+  closeButton: {
     marginTop: 20,
+    alignSelf: "center",
     backgroundColor: "#d2c2ed",
+    padding: 10,
+    borderRadius: 10,
+    width: "50%",
+    alignItems: "center",
+  },
+  closeButtonText: {
+    fontWeight: "bold",
+    color: "#4b2b82",
   },
 });

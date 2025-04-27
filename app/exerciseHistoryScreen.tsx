@@ -11,6 +11,33 @@ import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
 import Header from "@/components/header";
+const moodOptions = [
+  {
+    label: "Low Energy",
+    value: 100,
+    image: require("../assets/images/exerciseMood/1.png"),
+  },
+  {
+    label: "A Bit Drained",
+    value: 75,
+    image: require("../assets/images/exerciseMood/2.png"),
+  },
+  {
+    label: "Balanced & Okay",
+    value: 50,
+    image: require("../assets/images/exerciseMood/3.png"),
+  },
+  {
+    label: "Refreshed & Content",
+    value: 25,
+    image: require("../assets/images/exerciseMood/4.png"),
+  },
+  {
+    label: "Energized & Uplifted",
+    value: 0,
+    image: require("../assets/images/exerciseMood/5.png"),
+  },
+];
 export default function ExerciseHistoryScreen() {
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,6 +61,7 @@ export default function ExerciseHistoryScreen() {
       const user = auth.currentUser;
       if (!user) return;
       const data = await fetchExerciseLogs(user.uid);
+      console.log("Fetched logs:", data);
       setLogs(data);
       setLoading(false);
     };
@@ -43,7 +71,7 @@ export default function ExerciseHistoryScreen() {
 
   return (
     <>
-    <Header title=""/>
+    <Header title="" backPath="/fitness/(tabs)/explore"/>
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.container}>
           <Text style={styles.title}>Your Exercise Logs</Text>
@@ -80,7 +108,9 @@ export default function ExerciseHistoryScreen() {
                   </View>
                   {item.moodAfter !== undefined && (
                     <Text style={styles.mood}>
-                      Mood after: {item.moodAfter}/100
+                      Mood after: {
+                      moodOptions.find((mood) => mood.value === item.moodAfter)?.label || "Unknown"
+                      }
                     </Text>
                   )}
                   <Text style={styles.date}>

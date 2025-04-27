@@ -17,13 +17,13 @@ import {
   SafeAreaView,
   ActivityIndicator,
   FlatList,
-  Button,
   ScrollView,
   Image,
   Dimensions,
+  Linking,
   ImageBackground,
 } from "react-native";
-import { Surface } from "react-native-paper";
+import { Surface, Button } from "react-native-paper";
 import { Divider, useTheme } from "@rneui/themed";
 import {
   removeWidget as removeWidgetFromStorage,
@@ -38,6 +38,8 @@ import {
 
 import { useLocalSearchParams } from "expo-router";
 import dayjs from "dayjs";
+dayjs.extend(dayOfYear);
+import dayOfYear from "dayjs/plugin/dayOfYear";
 import { Link, useFocusEffect } from "expo-router";
 import { Header as HeaderRNE, HeaderProps, Icon } from "@rneui/themed";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -70,8 +72,7 @@ import MindfullnessWidget from "@/components/widgets/Mindfullness";
 import ThoughtReframeWidget from "@/components/widgets/ThoughtReframeWidget";
 import CopingBoxWidget from "@/components/widgets/CopingBoxWidget";
 import CBTToolsWidget from "@/components/widgets/CBTToolsWidget";
-import ThoughtReframeScreen from "../../components/ThoughtReframe/chatbot";
-import ReflectionCard from "../reflectionCard";
+
 import CombinedCheckInCard from "../combinedCheckInCard";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { getFunctions, httpsCallable } from "firebase/functions";
@@ -80,19 +81,35 @@ import * as Notifications from "expo-notifications";
 import { checkAndScheduleDailyReminder } from "@/utils/checkAndScheduleReminder";
 import { getDoc, doc } from "firebase/firestore";
 import OuotesBanner from "@/components/quotesBanner";
+import { useCheckInContext } from "@/context/checkInContext";
+
 const STORAGE_KEY = "@enabledWidgets";
 const dashboardSections = [
   { key: "greeting" },
   { key: "quote" },
   { key: "checkinCard" },
   { key: "logMood" },
+  { key: "quiz" },
   { key: "pinnedWidgets" },
+  { key: "actions" },
 ];
-
+const greetings = [
+  "Wishing you a calm and kind day 🌸",
+  "You are doing better than you think 🌟",
+  "Small steps are powerful too 🌿",
+  "Your feelings are valid today 💖",
+  "Be gentle with yourself today ☀️",
+  "You are enough, just as you are 🍃",
+  "Sending you strength and warmth 🌼",
+];
 export default function Dashboard() {
   const router = useRouter();
   const { userPreferences, loading } = useUserPreferences();
-  const { hasLoggedToday } = useMoodContext();
+  const [crisisModalVisible, setCrisisModalVisible] = useState(false);
+
+  const { hasCheckedInToday, refreshCheckIn } = useCheckInContext();
+
+
   const [showTools, setShowTools] = useState(false);
   const [authReady, setAuthReady] = useState(false);
   const opacity = useRef(new Animated.Value(0)).current;
@@ -102,6 +119,10 @@ export default function Dashboard() {
     string,
     any
   >>(null);
+  const todayIndex = dayjs().dayOfYear() % greetings.length;
+
+  const todaysGreeting = greetings[todayIndex];
+
   useEffect(() => {
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
   }, []);
@@ -301,8 +322,10 @@ export default function Dashboard() {
       <ImageBackground
         source={require("../../assets/images/dashboard/bg.png")} // your image here
         style={styles.greetingBackground}
-        imageStyle={{ borderRadius: 16 }} // optional rounded corners
+        imageStyle={{ borderRadius: 16 }} 
       >
+
+
         <SafeAreaView style={styles.headerContainer}>
           <FlatList
             data={dashboardSections}
@@ -317,11 +340,9 @@ export default function Dashboard() {
                   return (
                     <View style={styles.overlay}>
                       <Text style={styles.greetingText}>
-                        Hello, {userPreferences.name} 👋
+                        Hello, {userPreferences.name}!
                       </Text>
-                      <Text style={styles.subGreeting}>
-                        Wishing you a calm and kind day 🌸
-                      </Text>
+                      <Text style={styles.subGreeting}>{todaysGreeting}</Text>
                     </View>
                   );
 
@@ -332,12 +353,11 @@ export default function Dashboard() {
                     >
                       <View style={styles.card}>
                         <OuotesBanner />
-                      
                       </View>
                     </Animated.View>
                   );
                 case "checkinCard":
-                  if (!userPreferences.moodcCheckInBool || !hasLoggedToday)
+                  if (!userPreferences.moodcCheckInBool || !hasCheckedInToday)
                     return null;
 
                   return (
@@ -346,7 +366,7 @@ export default function Dashboard() {
                     </View>
                   );
                 case "logMood":
-                  if (!userPreferences.moodcCheckInBool || hasLoggedToday)
+                  if (!userPreferences.moodcCheckInBool || hasCheckedInToday)
                     return null;
 
                   return (
@@ -355,6 +375,16 @@ export default function Dashboard() {
                     >
                       <LogMoodButton latestCheckIn={latestCheckIn} />
                     </TouchableOpacity>
+                  );
+
+                case "quiz":
+                  if (hasCompletedScreening) return null;
+                  return (
+                    <View style={{width: width, marginBottom: 30 }}>
+                      <TakeQuizButton
+                        onPress={() => handleNavigate("../quizzes/screening")}
+                      />
+                    </View>
                   );
 
                 case "pinnedWidgets":
@@ -478,10 +508,9 @@ export default function Dashboard() {
                     <>
                       <DeleteButton />
                       <LogoutButton />
-                      <Button
-                        onPress={resetAllAsyncStorage}
-                        title="Reset Async Storage"
-                      />
+                      <Button onPress={resetAllAsyncStorage}>
+                        Reset Async Storage
+                      </Button>
                     </>
                   );
 
@@ -501,7 +530,7 @@ const { height } = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    width: "100%",
+    width: width,
     backgroundColor: "transparent",
     height: height,
     margin: 0,
@@ -533,7 +562,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 32,
+    fontSize: 42,
     fontWeight: "bold",
     // textAlign: "center",
     fontFamily: "Patrickhand-regular",
@@ -583,7 +612,9 @@ const styles = StyleSheet.create({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: "auto",
+    // marginBottom: "auto",
+    margin:0,
+    width: width,
   },
   sectionTitle: {
     fontSize: 24,
@@ -730,5 +761,45 @@ const styles = StyleSheet.create({
     color: "#5a4c7c",
     marginTop: 4,
     fontFamily: "Main-font",
+  },
+  crisisButton: {
+    position: "absolute",
+    bottom: 180,
+    right: 20,
+    backgroundColor: "#ff5c5c",
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 50,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    zIndex: 10,
+  },
+  crisisButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+    fontFamily: "Main-font",
+  },
+  modalWrapper: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    width: "100%",
+    maxWidth: 400,
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
 });

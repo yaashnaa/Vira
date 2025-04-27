@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -7,14 +7,21 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
+  Image,
+  Alert,
+  TouchableOpacity,
 } from "react-native";
-import { Button, Card } from "react-native-paper";
-import { createComment, listenToComments } from "@/utils/community"; // update path if needed
-
+import { Button } from "react-native-paper";
+import { createComment, listenToComments } from "@/utils/community";
+import { deleteDoc, doc } from "firebase/firestore";
+import { increment, updateDoc } from "firebase/firestore";
+import { db, auth } from "@/config/firebaseConfig";
+import Feather from "@expo/vector-icons/Feather";
+import Toast from "react-native-toast-message";
 export default function CommentSection({
   category,
   postId,
-  onCommentPosted, // 👈 Add this prop
+  onCommentPosted,
 }: {
   category: string;
   postId: string;
@@ -22,17 +29,76 @@ export default function CommentSection({
 }) {
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState("");
+  const flatListRef = useRef<FlatList>(null);
+  const currentUid = auth.currentUser?.uid;
+  const [isPosting, setIsPosting] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = listenToComments(category, postId, setComments);
+    const unsubscribe = listenToComments(category, postId, (newComments) => {
+      setComments(newComments);
+    });
     return () => unsubscribe();
   }, [category, postId]);
 
   const handlePostComment = async () => {
-    await createComment(category, postId, newComment);
-    setNewComment("");
-    onCommentPosted?.(); // 👈 Collapse after posting
+    if (!newComment.trim()) return; // extra safety
+
+    setIsPosting(true);
+    try {
+      await createComment(category, postId, newComment);
+      setNewComment("");
+      onCommentPosted?.();
+      setTimeout(
+        () => flatListRef.current?.scrollToEnd({ animated: true }),
+        300
+      );
+      Toast.show({
+        type: "success",
+        text1: "Comment posted successfully",
+      });
+    } catch (err) {
+      console.error("Failed to post comment:", err);
+      Toast.show({
+        type: "error",
+        text1: "Error posting comment",
+      });
+    } finally {
+      setIsPosting(false);
+    }
   };
+  const confirmDelete = (commentId: string) => {
+    Alert.alert(
+      "Delete Comment",
+      "Are you sure you want to delete this comment?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => deleteComment(commentId),
+        },
+      ]
+    );
+  };
+
+  const deleteComment = async (commentId: string) => {
+    try {
+      await deleteDoc(
+        doc(db, "discussions", category, "posts", postId, "comments", commentId)
+      );
+  
+      // 🛠 Decrease commentCount by 1
+      const postRef = doc(db, "discussions", category, "posts", postId);
+      await updateDoc(postRef, {
+        commentCount: increment(-1),
+      });
+  
+      onCommentPosted?.();
+    } catch (err) {
+      console.error("Failed to delete comment:", err);
+    }
+  };
+  
 
   return (
     <KeyboardAvoidingView
@@ -40,20 +106,40 @@ export default function CommentSection({
       style={styles.container}
     >
       <FlatList
+        ref={flatListRef}
         data={comments}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.commentCard}>
-            <View>
-              <Text style={styles.name}>{item.name}</Text>
+          <View style={styles.commentRow}>
+            <Image
+              source={{
+                uri:
+                  item.avatarUrl ||
+                  "https://cdn-icons-png.flaticon.com/512/847/847969.png",
+              }}
+              style={styles.avatar}
+            />
+            <View style={styles.commentBubble}>
+              <View style={styles.headerRow}>
+                <Text style={styles.name}>{item.name || "Anonymous"}</Text>
+                {item.userId === currentUid && (
+                  <TouchableOpacity onPress={() => confirmDelete(item.id)}>
+                    <Feather name="trash-2" size={16} color="#b92626" />
+                  </TouchableOpacity>
+                )}
+              </View>
               <Text style={styles.text}>{item.text}</Text>
             </View>
           </View>
         )}
-        ListEmptyComponent={
-          <Text style={styles.empty}>No comments yet. Be the first!</Text>
+        ListEmptyComponent={() =>
+          comments.length === 0 ? (
+            <Text style={styles.empty}>No comments yet. Be the first!</Text>
+          ) : null
         }
+        contentContainerStyle={{ paddingBottom: 12 }}
       />
+
       <View style={styles.commentContainer}>
         <TextInput
           value={newComment}
@@ -62,13 +148,18 @@ export default function CommentSection({
           style={styles.input}
         />
         <Button
-          //   mode="contained"
           onPress={handlePostComment}
           style={styles.button}
-          textColor="#050505"
-          disabled={!newComment.trim()}
+          disabled={!newComment.trim() || isPosting} // 👈 add isPosting
+          labelStyle={{
+            fontFamily: "Main-font",
+            fontSize: 14,
+            fontWeight: "bold",
+            textTransform: "none",
+            color: "#000",
+          }}
         >
-          Comment
+          {isPosting ? "Posting..." : "Post"} {/* Optional: change text too */}
         </Button>
       </View>
     </KeyboardAvoidingView>
@@ -79,72 +170,66 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 16,
   },
-  commentContainer: {
-    backgroundColor: "#fdf4ff", // a softer pinkish background
-    borderRadius: 16,
-    padding: 14,
-    marginTop: 16,
-    marginHorizontal: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  commentCard: {
+  commentRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
     marginBottom: 12,
-    backgroundColor: "#fff",
-    borderRadius: 14,
-    padding: 12,
     marginHorizontal: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
+  },
+  avatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: 8,
+    backgroundColor: "#ddd",
+  },
+  commentBubble: {
+    backgroundColor: "#f0ebff",
+    borderRadius: 16,
+    padding: 12,
+    flex: 1,
     elevation: 1,
+  },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
   },
   name: {
     fontWeight: "bold",
-    fontSize: 15,
-    marginBottom: 4,
-    fontFamily: "PatrickHand-Regular",
+    fontSize: 12,
     color: "#6b4c9a",
   },
   text: {
     fontSize: 14,
-    fontFamily: "Main-font",
     color: "#333",
   },
   empty: {
     fontSize: 14,
     color: "#aaa",
-    fontFamily: "Main-font",
     textAlign: "center",
-    marginVertical: 20,
+    marginVertical: 14,
+  },
+  commentContainer: {
+    marginHorizontal: 16,
+    marginTop: 8,
   },
   input: {
     backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 12,
-    height: 90,
+    borderRadius: 8,
+    padding: 10,
     borderWidth: 1,
     borderColor: "#ddd",
     fontFamily: "Main-font",
-    marginTop: 10,
     fontSize: 14,
     textAlignVertical: "top",
+    minHeight: 60,
   },
   button: {
-    marginTop: 10,
+    marginTop: 8,
     alignSelf: "flex-end",
-    backgroundColor: "#865dff",
-    paddingHorizontal: 24,
-    paddingVertical: 8,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 3,
-    elevation: 2,
+    backgroundColor: "#c4b0fd",
+    borderRadius: 8,
   },
 });

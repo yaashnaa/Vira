@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, Dimensions } from "react-native";
-import LogExercise from "../../logExercise";
+import LogExercise from "../../../components/Exercise/logExercise";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 export const dynamic = "force-static";

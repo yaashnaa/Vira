@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Alert,
   Modal,
-  Animated,
+  Animated, Linking
 } from "react-native";
 import { Card, Button, Divider } from "react-native-paper";
 import { auth, db } from "@/config/firebaseConfig";
@@ -112,7 +112,7 @@ export default function CrisisPlanSection() {
   };
 
   return (
-    <ScrollView>
+    <ScrollView style={{marginBottom:100}}>
       <Text style={styles.header}> Your Crisis Plan 🚨</Text>
 
       <TouchableOpacity onPress={() => setCollapsed(!collapsed)}>
@@ -123,9 +123,9 @@ export default function CrisisPlanSection() {
 
       <Collapsible collapsed={collapsed}>
         <Text style={styles.explanation}>
-          A crisis plan helps you stay safe when things feel overwhelming. It can
-          include emergency numbers, trusted contacts, and resources you can turn to
-          when you need help.
+          A crisis plan helps you stay safe when things feel overwhelming. It
+          can include emergency numbers, trusted contacts, and resources you can
+          turn to when you need help.
         </Text>
       </Collapsible>
 
@@ -135,7 +135,11 @@ export default function CrisisPlanSection() {
           <Card.Content>
             <Text style={styles.title}>{contact.label}</Text>
             <Text style={styles.text}>{contact.description}</Text>
-            <Text style={styles.phone}>📞 {contact.phone}</Text>
+            <TouchableOpacity
+              onPress={() => Linking.openURL(`tel:${contact.phone}`)}
+            >
+              <Text style={styles.phone}>📞 {contact.phone}</Text>
+            </TouchableOpacity>
           </Card.Content>
         </Card>
       ))}
@@ -144,27 +148,28 @@ export default function CrisisPlanSection() {
 
       <Text style={styles.subheader}>Your Emergency Contacts</Text>
       {userContacts.map((contact, idx) => (
-  <Card key={idx} style={styles.contactCard}>
-    <Card.Content style={styles.contactRow}>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.contactLabel}>{contact.label}</Text>
-        <Text style={styles.contactDescription}>{contact.description}</Text>
-        <Text style={styles.contactPhone}>📞 {contact.phone}</Text>
-      </View>
-      <Button
-        icon="delete"
-        mode="text"
-        textColor="#696969"
-        compact
-        style={styles.deleteButton}
-        onPress={() => removeUserContact(contact)}
-      >
-      <Text> </Text>  
-      </Button>
-    </Card.Content>
-  </Card>
-))}
-
+        <Card key={idx} style={styles.contactCard}>
+          <Card.Content style={styles.contactRow}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.contactLabel}>{contact.label}</Text>
+              <Text style={styles.contactDescription}>
+                {contact.description}
+              </Text>
+              <Text style={styles.contactPhone}>📞 {contact.phone}</Text>
+            </View>
+            <Button
+              icon="delete"
+              mode="text"
+              textColor="#696969"
+              compact
+              style={styles.deleteButton}
+              onPress={() => removeUserContact(contact)}
+            >
+              <Text> </Text>
+            </Button>
+          </Card.Content>
+        </Card>
+      ))}
 
       <Button
         mode="contained"
@@ -173,7 +178,6 @@ export default function CrisisPlanSection() {
       >
         Add New Contact
       </Button>
-
 
       <Modal
         transparent={true}
@@ -208,7 +212,7 @@ export default function CrisisPlanSection() {
             <TextInput
               style={styles.input}
               value={newDescription}
-                 placeholderTextColor={"#999"}
+              placeholderTextColor={"#999"}
               placeholder="Description or notes"
               onChangeText={setNewDescription}
             />
@@ -220,7 +224,13 @@ export default function CrisisPlanSection() {
               onChangeText={setNewPhone}
               keyboardType="phone-pad"
             />
-            <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 12 }}>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginTop: 12,
+              }}
+            >
               <Button onPress={closeModal}>Cancel</Button>
               <Button
                 mode="contained"
@@ -297,7 +307,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     textAlign: "center",
   },
-  
+
   subheader: {
     fontSize: 20,
     fontFamily: "PatrickHand-Regular",
@@ -384,5 +394,4 @@ const styles = StyleSheet.create({
     color: "#865dff",
     // marginTop: 4,
   },
-  
 });

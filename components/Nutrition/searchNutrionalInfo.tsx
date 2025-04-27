@@ -15,7 +15,13 @@ import { Card } from "react-native-paper";
 
 export function getFriendlyNutrientHighlights(fullNutrients: any[]) {
   const highlights = [];
-
+  const fallbackMessages = [
+    "nutritious in its own way",
+    "a wholesome choice",
+    "great for a balanced diet",
+    "a nice addition to your meal",
+  ];
+  
   const lookup = (id: number) =>
     fullNutrients.find((n) => n.attr_id === id)?.value || 0;
 
@@ -25,6 +31,12 @@ export function getFriendlyNutrientHighlights(fullNutrients: any[]) {
   if (lookup(301) > 100) highlights.push("a good source of calcium");
   if (lookup(303) > 2) highlights.push("contains iron");
   if (lookup(324) > 5) highlights.push("a good source of vitamin D");
+
+
+  if (highlights.length === 0) {
+    const randomIndex = Math.floor(Math.random() * fallbackMessages.length);
+    highlights.push(fallbackMessages[randomIndex]);
+  }
 
   return highlights;
 }

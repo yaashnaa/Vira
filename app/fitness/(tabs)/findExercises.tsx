@@ -349,6 +349,7 @@ export default function FitnessScreen() {
                   <Button
                     onPress={() => setModalVisible(false)}
                     style={styles.button}
+                    textColor="#271949"
                   >
                     Close
                   </Button>
