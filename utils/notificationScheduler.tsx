@@ -3,6 +3,27 @@ import * as Notifications from "expo-notifications";
 /**
  * Cancel all previously scheduled notifications.
  */
+const encouragementMessages: Record<
+  EncouragementType,
+  { title: string; body: string }
+> = {
+  "Gentle & Kind": {
+    title: "🌸 Gentle Nudge",
+    body: "You're doing your best. Take a soft breath. 🌿",
+  },
+  "Cheerful & Motivating": {
+    title: "🚀 Keep Going!",
+    body: "You're unstoppable! Keep shining today! ✨",
+  },
+  Minimal: {
+    title: "🔔 Reminder",
+    body: "Check in when you can.",
+  },
+  None: {
+    title: "",
+    body: "",
+  },
+};
 export async function clearAllScheduledNotifications() {
   try {
     await Notifications.cancelAllScheduledNotificationsAsync();
@@ -16,12 +37,19 @@ export async function clearAllScheduledNotifications() {
  * Schedule daily notifications based on selected reminder frequency.
  * @param frequency - User's selected reminder frequency
  */
-export async function scheduleUserNotifications(frequency: string) {
+export type EncouragementType =
+  | "Gentle & Kind"
+  | "Cheerful & Motivating"
+  | "Minimal"
+  | "None";
+
+export async function scheduleUserNotifications(
+  frequency: string,
+  encouragement: EncouragementType
+) {
   try {
-    // Step 1: Clear existing ones
     await clearAllScheduledNotifications();
 
-    // Step 2: Choose times based on user setting
     let times: { hour: number; minute: number }[] = [];
 
     switch (frequency) {
@@ -46,13 +74,16 @@ export async function scheduleUserNotifications(frequency: string) {
         return;
     }
 
-    // Step 3: Schedule new ones
+    // 💬 Pick message based on encouragement style
+    const selectedMessage =
+      encouragementMessages[encouragement] ?? encouragementMessages["Minimal"];
+
     for (const time of times) {
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: "🌸 Gentle Reminder",
-          body: "Take a moment to check in with yourself.",
-          sound: "default",
+          title: selectedMessage.title,
+          body: selectedMessage.body,
+          sound: "default", // or dynamic based on user sound selection if you want
         },
         trigger: {
           type: "calendar",
@@ -62,10 +93,14 @@ export async function scheduleUserNotifications(frequency: string) {
         } as Notifications.CalendarTriggerInput,
       });
     }
-    
 
-    console.log("✅ Notifications scheduled based on:", frequency);
+    console.log(
+      "✅ Notifications scheduled based on:",
+      frequency,
+      encouragement
+    );
   } catch (error) {
     console.error("❌ Error scheduling notifications:", error);
   }
 }
+

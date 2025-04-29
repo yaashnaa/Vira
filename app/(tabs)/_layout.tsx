@@ -37,20 +37,20 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="settings"
-        options={{
-          tabBarLabel: "Settings",
-          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
-            <Icon name="settings" type="feather" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="widgets"
         options={{
           tabBarLabel: "Widgets",
           tabBarIcon: ({ color, size }: { color: string; size: number }) => (
             <Icon name="grid" type="feather" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          tabBarLabel: "Settings",
+          tabBarIcon: ({ color, size }: { color: string; size: number }) => (
+            <Icon name="settings" type="feather" color={color} size={size} />
           ),
         }}
       />

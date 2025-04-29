@@ -71,7 +71,7 @@ export default function MoodTagSuggestions({
   } else if (!isNaN(Number(mood))) {
     const moodNum = Number(mood);
   
-    // First try value-to-label
+    
     if (labelMap[moodNum]) {
       moodLabel = labelMap[moodNum];
     } 

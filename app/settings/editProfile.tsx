@@ -21,15 +21,16 @@ import { Ionicons } from "@expo/vector-icons";
 
 import { useRouter } from "expo-router";
 import { auth, db } from "@/config/firebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { useUserPreferences } from "@/context/userPreferences";
-import { Header as HeaderRNE, Icon } from "@rneui/themed";
+import Header from "@/components/header";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Toast from "react-native-toast-message";
 export default function EditProfileScreen() {
   const router = useRouter();
   const { userPreferences, updatePreferencesFromFirestore } =
     useUserPreferences();
+  const [username, setUsername] = useState("");
 
   const [name, setName] = useState(userPreferences.name ?? "");
   const [ageGroup, setAgeGroup] = useState(userPreferences.ageGroup ?? "");
@@ -56,10 +57,27 @@ export default function EditProfileScreen() {
     if (Platform.OS === "android") ToastAndroid.show(msg, ToastAndroid.SHORT);
     else alert(msg);
   };
+  useEffect(() => {
+    const fetchUsername = async () => {
+      try {
+        const userDoc = await getDoc(
+          doc(db, "users", auth.currentUser?.uid || "")
+        );
+        if (userDoc.exists()) {
+          setUsername(userDoc.data()?.username || "");
+        }
+      } catch (error) {
+        console.error("Error fetching username:", error);
+      }
+    };
+
+    fetchUsername();
+  }, []);
 
   const handleSave = async () => {
     const updated = {
       name,
+
       ageGroup,
       activityLevel,
       physicalHealth,
@@ -78,6 +96,12 @@ export default function EditProfileScreen() {
       if (currentUser) {
         const docRef = doc(db, "users", currentUser.uid, "preferences", "main");
         await setDoc(docRef, updated, { merge: true });
+        await setDoc(
+          doc(db, "users", auth.currentUser?.uid || ""),
+          { username },
+          { merge: true }
+        );
+
         await updatePreferencesFromFirestore();
         Toast.show({
           type: "success",
@@ -95,23 +119,8 @@ export default function EditProfileScreen() {
 
   return (
     <Provider>
-      <HeaderRNE
-        containerStyle={{ backgroundColor: "#f8edeb", borderBottomWidth: 0 }}
-        leftComponent={
-          <TouchableOpacity onPress={() => router.back()}>
-            <Icon name="arrow-back" type="ionicon" color="#190028" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "EDIT PROFILE",
-          style: {
-            color: "#271949",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "PatrickHand-Regular",
-          },
-        }}
-      />
+      
+      <Header title="Edit Profile" backPath="/settings"/>
 
       <ScrollView style={styles.container}>
         <Text style={styles.label}>Name</Text>
@@ -120,6 +129,14 @@ export default function EditProfileScreen() {
           value={name}
           placeholder="Your name"
           onChangeText={setName}
+        />
+        <Divider style={{ marginVertical: 18 }} />
+        <Text style={styles.label}>Username</Text>
+        <TextInput
+          style={styles.input}
+          value={username}
+          placeholder="Choose your username"
+          onChangeText={setUsername}
         />
         <Divider style={{ marginVertical: 18 }} />
 
@@ -132,14 +149,12 @@ export default function EditProfileScreen() {
               onPress={() => setAgeMenuVisible(true)}
               style={styles.dropdown}
             >
-                <View style={styles.dropdownRow}>
-
+              <View style={styles.dropdownRow}>
                 <Text style={styles.dropdownText}>
-                {ageGroup || "Select age group"}
-              </Text>
-              <Ionicons name="chevron-down" size={18} color="#5a5a5a" />
-                </View>
-              
+                  {ageGroup || "Select age group"}
+                </Text>
+                <Ionicons name="chevron-down" size={18} color="#5a5a5a" />
+              </View>
             </TouchableOpacity>
           }
         >
@@ -207,14 +222,12 @@ export default function EditProfileScreen() {
               onPress={() => setHealthMenuVisible(true)}
               style={styles.dropdown}
             >
-                <View style={styles.dropdownRow}>
- 
+              <View style={styles.dropdownRow}>
                 <Text style={styles.dropdownText}>
                   {physicalHealth || "Select physical health status"}
                 </Text>
                 <Ionicons name="chevron-down" size={18} color="#5a5a5a" />
-                </View>
-             
+              </View>
             </TouchableOpacity>
           }
         >
@@ -302,11 +315,10 @@ export default function EditProfileScreen() {
           onPress={() => setShowGoalsMenu(true)}
           style={styles.dropdown}
         >
-            <View style={styles.dropdownRow}>
+          <View style={styles.dropdownRow}>
             <Text style={styles.dropdownText}>Edit Goals (up to 3)</Text>
             <Ionicons name="chevron-down" size={18} color="#5a5a5a" />
-            </View>
-        
+          </View>
         </TouchableOpacity>
         <Divider style={{ marginVertical: 18 }} />
         <Text style={styles.label}>Medical Conditions (optional)</Text>
@@ -326,13 +338,13 @@ export default function EditProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#ffffff", padding: 16 },
+  container: { flex: 1, backgroundColor: "#ffffff", padding: 16,  },
   label: {
     fontSize: 17,
     fontFamily: "Main-font",
     color: "#3a3a3a",
     // marginTop: 16,
-    // marginBottom: 6,
+
   },
   input: {
     backgroundColor: "#fff",
@@ -348,6 +360,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#865dff",
     paddingVertical: 8,
     borderRadius: 8,
+    marginBottom: 75,
   },
   dropdownRow: {
     flexDirection: "row",

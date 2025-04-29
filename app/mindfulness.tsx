@@ -1,102 +1,195 @@
 import React from "react";
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
-import LottieView from "lottie-react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  Linking,
+  Image,
+  Dimensions,
+} from "react-native";
+import { Card } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { Header as HeaderRNE, Icon } from "@rneui/themed";
+import Header from "@/components/header";
+import AntDesign from '@expo/vector-icons/AntDesign';
+import LottieView from "lottie-react-native";
+const techniques = [
+  { title: "Breathing Exercise", route: "/BreathingExercise", icon: require("../assets/images/widgetImages/breathing.png") },
+  { title: "Body Scan", route: "/BodyScanExercise", icon: require("../assets/images/widgetImages/bodyScan.png") },
+  { title: "Five Senses", route: "/FiveSensesExercise", icon: require("../assets/images/widgetImages/senses.png") },
+];
 
-const width = Dimensions.get("window").width;
-const height = Dimensions.get("window").height;
-export default function Mindfullness() {
+const videos = [
+  {
+    title: "5-Minute Breathing Exercise",
+    url: "https://www.youtube.com/watch?v=nmFUDkj1Aq0",
+    icon: require("../assets/images/widgetImages/video.png") 
+
+  },
+  {
+    title: "Guided Body Scan Meditation",
+    url: "https://www.youtube.com/watch?v=QS2yDmWk0vs",
+    icon: require("../assets/images/widgetImages/video.png") 
+
+  },
+  {
+    title: "5-4-3-2-1 Grounding Technique",
+    url: "https://www.youtube.com/watch?v=9S3whGkwhGI",
+    icon: require("../assets/images/widgetImages/video.png") 
+ 
+  },
+];
+
+export default function MindfulnessHomeScreen() {
   const router = useRouter();
-  const mindfullnessLottie = require("../assets/animations/underConstruction.json");
-  const handleBackPress = () => {
-    router.replace("/dashboard");
+  const [videosCollapsed, setVideosCollapsed] = React.useState(true);
+  const openLink = async (url: string) => {
+    const supported = await Linking.canOpenURL(url);
+    if (supported) {
+      await Linking.openURL(url);
+    } else {
+      console.error("Cannot open URL:", url);
+    }
   };
+
   return (
     <>
-      <HeaderRNE
-        containerStyle={{
-          backgroundColor: "#f8edeb",
-          borderBottomWidth: 0,
-          paddingTop: 10,
-        }}
-        leftComponent={
-          <TouchableOpacity onPress={handleBackPress}>
-            <Icon name="arrow-back" size={25} type="ionicon" color="#271949" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "MINDFULLNESS",
-          style: {
-            color: "#271949",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "PatrickHand-Regular",
-          },
-        }}
-        rightComponent={
-          <View style={styles.headerRight}>
-            <TouchableOpacity
-              style={{ marginLeft: 12 }}
-              onPress={handleBackPress}
-            >
-              <Icon name="settings" size={25} type="feather" color="#271949" />
-            </TouchableOpacity>
-          </View>
-        }
+      <Header title="Mindfulness Hub" />
+    
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+          <LottieView
+        source={require("../assets/animations/mindfulness.json")}
+        autoPlay
+        loop
+        style={{ width: width, height: 200, alignSelf: "center" }}
       />
-      <Text style={styles.title}> We are currently under construction 🚧</Text>
-      <Text style={styles.subtitle}> Check back again soon!</Text>
-      <View style={styles.container}>
-        <LottieView
-          source={mindfullnessLottie}
-          autoPlay
-          loop
-          style={{
-            width: width *1.2,
-            height: height ,
-            marginLeft: 10,
-            marginBottom: 20,
-          }}
-        />
-      </View>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}> Explore Techniques</Text>
+          {techniques.map((tech, idx) => (
+            <TouchableOpacity
+              key={idx}
+              onPress={() =>
+                router.push(tech.route as Parameters<typeof router.push>[0])
+              }
+            >
+              <Card style={styles.techniqueCard}>
+                <Card.Content style={styles.cardContent}>
+                  <View style={{ justifyContent: "center", alignItems: "center", flexDirection: "row" }}>
+                  <Image source={tech.icon} style={styles.icon} />
+                  <Text style={styles.techniqueText}>{tech.title}</Text>
+                  </View>
+
+                  <AntDesign name="right" size={24} color="black"  style={{ marginLeft: 60, alignSelf:"center", justifyContent: "flex-end"}}/>
+                </Card.Content>
+              </Card>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <View style={styles.VideoSection}>
+          <TouchableOpacity
+            onPress={() => setVideosCollapsed(!videosCollapsed)}
+            style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%", paddingHorizontal: 16, paddingVertical: 10 }}
+          >
+            <Text style={styles.sectionTitle}>🎥 Helpful Video Resources</Text>
+            <AntDesign
+              name={videosCollapsed ? "down" : "up"}
+              size={24}
+              color="black"
+            />
+          </TouchableOpacity>
+          {!videosCollapsed &&
+            videos.map((video, idx) => (
+              <TouchableOpacity key={idx} onPress={() => openLink(video.url)}>
+          <Card style={styles.videoCard}>
+            <Card.Content style={styles.cardContent}>
+              <Text style={styles.videoTitle}>{video.title}</Text>
+            </Card.Content>
+          </Card>
+              </TouchableOpacity>
+            ))}
+        </View>
+      </ScrollView>
     </>
   );
 }
 
+const { width } = Dimensions.get("window");
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#F9FAFB",
+  },
+  VideoSection:{
     justifyContent: "center",
     alignItems: "center",
-    // backgroundColor: "#f5f5f5",
-    display: "flex",
-    margin:"auto",
+    gap: 10,
   },
-  text: {
-    fontSize: 18,
-    top: 60,
-    color: "#333",
+  content: {
+    paddingBottom: 50,
+    paddingTop: 20,
+    paddingHorizontal: 16,
   },
-  headerRight: {
-    flexDirection: "row",
-    marginTop: 5,
+  section: {
+    marginBottom: 30,
   },
-  title: {
-    fontSize: 28,
-    top: 60,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 10,
+  sectionTitle: {
+    fontSize: 26,
     fontFamily: "PatrickHand-Regular",
-  },
-  subtitle:{
-    top: 60,
-    fontSize: 22,
-    textAlign: "center",
+    color: "#17092d",
     marginBottom: 20,
-    fontFamily: "PatrickHand-Regular",
-    color: "#666",
-  }
+    textAlign: "center",
+  },
+  techniqueCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    paddingVertical: 0,
+    paddingHorizontal: 4,
+    marginBottom: 16,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    minHeight: 50,
+    justifyContent: "center",
+  },
+  videoCard: {
+    backgroundColor: "#EEF2FF",
+    borderRadius: 20,
+    paddingVertical: 0,
+    paddingHorizontal: 6,
+    marginBottom: 16,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: "#CBD5E1",
+    minHeight: 40,
+    justifyContent: "center",
+  },
+  techniqueText: {
+    fontSize: 18,
+    fontFamily: "Main-font",
+    color: "#374151",
+    marginLeft: 12,
+  },
+  videoTitle: {
+    fontSize: 18,
+    fontFamily: "Main-font",
+    color: "#1E40AF",
+    marginLeft: 12,
+  },
+  icon: {
+    width: 39,
+    height: 39,
+    resizeMode: "contain",
+  },
+  cardContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
 });
-

@@ -8,15 +8,15 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  ActivityIndicator,
-  Linking,
+
+
   TouchableOpacity,
 } from "react-native";
 import { Icon } from "react-native-elements";
 import { Button } from "react-native-paper";
 import axios from "axios";
 import Constants from "expo-constants";
-import Collapsible from "react-native-collapsible";
+
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db, auth } from "@/config/firebaseConfig";
 import { KeyboardAwareFlatList } from "react-native-keyboard-aware-scroll-view";
@@ -38,14 +38,23 @@ export default function ThoughtReframeChatbotScreen() {
       const userId = auth.currentUser?.uid;
       if (!userId) return;
 
-      const docRef = doc(db, "users", userId, "thoughtReframeChats", "currentChat");
+      const docRef = doc(
+        db,
+        "users",
+        userId,
+        "thoughtReframeChats",
+        "currentChat"
+      );
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
         const data = docSnap.data();
         setMessages(
           data.messages || [
-            { role: "ai", content: "What’s a thought you’d like to work on together?" },
+            {
+              role: "ai",
+              content: "What’s a thought you’d like to work on together?",
+            },
           ]
         );
       }
@@ -72,10 +81,19 @@ export default function ThoughtReframeChatbotScreen() {
               parts: [
                 {
                   text: `
-              You are a gentle, supportive chatbot helping users reframe unhelpful thoughts using CBT techniques.
-              Always validate their feelings before offering reframes.
+                        You are a gentle, supportive chatbot helping users reframe unhelpful thoughts using CBT (Cognitive Behavioral Therapy) techniques.
+            Always validate the user's feelings first before offering thoughtful reframes.
+            You are not a therapist, but you can provide helpful suggestions and reframes.
+            Your goal is to help the user feel heard and supported.
+            Keep your answers short and to the point.
+            Focus only on the user's thought that is provided.
+            Do not answer unrelated questions or engage in off-topic conversation.
 
-              User's Thought: ${userInput}
+            User's Thought: ${userInput}
+
+            Please validate their emotion about this thought first, and then gently help them find a healthier or more balanced way to look at it.
+
+
               `,
                 },
               ],
@@ -94,7 +112,10 @@ export default function ThoughtReframeChatbotScreen() {
         response.data?.candidates?.[0]?.content?.parts?.[0]?.text ||
         "Sorry, I'm not sure how to respond.";
 
-      const updatedMessages = [...newMessages, { role: "ai", content: botReply }];
+      const updatedMessages = [
+        ...newMessages,
+        { role: "ai", content: botReply },
+      ];
       setMessages(updatedMessages);
 
       const userId = auth.currentUser?.uid;
@@ -128,14 +149,15 @@ export default function ThoughtReframeChatbotScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 250 : 0}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 230 : 0}
       style={{ flex: 1 }}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.container}>
+        <View style ={styles.container}>
           <KeyboardAwareFlatList
             ref={flatListRef}
             data={messages}
+            keyboardShouldPersistTaps="handled" 
             keyExtractor={(_, index) => index.toString()}
             renderItem={({ item }) => (
               <View
@@ -156,7 +178,6 @@ export default function ThoughtReframeChatbotScreen() {
             )}
             contentContainerStyle={{ paddingBottom: 0, paddingTop: 10 }}
             onScrollBeginDrag={() => setAutoScroll(false)}
-   
             extraScrollHeight={100}
             enableAutomaticScroll
           />

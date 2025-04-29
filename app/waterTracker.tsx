@@ -13,7 +13,7 @@ import ConfettiCannon from "react-native-confetti-cannon";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import { AddRemoveButton } from "../components/addRemoveButton";
-
+import Header from "@/components/header";
 import { IconButton, MD3Colors } from "react-native-paper";
 import { useRouter } from "expo-router";
 
@@ -132,34 +132,7 @@ export default function WaterTrackerScreen() {
 
   return (
     <>
-      <HeaderRNE
-        containerStyle={{
-          backgroundColor: "#f8edeb",
-          borderBottomWidth: 0,
-          paddingTop: 10,
-        }}
-        leftComponent={
-          <TouchableOpacity onPress={handleBackPress}>
-            <Icon name="arrow-back" size={25} type="ionicon" color="#150b01" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "WATER TRACKER",
-          style: {
-            color: "#13100d",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "PatrickHand-Regular",
-          },
-        }}
-        rightComponent={
-                  <View style={styles.headerRight}>
-                    <TouchableOpacity onPress={() => handleNavigate("/settings")}>
-                      <Icon name="settings" type="feather" color="#150b01" />
-                    </TouchableOpacity>
-                  </View>
-                }
-      />
+      <Header title="Water Tracker" />
 
       <SafeAreaView style={styles.container}>
         {showConfetti && (
@@ -173,18 +146,18 @@ export default function WaterTrackerScreen() {
           <View style={styles.goalRow}>
             <IconButton
               icon={() => (
-                <Ionicons name="add-circle" size={25} color="#472608" />
+                <Ionicons name="remove-circle" size={25} color="#472608" />
               )}
-              onPress={() => setWaterGoal(waterGoal + 250)}
+              onPress={() => setWaterGoal(waterGoal - 250)}
               style={{ marginLeft: 0, marginRight: 0 }}
-            />
+            /> 
             <Text style={styles.goalText}>{waterGoal} mL</Text>
 
             <IconButton
               icon={() => (
-                <Ionicons name="remove-circle" size={25} color="#472608" />
+                <Ionicons name="add-circle" size={25} color="#472608" />
               )}
-              onPress={() => setWaterGoal(waterGoal - 250)}
+              onPress={() => setWaterGoal(waterGoal + 250)}
               style={{ marginLeft: 0, marginRight: 0 }}
             />
           </View>

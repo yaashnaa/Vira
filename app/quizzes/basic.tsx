@@ -10,11 +10,9 @@ import {
 } from "react-native";
 import { Image } from "react-native";
 import { Button, ProgressBar } from "react-native-paper";
-import { Ionicons } from "@expo/vector-icons";
 import { useUserPreferences } from "../../context/userPreferences";
 import { useRouter } from "expo-router";
 import { auth } from "../../config/firebaseConfig"; // ← Required for currentUser
-import { markQuizComplete } from "@/utils/asyncStorage";
 import { markQuizCompletedInFirestore } from "../../utils/firestore";
 export default function BasicQuiz() {
   const { updatePreferences, userPreferences } = useUserPreferences();
@@ -22,27 +20,19 @@ export default function BasicQuiz() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [goalError, setGoalError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // Other state variables...
   const [medicalConditionsInput, setMedicalConditionsInput] = useState(""); // User enters comma-separated conditions
   const [primaryGoals, setPrimaryGoals] = useState<string[]>([]);
-  const [name, setName] = useState(userPreferences.name);
-  const [ageGroup, setAgeGroup] = useState(userPreferences.ageGroup);
-  const [activityLevel, setactivityLevel] = useState(
-    userPreferences.activityLevel
-  );
+  const [name, setName] = useState("");
+  const [ageGroup, setAgeGroup] = useState("");
+  const [activityLevel, setactivityLevel] = useState("");
   const [medicalConditions, setMedicalConditions] = useState("");
 
-  const [mentalDisorder, setMentalDisorder] = useState<string[]>(
-    userPreferences.mentalHealthConditions || []
-  );
+  const [mentalDisorder, setMentalDisorder] = useState<string[]>([]);
 
-  const [customDisorder, setCustomDisorder] = useState(
-    userPreferences.customMentalHealthConditions || ""
-  );
-  const [customMedicalConditions, setCustomMedicalConditions] = useState(
-    userPreferences.customMedicalConditions || ""
-  );
+  const [customDisorder, setCustomDisorder] = useState("");
+  const [customMedicalConditions, setCustomMedicalConditions] = useState("");
 
   let finalMedicalConditions: string[] = [];
   if (medicalConditions === "Yes" && customMedicalConditions.trim()) {
@@ -98,56 +88,68 @@ export default function BasicQuiz() {
     } else {
       setGoalError("");
     }
+    setLoading(true);
+    try {
+      const finalMedicalConditionsArray: string[] =
+        medicalConditions === "Yes" && customMedicalConditions.trim()
+          ? [customMedicalConditions.trim()]
+          : medicalConditions === "No"
+            ? ["None"]
+            : ["Prefer not to say"];
 
-    const finalMedicalConditionsArray: string[] =
-      medicalConditions === "Yes" && customMedicalConditions.trim()
-        ? [customMedicalConditions.trim()]
-        : medicalConditions === "No"
-          ? ["None"]
+      const finalMentalHealthConditionsArray: string[] =
+        !mentalDisorder.includes("None of the above") &&
+        !mentalDisorder.includes("Prefer not to say") &&
+        mentalDisorder.length > 0
+          ? [mentalDisorder.join(", ")]
           : ["Prefer not to say"];
 
-    const finalMentalHealthConditionsArray: string[] =
-      !mentalDisorder.includes("None of the above") &&
-      !mentalDisorder.includes("Prefer not to say") &&
-      mentalDisorder.length > 0
-        ? [mentalDisorder.join(", ")]
-        : ["Prefer not to say"];
+      if (mentalDisorder.includes("Other") && customDisorder.trim()) {
+        finalMentalHealthConditionsArray.push(customDisorder.trim());
+      }
 
-    if (mentalDisorder.includes("Other") && customDisorder.trim()) {
-      finalMentalHealthConditionsArray.push(customDisorder.trim());
-    }
+      const newPrefs = {
+        name: name.trim() || "User",
+        ageGroup: ageGroup || "Prefer not to say",
+        activityLevel: activityLevel || "Prefer not to say",
+        medicalConditions: finalMedicalConditionsArray,
+        mentalHealthConditions: finalMentalHealthConditionsArray,
+        customMentalHealthConditions: customDisorder || "",
+        customMedicalConditions: customMedicalConditions || "",
+        primaryGoals:
+          primaryGoals.length > 0
+            ? primaryGoals
+            : ["Improve mental well-being"],
+      };
 
-    const newPrefs = {
-      name: name.trim() || "User",
-      ageGroup: ageGroup || "Prefer not to say",
-      activityLevel: activityLevel || "Prefer not to say",
-      medicalConditions: finalMedicalConditionsArray,
-      mentalHealthConditions: finalMentalHealthConditionsArray,
-      customMentalHealthConditions: customDisorder || "",
-      customMedicalConditions: customMedicalConditions || "",
-      primaryGoals:
-        primaryGoals.length > 0 ? primaryGoals : ["Improve mental well-being"],
-    };
+      updatePreferences(newPrefs);
 
-    updatePreferences(newPrefs);
+      // console.log("🔁 Updating preferences in context:", newPrefs);
 
-    // console.log("🔁 Updating preferences in context:", newPrefs);
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        const { saveUserPreferences } = await import("../../utils/firestore");
 
-    const currentUser = auth.currentUser;
-    if (currentUser) {
-      const { saveUserPreferences } = await import("../../utils/firestore");
+        await saveUserPreferences(currentUser.uid, {
+          ...userPreferences,
+          ...newPrefs,
+        });
 
-      await saveUserPreferences(currentUser.uid, {
-        ...userPreferences,
-        ...newPrefs,
-      });
+        await markQuizCompletedInFirestore(currentUser.uid);
 
-      await markQuizCompletedInFirestore(currentUser.uid);
-
-      // console.log("✅ Quiz complete for:", currentUser.uid);
-      router.replace("/dashboard");
-    } else {
-      console.warn("⚠️ No current user found during quiz submit");
+        // console.log("✅ Quiz complete for:", currentUser.uid);
+        router.replace("/dashboard");
+      } else {
+        console.warn("⚠️ No current user found during quiz submit");
+      }
+    } catch (error) {
+      console.error("Error submitting quiz:", error);
+      setError(
+        "An error occurred while submitting the form. Please try again."
+      );
+    } finally {
+      setLoading(false);
+      resetForm();
     }
   };
 
@@ -351,7 +353,7 @@ export default function BasicQuiz() {
                   image: require("../../assets/images/goals/learn.png"),
                 },
                 {
-                  label: "Enhance social connections or community support", 
+                  label: "Enhance social connections or community support",
                   image: require("../../assets/images/goals/social.png"),
                 },
                 {
@@ -389,12 +391,19 @@ export default function BasicQuiz() {
                       source={option.image}
                       style={{ width: 30, height: 30, marginRight: 10 }}
                     />
-                    <View style={{ flex: 1, flexWrap: "wrap", justifyContent: "center", alignItems: "center" }}>
+                    <View
+                      style={{
+                        flex: 1,
+                        flexWrap: "wrap",
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
                       <Text style={styles.optionText}>{option.label}</Text>
                     </View>
                   </View>
                 </TouchableOpacity>
-              ))}
+              ))}                           
             </View>
             <View style={styles.navigationButtons}>
               <Button
@@ -406,13 +415,14 @@ export default function BasicQuiz() {
               >
                 Back
               </Button>
-              <Button
+              <Button                                                                                                                   
                 mode="contained"
                 onPress={handleSubmitForm}
                 textColor="#390a84"
                 theme={{ colors: { primary: "#C3B1E1" } }}
+                disabled={loading}
               >
-                Submit
+                {loading ? "Submitting..." : "Submit"}
               </Button>
             </View>
           </>
@@ -467,7 +477,6 @@ export default function BasicQuiz() {
       alignItems: "center",
       justifyContent: "flex-start", // change if needed
       width: "100%",
-      
     },
 
     optionButton: {

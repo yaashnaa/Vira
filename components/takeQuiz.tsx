@@ -8,14 +8,14 @@ import {
   Dimensions,
 } from "react-native";
 import { Divider } from "react-native-paper";
-import AntDesign from '@expo/vector-icons/AntDesign';
+import AntDesign from "@expo/vector-icons/AntDesign";
 interface TakeQuizButtonProps {
   onPress: () => void;
 }
 const { width } = Dimensions.get("window");
 export default function TakeQuiz({ onPress }: TakeQuizButtonProps) {
   return (
- 
+    <View style={{width: width }}>
       <Pressable style={styles.button} onPress={onPress}>
         <Image
           source={require("../assets/images/takeQuiz.png")} // Replace with your own image path
@@ -33,18 +33,40 @@ export default function TakeQuiz({ onPress }: TakeQuizButtonProps) {
           >
             Personalise your experience
           </Text>
-          <Text style={{fontSize: 10, width: "80%", marginBottom: 10,  color: "#333"}}> Take a short quiz to tailor the app just for you </Text>
-          <Text style={[styles.text, { display: 'flex', alignItems: 'center', justifyContent: 'center'}]}>Take the quiz <AntDesign name="arrowright" size={14} color="black" /></Text>
+          <Text
+            style={{
+              fontSize: 10,
+              width: "80%",
+              marginBottom: 10,
+              color: "#333",
+            }}
+          >
+
+            Take a short quiz to tailor the app just for you
+          </Text>
+          <Text
+            style={[
+              styles.text,
+              {
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              },
+            ]}
+          >
+            Take the quiz{" "}
+            <AntDesign name="arrowright" size={14} color="black" />
+          </Text>
         </View>
       </Pressable>
-
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   button: {
     marginTop: 20,
-    width: width * 0.9,
+    width: width ,
     justifyContent: "center",
     margin: "auto",
     alignItems: "center",
@@ -66,7 +88,7 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
-    
+
     width: "60%",
   },
   image: {

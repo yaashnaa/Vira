@@ -27,7 +27,7 @@ export default function DailyPrompt() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#f4f4f4",
+    backgroundColor: "#fcf5f5",
     borderRadius: 10,
     padding: 14,
     marginBottom: 20,

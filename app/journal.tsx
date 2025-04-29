@@ -22,7 +22,6 @@ import {
 import { useRouter } from "expo-router";
 import { useUserPreferences } from "@/context/userPreferences";
 import { Header as HeaderRNE, Icon } from "@rneui/themed";
-import { useMoodContext } from "@/context/moodContext";
 import dayjs from "dayjs";
 import MoodTagSuggestions from "@/components/Journal/moodTagSuggestions";
 import CBTJournalingInfo from "@/components/Journal/CBTInfo";
@@ -31,12 +30,14 @@ import CBTPromptSelector from "@/components/Journal/CBTPromptSelector";
 import LottieView from "lottie-react-native";
 import { saveJournalEntry } from "@/utils/journalHelper";
 import Header from "@/components/header";
-
+import DailyPrompt from "@/components/Journal/dailyPrompt";
+import { useCheckInContext } from "@/context/checkInContext";
 
 
 export default function Journal() {
   const { userPreferences } = useUserPreferences();
-  const { mood, hasLoggedToday } = useMoodContext();
+  const { moodLabel, energyLabel, sleepLabel, hasCheckedInToday } = useCheckInContext();
+
   const today = dayjs().format("YYYY-MM-DD");
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
@@ -57,11 +58,11 @@ export default function Journal() {
 
   const entryOptions = [
     { value: "free", label: "Free Write" },
-    { value: "prompt", label: "Prompt-Based" },
+    { value: "prompt", label: "Prompts" },
   ];
 
   if (shouldShowMoodOption) {
-    entryOptions.push({ value: "mood", label: "Mood-Based" });
+    entryOptions.push({ value: "mood", label: "Mood" });
   }
 
   const fetchEntries = async () => {
@@ -91,7 +92,7 @@ export default function Journal() {
 
   const renderEntryExtras = () => {
     if (entryType === "mood") {
-      return <MoodTagSuggestions mood={mood ?? 2} />;
+      return <MoodTagSuggestions mood={moodLabel ?? 2} />;
     }
     if (entryType === "prompt") {
       return (
@@ -166,11 +167,14 @@ export default function Journal() {
               <Text style={styles.sectionTitle}>
                 What kind of journaling today?
               </Text>
-              <SegmentedButtons
-                value={entryType}
-                onValueChange={setEntryType}
-                buttons={entryOptions}
-              />
+   
+                <SegmentedButtons
+                  value={entryType}
+                  onValueChange={setEntryType}
+                  buttons={entryOptions}
+                  style={{ flexWrap: "wrap", width:"100%" }}
+                />
+
               <Text style={styles.modeDescription}>
                 {entryType === "free" &&
                   "Write freely about anything on your mind."}
@@ -179,9 +183,9 @@ export default function Journal() {
                 {entryType === "mood" &&
                   "Get suggestions based on how you're feeling today."}
               </Text>
-
+              {entryType === "free" && <DailyPrompt />}
               {/* Conditional: If mood mode selected but no check-in */}
-              {entryType === "mood" && !hasLoggedToday ? (
+              {entryType === "mood" && !hasCheckedInToday ? (
                 <View style={styles.checkInNotice}>
                   <Text style={styles.noticeText}>
                     You haven't checked in today. Please do a mood check-in
@@ -201,7 +205,7 @@ export default function Journal() {
                   <JournalEntrySection
                     onFocus={scrollToInput}
                     entryType={entryType as "free" | "prompt" | "mood"}
-                    moodLabel={String(mood ?? "")}
+                    moodLabel={moodLabel ?? ""}
                     onSave={() => {
                       fetchEntries();
                     }}
@@ -234,6 +238,13 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#ffffff",
     flexGrow: 1,
+  },
+  segmentedContainer: {
+    flexDirection: "row",
+    // flexWrap: "wrap",
+    // justifyContent: "center",
+    marginBottom: 10,
+    // width:'100%'
   },
   heading: {
     fontSize: 26,

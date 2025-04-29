@@ -1,6 +1,5 @@
 import React from "react";
 import { View, Text, StyleSheet, Linking, ScrollView } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Card, Button } from "react-native-paper";
 import Header from "@/components/header";
 import { useRouter } from "expo-router";
@@ -31,7 +30,7 @@ export default function SupportScreen() {
 
   return (
     <>
-      <Header title="Need Support?" />
+      <Header title="Need Support?" backPath="/settings"/>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.introText}>
           If you're feeling overwhelmed, confused, or need help with the app,

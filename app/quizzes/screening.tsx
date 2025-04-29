@@ -10,20 +10,12 @@ import {
   SafeAreaView,
 } from "react-native";
 import { doc, setDoc } from "firebase/firestore";
-import { isScreeningQuizCompleted } from "@/utils/firestore";
 import { db } from "@/config/firebaseConfig";
 import { auth } from "@/config/firebaseConfig";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  isScreeningQuizComplete,
-  markQuizComplete,
-} from "@/utils/asyncStorage";
 import { Button, ProgressBar } from "react-native-paper";
 import { useUserPreferences } from "../../context/userPreferences";
 import { useRouter } from "expo-router";
-import BasicQuiz from "./basic";
-import { lightTheme } from "@/config/theme";
-import AntDesign from "@expo/vector-icons/AntDesign";
+
 export default function QuizScreen() {
   const [step, setStep] = useState(0);
   const router = useRouter();
@@ -33,8 +25,7 @@ export default function QuizScreen() {
   const [customDiet, setCustomDiet] = useState("");
   const [mealLoggingComfort, setMealLoggingComfort] = useState<string>("");
   const [physicalHealth, setPhysicalHealth] = useState<string>("");
-  const [calorieViewing, setCalorieViewing] = useState<string>("");
-  const [macroViewing, setMacroViewing] = useState<string>("");
+
   const [remindersFrequency, setRemindersFrequency] = useState("Standard");
   const [moodCheckIn, setMoodCheckIn] = useState("");
   const [mentalHealthResouces, setMentalHealthResouces] = useState(""); // string
@@ -134,7 +125,7 @@ export default function QuizScreen() {
     } else {
       console.error("No current user found.");
     }
-    console.log("User Preferences Submitted!");
+
     router.replace("/dashboard");
   };
 

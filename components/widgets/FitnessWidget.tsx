@@ -11,7 +11,7 @@ interface FitnessWidgetProps {
 const FitnessWidget: React.FC<FitnessWidgetProps> = ({ onRemove }) => {
   const router = useRouter();
   const handlePress = () => {
-    router.replace("/fitness");
+    router.replace("/fitness/(tabs)/explore");
   };
 
   return (

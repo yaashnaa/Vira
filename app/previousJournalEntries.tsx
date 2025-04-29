@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
+import { View, Text, StyleSheet, FlatList, SafeAreaView } from "react-native";
 
-  SafeAreaView,
-} from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
-import { Header as HeaderRNE, Icon } from "@rneui/themed";
+
 import { auth, db } from "@/config/firebaseConfig";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
-import { getJournalEntries } from "@/utils/journalHelper";
+import Header from "@/components/header";
+const moodLabels: { [key: number]: string } = {
+  0: "😞 Very Low",
+  25: "😔 Low",
+  50: "😐 Neutral",
+  75: "🙂 Good",
+  100: "😄 Very Good",
+};
+
 export default function PreviousJournalEntries() {
   const [entries, setEntries] = useState<any[]>([]);
   const router = useRouter();
@@ -36,66 +37,51 @@ export default function PreviousJournalEntries() {
 
     fetchEntries();
   }, []);
-const handleBackPress = () => {
+  const handleBackPress = () => {
     router.replace("/journal");
-}
+  };
   return (
-    <View style={{ flex: 1 }}>
-      <HeaderRNE
-        containerStyle={{
-          backgroundColor: "#f8edeb",
-          borderBottomWidth: 0,
-          paddingTop: 10,
-        }}
-        leftComponent={
-          <TouchableOpacity onPress={handleBackPress}>
-            <Icon name="arrow-back" size={25} type="ionicon" color="#271949" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "My Journal",
-          style: {
-            color: "#271949",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "PatrickHand-Regular",
-          },
-        }}
-      />
-      <View style={styles.container}>
-        <Text style={styles.title}>Previous Entries</Text>
-        <FlatList
-          data={entries}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={styles.entryCard}>
-              <Text style={styles.entryTitle}>
-                {item.entryType === "prompt"
-                  ? "🧠 Prompt-Based Entry"
-                  : item.entryType === "mood"
-                  ? "💬 Mood-Based Entry"
-                  : "✍️ Free Write"}
-              </Text>
-              {item.prompt && (
-                <Text style={styles.entryMeta}>
-                  <Text style={{ fontWeight: "bold" }}>Prompt:</Text> {item.prompt}
+    <>
+      <Header title="Previous Journal Entries" backPath="/journal"/>
+      <View style={{ flex: 1 }}>
+        <View style={styles.container}>
+          <Text style={styles.title}>Previous Entries</Text>
+          <FlatList
+            data={entries}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <View style={styles.entryCard}>
+                <Text style={styles.entryTitle}>
+                  {item.entryType === "prompt"
+                    ? "🧠 Prompt-Based Entry"
+                    : item.entryType === "mood"
+                      ? "💬 Mood-Based Entry"
+                      : "✍️ Free Write"}
                 </Text>
-              )}
-              <Text style={styles.entryBody}>{item.entryText}</Text>
-              {item.mood && (
+                {item.prompt && (
+                  <Text style={styles.entryMeta}>
+                    <Text style={{ fontWeight: "bold" }}>Prompt:</Text>{" "}
+                    {item.prompt}
+                  </Text>
+                )}
+                <Text style={styles.entryBody}>{item.entryText}</Text>
+            
+
                 <Text style={styles.entryMeta}>
-                  <Text style={{ fontWeight: "bold" }}>Mood:</Text> {item.mood}
+                  <Text style={{ fontWeight: "bold" }}>Date: </Text>
+
+                  {new Date(item.date).toLocaleDateString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
                 </Text>
-              )}
-              <Text style={styles.entryMeta}>
-                <Text style={{ fontWeight: "bold" }}>Date:</Text> {item.date}
-              </Text>
-            </View>
-          )}
-          
-        />
+              </View>
+            )}
+          />
+        </View>
       </View>
-    </View>
+    </>
   );
 }
 

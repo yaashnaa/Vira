@@ -8,8 +8,6 @@ import React, {
 import { auth } from "../config/firebaseConfig";
 import { onAuthStateChanged, getAuth } from "firebase/auth";
 import { migrateNameToPreferences } from "@/utils/migrateNameToPreferences";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
 import { saveUserPreferences } from "../utils/firestore";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../config/firebaseConfig";
@@ -47,9 +45,12 @@ export interface UserPreferences {
   contentAvoidance: string;
   copingToolsConsent: string;
   userNotes: string;
-  notificationTime?: string; // Optional field for notification time
-  notificationSound?: string; // Optional field for notification sound
-  encouragementNotifications?: string; // Optional field for encouragement notifications
+  notificationTime?: string;
+  notificationSound?: string; 
+  encouragementNotifications?: string; 
+  waterReminderEnabled?: boolean; 
+  waterReminderFrequency?: number;
+  macroUnit?: string; 
 
 }
 
@@ -86,6 +87,9 @@ export const DEFAULT_PREFS: UserPreferences = {
   contentAvoidance: "None",
   copingToolsConsent: "Yes, always",
   userNotes: "",
+  waterReminderEnabled: false,
+  waterReminderFrequency: 3, 
+  macroUnit: "percent", 
 };
 
 interface UserPreferencesContextProps {

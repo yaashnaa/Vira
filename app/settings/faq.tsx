@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import {
   ScrollView,
-  View,
+
   Text,
   StyleSheet,
-  TouchableOpacity,
+
 } from "react-native";
-import { Header as HeaderRNE, Icon } from "@rneui/themed";
+import Header from "@/components/header";
 import { useRouter } from "expo-router";
 import { Card, Divider, IconButton } from "react-native-paper";
 
@@ -16,6 +16,12 @@ const faqData = [
     answer:
       "Nope! Vira is a gentle wellness companion focused on your emotional well-being. It doesn’t track weight, calories, or workouts.",
   },
+  {
+    question: "How do I pin my favorite widgets?",
+    answer:
+      "To pin a widget, go to the 'Widgets' tab and tap the pin icon next to any widget you want quick access to. Your pinned widgets will appear on your Dashboard for easy viewing!",
+  },
+  
   {
     question: "Will I lose progress if I skip a few days?",
     answer:
@@ -62,23 +68,7 @@ export default function FaqScreen() {
 
   return (
     <>
-          <HeaderRNE
-        containerStyle={{ backgroundColor: "#f8edeb", borderBottomWidth: 0 }}
-        leftComponent={
-          <TouchableOpacity onPress={() => router.back()}>
-            <Icon name="arrow-back" type="ionicon" color="#190028" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "FAQ",
-          style: {
-            color: "#271949",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "PatrickHand-Regular",
-          },
-        }}
-      />
+     <Header title="FAQ" backPath="/settings" />
 
       <ScrollView style={styles.container}>
       <Text style={styles.header}>Frequently Asked Questions</Text>
@@ -115,6 +105,8 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     backgroundColor: "#ffffff",
+    paddingBottom: 100,
+  
   },
   header: {
     fontSize: 28,

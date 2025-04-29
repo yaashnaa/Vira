@@ -21,7 +21,7 @@ const MoodWidget: React.FC<MoodWidgetProps> = ({ onRemove }) => {
         </Pressable>
       )}
       <WidgetCard
-        title="Mood Tracker"
+        title="Insights"
         imageSource={require("../../assets/images/widgetImages/mood.png")}
         onPress={handlePress}
       />

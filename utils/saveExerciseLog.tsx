@@ -8,7 +8,33 @@ interface ExerciseLogEntry {
     duration: number;
     moodAfter?: string | null;
 }
-
+const moodOptions = [
+  {
+    label: "Low Energy",
+    value: 100,
+    image: require("../assets/images/exerciseMood/1.png"),
+  },
+  {
+    label: "A Bit Drained",
+    value: 75,
+    image: require("../assets/images/exerciseMood/2.png"),
+  },
+  {
+    label: "Balanced & Okay",
+    value: 50,
+    image: require("../assets/images/exerciseMood/3.png"),
+  },
+  {
+    label: "Refreshed & Content",
+    value: 25,
+    image: require("../assets/images/exerciseMood/4.png"),
+  },
+  {
+    label: "Energized & Uplifted",
+    value: 0,
+    image: require("../assets/images/exerciseMood/5.png"),
+  },
+];
 export const saveExerciseLog = async ({
     userId,
     description,
@@ -25,6 +51,7 @@ export const saveExerciseLog = async ({
         timestamp: Timestamp.now(),
       });
       console.log("✅ Exercise log saved to Firestore!");
+
     } catch (error) {
       console.error("🔥 Error saving exercise log:", error);
     }

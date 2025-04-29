@@ -1,6 +1,6 @@
 // app/tools/index.tsx
 
-import React, { useEffect, useState } from "react";
+import React, {  useState } from "react";
 import {
   View,
   Text,
@@ -9,16 +9,16 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import { Card, IconButton } from "react-native-paper";
+import { Card, IconButton, Modal, Portal, Button } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { RelativePathString, ExternalPathString } from "expo-router";
-import { auth, db } from "@/config/firebaseConfig";
+import { auth } from "@/config/firebaseConfig";
 import { useFocusEffect } from "expo-router";
 import {
   addWidget,
   removeWidget as removeWidgetFromStorage,
   getEnabledWidgets,
 } from "@/utils/widgetStorage";
+import CrisisQuickView from "@/components/crisisQuickView";
 
 const tools = [
   {
@@ -29,14 +29,16 @@ const tools = [
         label: "Thought Reframe",
         route: "/thoughtReframeScreen",
         icon: require("../../assets/images/widgetImages/rainbow.png"),
-        description: "Challenge unhelpful thoughts and reframe them constructively.",
+        description:
+          "Challenge unhelpful thoughts and reframe them constructively.",
       },
       {
         id: "cbtTools",
         label: "CBT Thought Record",
         route: "/CBTToolsScreen",
         icon: require("../../assets/images/widgetImages/notebook.png"),
-        description: "Track automatic thoughts and explore cognitive distortions.",
+        description:
+          "Track automatic thoughts and explore cognitive distortions.",
       },
     ],
   },
@@ -60,14 +62,22 @@ const tools = [
         label: "Coping Box",
         route: "/copingBoxScreen",
         icon: require("../../assets/images/widgetImages/heart.png"),
-        description: "Access a personalized collection of comfort tools and ideas.",
+        description:
+          "Access a personalized collection of comfort tools and ideas.",
       },
       {
         id: "mindfulness",
         label: "Mindfulness",
-        route: "/mindfullness",
+        route: "/mindfulness",
         icon: require("../../assets/images/widgetImages/yoga.png"),
         description: "Breathe, pause, and reset with simple mindful exercises.",
+      },
+      {
+        id: "crisisHelp", // 🆘 NEW TOOL
+        label: "Get Immediate Help",
+        route: "modalCrisisHelp", // handled specially
+        icon: require("../../assets/images/widgetImages/sos.png"), // create a small life ring or SOS image
+        description: "Access crisis resources and emergency contacts anytime.",
       },
     ],
   },
@@ -79,26 +89,27 @@ const tools = [
         label: "Insights",
         route: "/mood",
         icon: require("../../assets/images/widgetImages/mood.png"),
-        description: "Discover patterns in how you feel and grow with awareness.",
+        description:
+          "Discover patterns in how you feel and grow with awareness.",
       },
       {
         id: "fitness",
         label: "Fitness Tracker",
-        route: "/fitnessScreen",
+        route: "/fitness",
         icon: require("../../assets/images/widgetImages/triangle.png"),
         description: "Explore gentle, energy-based exercise suggestions.",
       },
       {
         id: "nutrition",
         label: "Nutrition Tracker",
-        route: "/nutritionScreen",
+        route: "/nutrition",
         icon: require("../../assets/images/widgetImages/diet.png"),
         description: "Log meals, view insights, and reflect on how food feels.",
       },
       {
         id: "water",
         label: "Water Tracker",
-        route: "/waterScreen",
+        route: "/waterTracker",
         icon: require("../../assets/images/widgetImages/water.png"),
         description: "Track hydration without pressure. Just gentle reminders.",
       },
@@ -109,7 +120,7 @@ const tools = [
 export default function ToolsScreen() {
   const router = useRouter();
   const [pinned, setPinned] = useState<string[]>([]);
-
+  const [crisisModalVisible, setCrisisModalVisible] = useState(false);
   useFocusEffect(
     React.useCallback(() => {
       const fetchPinned = async () => {
@@ -142,7 +153,14 @@ export default function ToolsScreen() {
           {section.items.map((tool, j) => (
             <TouchableOpacity
               key={j}
-              onPress={() => router.push(tool.route as any)}
+              onPress={() => {
+                if (tool.id === "crisisHelp") {
+                  // open crisis modal
+                  setCrisisModalVisible(true);
+                } else {
+                  router.push(tool.route as any);
+                }
+              }}
             >
               <Card style={styles.card}>
                 <View style={styles.cardContent}>
@@ -154,7 +172,7 @@ export default function ToolsScreen() {
                   <IconButton
                     icon={pinned.includes(tool.id) ? "pin" : "pin-outline"}
                     size={20}
-                    style={{position: "absolute", left: 290, bottom: 40}}
+                    style={{ position: "absolute", left: 290, bottom: 40 }}
                     iconColor="#635b75"
                     onPress={() => togglePin(tool.id)}
                   />
@@ -164,6 +182,24 @@ export default function ToolsScreen() {
           ))}
         </View>
       ))}
+      <Portal>
+        <Modal
+          visible={crisisModalVisible}
+          onDismiss={() => setCrisisModalVisible(false)}
+          contentContainerStyle={styles.modalContentContainer}
+        >
+          <ScrollView contentContainerStyle={{ padding: 20 }}>
+            <CrisisQuickView />
+            <Button
+              mode="outlined"
+              onPress={() => setCrisisModalVisible(false)}
+              style={{ marginTop: 20 }}
+            >
+              Close
+            </Button>
+          </ScrollView>
+        </Modal>
+      </Portal>
     </ScrollView>
   );
 }
@@ -211,5 +247,33 @@ const styles = StyleSheet.create({
     color: "#5e5e5e",
     fontFamily: "Main-font",
     marginTop: 2,
+  },
+  modalWrapper: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+    height: 500,
+  },
+  modalContentContainer: {
+    backgroundColor: "#fff",
+    padding: 20,
+    margin: 20,
+    borderRadius: 16,
+    alignSelf: "center",
+  },
+  
+  modalContent: {
+    backgroundColor: "#fff",
+    width: "100%",
+    maxWidth: 400,
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
   },
 });

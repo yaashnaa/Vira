@@ -3,6 +3,7 @@ import Constants from "expo-constants";
 import axios from "axios";
 
 export interface ExerciseProps {
+  id?: string;
   name: string;
   type: string;
   muscle: string;

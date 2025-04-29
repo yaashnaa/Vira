@@ -10,6 +10,34 @@ import { Alert } from "react-native";
 import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
+import Header from "@/components/header";
+const moodOptions = [
+  {
+    label: "Low Energy",
+    value: 100,
+    image: require("../assets/images/exerciseMood/1.png"),
+  },
+  {
+    label: "A Bit Drained",
+    value: 75,
+    image: require("../assets/images/exerciseMood/2.png"),
+  },
+  {
+    label: "Balanced & Okay",
+    value: 50,
+    image: require("../assets/images/exerciseMood/3.png"),
+  },
+  {
+    label: "Refreshed & Content",
+    value: 25,
+    image: require("../assets/images/exerciseMood/4.png"),
+  },
+  {
+    label: "Energized & Uplifted",
+    value: 0,
+    image: require("../assets/images/exerciseMood/5.png"),
+  },
+];
 export default function ExerciseHistoryScreen() {
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,6 +61,7 @@ export default function ExerciseHistoryScreen() {
       const user = auth.currentUser;
       if (!user) return;
       const data = await fetchExerciseLogs(user.uid);
+      console.log("Fetched logs:", data);
       setLogs(data);
       setLoading(false);
     };
@@ -42,37 +71,7 @@ export default function ExerciseHistoryScreen() {
 
   return (
     <>
-      <HeaderRNE
-        containerStyle={{
-          backgroundColor: "#f8edeb",
-          borderBottomWidth: 0,
-          paddingTop: 10,
-        }}
-        leftComponent={
-          <TouchableOpacity onPress={handleBackPress}>
-            <Icon name="arrow-back" size={25} type="ionicon" color="#271949" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "EXERCISE LOGS",
-          style: {
-            color: "#271949",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "PatrickHand-Regular",
-          },
-        }}
-        rightComponent={
-          <View style={styles.headerRight}>
-            <TouchableOpacity
-              style={{ marginLeft: 12 }}
-              onPress={() => router.replace("/settings")}
-            >
-              <Icon name="settings" size={25} type="feather" color="#271949" />
-            </TouchableOpacity>
-          </View>
-        }
-      />
+    <Header title="" backPath="/fitness/(tabs)/explore"/>
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.container}>
           <Text style={styles.title}>Your Exercise Logs</Text>
@@ -87,7 +86,7 @@ export default function ExerciseHistoryScreen() {
               renderItem={({ item }) => (
                 <View style={styles.card}>
                   <View style={styles.row}>
-                    <Text style={styles.desc}>🏋️ {item.description}</Text>
+                    <Text style={styles.desc}> {item.description}</Text>
                     <IconButton
                       icon="delete"
                       size={18}
@@ -109,7 +108,9 @@ export default function ExerciseHistoryScreen() {
                   </View>
                   {item.moodAfter !== undefined && (
                     <Text style={styles.mood}>
-                      Mood after: {item.moodAfter}/100
+                      Mood after: {
+                      moodOptions.find((mood) => mood.value === item.moodAfter)?.label || "Unknown"
+                      }
                     </Text>
                   )}
                   <Text style={styles.date}>
@@ -152,7 +153,6 @@ const styles = StyleSheet.create({
   mood: {
     fontSize: 14,
     color: "#6B46C1",
-    marginTop: 4,
   },
   date: {
     fontSize: 12,
@@ -167,6 +167,6 @@ const styles = StyleSheet.create({
   headerRight: {
     display: "flex",
     flexDirection: "row",
-    marginTop: 5,
+    // marginTop: 5,
   },
 });

@@ -5,7 +5,6 @@ import {
   TextInput,
   StyleSheet,
   Alert,
-  Platform,
   TouchableOpacity,
   Dimensions,
 } from "react-native";
@@ -17,13 +16,12 @@ import {
   updateEmail,
 } from "firebase/auth";
 import { Ionicons } from "@expo/vector-icons";
+import Header from "@/components/header";
 
-import { Header as HeaderRNE, Icon } from "@rneui/themed";
-import { auth, db } from "@/config/firebaseConfig";
+import { auth } from "@/config/firebaseConfig";
 import { deleteAccount, logoutUser } from "@/utils/auth";
 import { useRouter } from "expo-router";
-import { useEffect } from "react";
-import { getDoc, doc } from "firebase/firestore";
+
 import { useUserPreferences } from "@/context/userPreferences";
 export default function AccountSettingsSection() {
   const user = auth.currentUser;
@@ -112,23 +110,7 @@ export default function AccountSettingsSection() {
 
   return (
     <>
-      <HeaderRNE
-        containerStyle={{ backgroundColor: "#f8edeb", borderBottomWidth: 0 }}
-        leftComponent={
-          <TouchableOpacity onPress={() => router.back()}>
-            <Icon name="arrow-back" type="ionicon" color="#190028" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "ACCOUNT SETTINGS",
-          style: {
-            color: "#271949",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "PatrickHand-Regular",
-          },
-        }}
-      />
+<Header title="Account"/>
       <View style={styles.section}>
         <Text style={styles.nameLabel}> Welcome, {userPreferences.name}</Text>
         <TouchableOpacity
@@ -147,7 +129,7 @@ export default function AccountSettingsSection() {
           <>
             <Text style={styles.label}>
               Current email:
-              <Text style={{ marginBottom: 10}}>{user?.email}</Text>
+              <Text style={{ marginBottom: 15}}>{user?.email}</Text>
             </Text>
             <TextInput
               style={styles.input}
@@ -192,7 +174,7 @@ export default function AccountSettingsSection() {
         {showPasswordSection && (
           <>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { marginTop: 10 }]}
               placeholder="Current password"
               value={currentPassword}
               onChangeText={setCurrentPassword}
@@ -254,17 +236,12 @@ const styles = StyleSheet.create({
     // marginTop: 24,
     backgroundColor: "#fff",
     height: height,
+    marginBottom: 75
   },
   sectionHeading: {
     fontSize: 20,
     fontFamily: "PatrickHand-Regular",
     color: "#3e2a6e",
-    // marginBottom: 12,
-    // marginTop: 32,
-    // borderWidth: 1,
-    // borderColor: "#865dff",
-    // padding: 8,
-    // borderRadius: 8,
   },
   sectionTitle: {
     fontSize: 20,
@@ -272,11 +249,11 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     color: "#3e2a6e",
     fontFamily: "Main-font",
-    // fontFamily: Platform.select({ ios: "Helvetica", android: "Roboto" }),
+
   },
   label: {
-    fontWeight: "500",
-    marginTop: 18,
+
+    marginTop: 10,
     marginBottom: 6,
     color: "#333",
   },

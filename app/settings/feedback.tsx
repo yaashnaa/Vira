@@ -7,15 +7,16 @@ import {
   Alert,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  Keyboard,
+  Keyboard,Dimensions
 } from "react-native";
-import { Header as HeaderRNE, Icon } from "@rneui/themed";
+import AntDesign from '@expo/vector-icons/AntDesign';
+
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Menu } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { auth, db } from "@/config/firebaseConfig";
 import { doc, setDoc, Timestamp } from "firebase/firestore";
-
+import Header from "@/components/header";
 const categories = ["Suggestion", "Bug", "Kind Words", "Other"];
 
 export default function FeedbackScreen() {
@@ -52,34 +53,20 @@ export default function FeedbackScreen() {
 
   return (
     <>
-      <HeaderRNE
-        containerStyle={{ backgroundColor: "#f8edeb", borderBottomWidth: 0 }}
-        leftComponent={
-          <TouchableOpacity onPress={() => router.back()}>
-            <Icon name="arrow-back" type="ionicon" color="#190028" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "EDIT PROFILE",
-          style: {
-            color: "#271949",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "PatrickHand-Regular",
-          },
-        }}
-      />
+    <Header title="Feedback" backPath="/settings"/>
 
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.header}>💌 We’d love your feedback</Text>
-        <Text style={styles.subtext}>
-          Whether it's a kind word, a suggestion, or something that felt off —
-          your voice helps us grow.
-        </Text>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <SafeAreaView style={styles.container}>
+          <Text style={styles.header}>💌 We’d love your feedback</Text>
+          <Text style={styles.subtext}>
+            Whether it's a kind word, a suggestion, or something that felt off —
+            your voice helps us grow.
+          </Text>
           <View style={styles.dropdownContainer}>
             <Menu
               visible={menuVisible}
+              contentStyle={styles.dropdown}
+        
               onDismiss={() => setMenuVisible(false)}
               anchor={
                 <TouchableOpacity
@@ -87,13 +74,14 @@ export default function FeedbackScreen() {
                   onPress={() => setMenuVisible(true)}
                 >
                   <Text style={styles.dropdownText}>{category}</Text>
-                  <Icon name="chevron-down" size={20} color="#271949" />
+                  <AntDesign name="down" size={20} color="black" />
                 </TouchableOpacity>
               }
             >
               {categories.map((item) => (
                 <Menu.Item
                   key={item}
+                  titleStyle={{ color: '#6b4c9a', fontSize: 14 }}
                   onPress={() => {
                     setCategory(item);
                     setMenuVisible(false);
@@ -103,32 +91,33 @@ export default function FeedbackScreen() {
               ))}
             </Menu>
           </View>
-        </TouchableWithoutFeedback>
-        <TextInput
-          style={styles.input}
-          placeholder="Type your thoughts here..."
-          multiline
-          placeholderTextColor="#999"
-          value={feedback}
-          onChangeText={setFeedback}
-        />
 
-        <Button
-          mode="contained"
-          onPress={handleSubmit}
-          style={styles.button}
-          textColor="#271949"
-        >
-          Submit Feedback
-        </Button>
-        <Button onPress={() => router.back()} style={styles.backButton}>
-          Back to Settings
-        </Button>
-      </SafeAreaView>
+          <TextInput
+            style={styles.input}
+            placeholder="Type your thoughts here..."
+            multiline
+            placeholderTextColor="#999"
+            value={feedback}
+            onChangeText={setFeedback}
+          />
+
+          <Button
+            mode="contained"
+            onPress={handleSubmit}
+            style={styles.button}
+            textColor="#271949"
+          >
+            Submit Feedback
+          </Button>
+          <Button textColor="#250808" onPress={() => router.back()} style={styles.backButton}>
+            Back to Settings
+          </Button>
+        </SafeAreaView>
+      </TouchableWithoutFeedback>
     </>
   );
 }
-
+const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -152,12 +141,16 @@ const styles = StyleSheet.create({
   },
   dropdownContainer: {
     marginBottom: 20,
+
   },
   dropdown: {
     borderWidth: 1,
     borderColor: "#ccc",
     backgroundColor: "#fff",
     borderRadius: 8,
+    color: "#271949",
+    marginTop: 55,
+    width: width *0.9,
   },
   input: {
     backgroundColor: "#fff",
@@ -179,6 +172,8 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginTop: 12,
+    color: "#271949",
+    marginBottom: 120,
   },
   dropdownButton: {
     flexDirection: "row",
@@ -195,7 +190,7 @@ const styles = StyleSheet.create({
   dropdownText: {
     fontFamily: "Main-font",
     fontSize: 16,
-    color: "#271949",
+    color: "#09090a",
   },
 
   dropdownArrow: {

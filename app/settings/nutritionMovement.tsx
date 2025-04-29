@@ -8,17 +8,17 @@ import {
   ScrollView,
   Dimensions,
 } from "react-native";
-import { Icon } from "@rneui/themed";
 import Toast from "react-native-toast-message";
-import { Menu, List, Divider } from "react-native-paper";
+import { Menu, Divider } from "react-native-paper";
 import { useUserPreferences } from "@/context/userPreferences";
 import { auth, db } from "@/config/firebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
 import { Button } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+
 import { Ionicons } from "@expo/vector-icons";
-import { Header as HeaderRNE } from "@rneui/themed";
+import Header from "@/components/header";
+
 export default function DietMovementScreen() {
   const { userPreferences, updatePreferences } = useUserPreferences();
   const router = useRouter();
@@ -96,23 +96,7 @@ export default function DietMovementScreen() {
 
   return (
     <>
-      <HeaderRNE
-        containerStyle={{ backgroundColor: "#f8edeb", borderBottomWidth: 0 }}
-        leftComponent={
-          <TouchableOpacity onPress={() => router.back()}>
-            <Icon name="arrow-back" type="ionicon" color="#190028" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "EDIT PROFILE",
-          style: {
-            color: "#271949",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "PatrickHand-Regular",
-          },
-        }}
-      />
+      <Header title="Nutrition & Movement" backPath="/settings"/>
 
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.label}>Dietary Preferences</Text>
@@ -120,6 +104,7 @@ export default function DietMovementScreen() {
           visible={showDietMenu}
           onDismiss={() => setShowDietMenu(false)}
           contentStyle={{ backgroundColor: "#f7f0ff", width: "100%" }}
+           anchorPosition="bottom"
           anchor={
             <TouchableOpacity
               style={styles.dropdown}
@@ -186,6 +171,7 @@ export default function DietMovementScreen() {
         <Menu
           visible={showMealLoggingMenu}
           contentStyle={{ backgroundColor: "#f7f0ff", width: "100%" }}
+          anchorPosition="bottom"
           onDismiss={() => setShowMealLoggingMenu(false)}
           anchor={
             <TouchableOpacity
@@ -225,6 +211,7 @@ export default function DietMovementScreen() {
           visible={showCalorieMenu}
           contentStyle={{ backgroundColor: "#f7f0ff", width: "100%" }}
           onDismiss={() => setShowCalorieMenu(false)}
+           anchorPosition="bottom"
           anchor={
             <TouchableOpacity
               style={styles.dropdown}
@@ -261,6 +248,7 @@ export default function DietMovementScreen() {
           contentStyle={{ backgroundColor: "#f7f0ff", width: "100%" }}
           visible={showMacroMenu}
           onDismiss={() => setShowMacroMenu(false)}
+           anchorPosition="bottom"
           anchor={
             <TouchableOpacity
               style={styles.dropdown}
@@ -297,6 +285,7 @@ export default function DietMovementScreen() {
           visible={showMovementMenu}
           onDismiss={() => setShowMovementMenu(false)}
           contentStyle={{ backgroundColor: "#f7f0ff", width: "100%" }}
+           anchorPosition="top"
           anchor={
             <TouchableOpacity
               style={styles.dropdown}
@@ -319,6 +308,7 @@ export default function DietMovementScreen() {
             "Prefer not to say",
           ].map((option) => (
             <Menu.Item
+            
               key={option}
               // contentStyle={{ backgroundColor: "#f7f1ff"}}
               titleStyle={{ color: "#0e0e0e" }}
@@ -337,6 +327,8 @@ export default function DietMovementScreen() {
         <Menu
           visible={showPhysicalMenu}
           onDismiss={() => setShowPhysicalMenu(false)}
+           anchorPosition="top"
+           contentStyle={{ backgroundColor: "#f7f0ff", width: "100%" }}
           anchor={
             <TouchableOpacity
               style={styles.dropdown}
@@ -378,6 +370,7 @@ export default function DietMovementScreen() {
             marginTop: 24,
             backgroundColor: "#7550a7",
             borderRadius: 8,
+            marginBottom: 56,
           }}
           contentStyle={{ paddingVertical: 6 }}
           labelStyle={{
@@ -399,7 +392,8 @@ const styles = StyleSheet.create({
   container: {
     padding: 16,
     backgroundColor: "#ffffff",
-    height: height,
+    // height: height,
+    marginBottom: 75,
   },
   heading: {
     fontSize: 21,
