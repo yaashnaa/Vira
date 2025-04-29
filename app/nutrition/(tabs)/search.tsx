@@ -7,7 +7,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-  Dimensions, FlatList
+  Dimensions,
+  FlatList,
 } from "react-native";
 import { Card, SegmentedButtons } from "react-native-paper";
 import { fetchTastyRecipes, TastyRecipe } from "@/utils/api/fetchTastyRecipes";
@@ -43,40 +44,31 @@ export default function RecipeSearchScreen() {
 
     return (
       <Card key={recipe.id} mode="outlined" style={styles.card}>
-        <ScrollView>
-          <View style={styles.tagContainer}>
-            {recipeTags.slice(0, 2).map((tag, index) => (
-              <View key={index} style={styles.tagBadge}>
-                <Text style={styles.tagText}>{tag}</Text>
-              </View>
-            ))}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View>
+            <View style={styles.tagContainer}>
+              {recipeTags.slice(0, 2).map((tag, index) => (
+                <View key={index} style={styles.tagBadge}>
+                  <Text style={styles.tagText}>{tag}</Text>
+                </View>
+              ))}
+            </View>
+
+            <Card.Cover
+              source={{ uri: recipe.thumbnail_url }}
+              style={styles.cover}
+            />
+            <Card.Content>
+              <Text style={styles.recipeTitle}>{recipe.name}</Text>
+              <Text style={styles.recipeDesc}>{recipe.description || ""}</Text>
+
+              {recipe.video_url && (
+                <TouchableOpacity onPress={() => setPlayingVideoId(recipe.id)}>
+                  <Text style={styles.link}>▶️ Watch Video</Text>
+                </TouchableOpacity>
+              )}
+            </Card.Content>
           </View>
-
-          <Card.Cover
-            source={{ uri: recipe.thumbnail_url }}
-            style={styles.cover}
-          />
-          <Card.Content style={{ paddingBottom: 30 }}>
-            <Text style={styles.recipeTitle}>{recipe.name}</Text>
-            <Text style={styles.recipeDesc}>
-              {recipe.description ? recipe.description : ""}
-            </Text>
-
-            {recipe.video_url && recipe.id === playingVideoId && (
-              <WebView
-                source={{ uri: recipe.video_url }}
-                style={styles.video}
-              />
-            )}
-            {recipe.video_url && recipe.id !== playingVideoId && (
-              <Text
-                style={styles.link}
-                onPress={() => setPlayingVideoId(recipe.id)}
-              >
-                ▶️ Watch Video
-              </Text>
-            )}
-          </Card.Content>
         </ScrollView>
       </Card>
     );
@@ -84,18 +76,18 @@ export default function RecipeSearchScreen() {
 
   return (
     <>
-      <NutritionTipsModal
-        visible={true}
-        onDismiss={() => console.log("Modal dismissed")}
-      />
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.scrollContainer}
-      >
-        <View style={styles.container}>
+      <>
+        <NutritionTipsModal
+          visible={true}
+          onDismiss={() => console.log("Modal dismissed")}
+        />
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={{ paddingBottom: 50 }}
+        >
           <Text style={styles.title}>🔎 Nutrition & Recipe Search</Text>
 
-          {/* 🟣 Segmented Buttons */}
+          {/* Segmented Buttons */}
           <SegmentedButtons
             value={mode}
             onValueChange={(value) => setMode(value as "recipes" | "nutrition")}
@@ -107,53 +99,51 @@ export default function RecipeSearchScreen() {
           />
 
           {mode === "nutrition" ? (
-            <>
-              <NutritionSearch />
-            </>
+            <NutritionSearch />
           ) : (
             <>
               <View style={styles.searchContainer}>
-              <TextInput
-                placeholder="Search for a recipe..."
-                value={query}
-                onChangeText={setQuery}
-                style={styles.input}
-                onSubmitEditing={handleSearch}
-              />
-              <TouchableOpacity
-                style={styles.searchButton}
-                onPress={handleSearch}
-              >
-                <Text style={styles.searchButtonText}>Search</Text>
-              </TouchableOpacity>
+                <TextInput
+                  placeholder="Search for a recipe..."
+                  value={query}
+                  onChangeText={setQuery}
+                  style={styles.input}
+                  onSubmitEditing={handleSearch}
+                />
+                <TouchableOpacity
+                  style={styles.searchButton}
+                  onPress={handleSearch}
+                >
+                  <Text style={styles.searchButtonText}>Search</Text>
+                </TouchableOpacity>
               </View>
 
               {loading ? (
-              <ActivityIndicator
-                size="large"
-                color="#A084DC"
-                style={{ marginTop: 20 }}
-              />
+                <ActivityIndicator
+                  size="large"
+                  color="#A084DC"
+                  style={{ marginTop: 20 }}
+                />
               ) : recipes.length === 0 && query.trim() !== "" ? (
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyText}>
-                🍳 No recipes found. Try another search!
-                </Text>
-              </View>
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyText}>
+                    🍳 No recipes found. Try another search!
+                  </Text>
+                </View>
               ) : (
-              <FlatList<TastyRecipe>
-                data={recipes}
-                keyExtractor={(item: TastyRecipe) => item.id.toString()}
-                renderItem={({ item }: { item: TastyRecipe }) => renderCard(item)}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.scrollView}
-              />
+                <FlatList<TastyRecipe>
+                  data={recipes}
+                  keyExtractor={(item) => item.id.toString()}
+                  renderItem={({ item }) => renderCard(item)}
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingVertical: 20 }}
+                />
               )}
             </>
           )}
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </>
     </>
   );
 }
@@ -235,6 +225,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#444",
     lineHeight: 18,
+    flexWrap: "wrap",
+    maxWidth: 240,
   },
   tagContainer: {
     flexDirection: "row",

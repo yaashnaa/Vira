@@ -101,7 +101,7 @@ const moodFeelingMap: { [key: string]: string } = {
 };
 
 export default function CombinedCheckInCard() {
-  const { moodLabel, energyLabel, sleepLabel, hasCheckedInToday } =
+  const { moodLabel, energyLabel, sleepLabel, hasCheckedInToday, fetchAllCheckIns } =
     useCheckInContext();
   const [expanded, setExpanded] = useState(false);
   const start = dayjs().startOf("day").toDate();
@@ -113,8 +113,42 @@ export default function CombinedCheckInCard() {
     sleep: keyof typeof sleepEmoji;
     date: string;
   }>(null);
-
+  function getMoodValue(label: string): number {
+    switch (label) {
+      case "Feeling Great": return 0;
+      case "Pretty Good": return 25;
+      case "Hanging in There": return 50;
+      case "Not My Best": return 75;
+      case "Having a Tough Day": return 100;
+      default: return 50;
+    }
+  }
+  
+  function sleepLabelToScore(label: string): number {
+    const map: Record<string, number> = {
+      "Really Struggled": 1,
+      "Not the Best": 2,
+      "Okay Sleep": 3,
+      "Pretty Restful": 4,
+      "Slept Like a Baby": 5,
+    };
+    return map[label] || 3;
+  }
+  
+  function energyLabelToScore(label: string): number {
+    const map: Record<string, number> = {
+      "Running on Empty": 1,
+      "A Little Tired": 2,
+      "Doing Alright": 3,
+      "Feeling Energized": 4,
+      "Ready to Take on the Day": 5,
+    };
+    return map[label] || 3;
+  }
+  
   const router = useRouter();
+
+  
   useEffect(() => {
     const fetchCheckIn = async () => {
       const uid = auth.currentUser?.uid;

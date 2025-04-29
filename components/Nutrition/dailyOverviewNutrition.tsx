@@ -128,10 +128,11 @@ export default function DailyOverviewNutrition({
             <>
               {/* Calories */}
               {userPreferences.calorieViewing && goals.calories && (
-  <Text style={styles.label}>
-    Calories: {Math.round(totals.calories)} / {goals.calories} kcal
-  </Text>
-)}
+                <Text style={styles.label}>
+                  Calories: {Math.round(totals.calories)} / {goals.calories}{" "}
+                  kcal
+                </Text>
+              )}
 
               {/* Macros */}
               {userPreferences.macroViewing && hasNutritionGoals ? (
@@ -141,54 +142,96 @@ export default function DailyOverviewNutrition({
                   goals.protein &&
                   goals.carbs &&
                   goals.fat ? (
-                    <View style={styles.circularContainer}>
-                      {["protein", "carbs", "fat"].map((macro) => (
-                        <View style={styles.circleWrapper} key={macro}>
-                          <CircularProgress
-                            value={
-                              goals.macroUnit === "percent"
-                                ? Math.min(
-                                    (totals[macro as keyof typeof totals] /
-                                      ((parseFloat(goals.calories) *
-                                        (parseFloat(
+                    <>
+                      {/* Circular Progress Bars */}
+                      <View style={styles.circularContainer}>
+                        {["protein", "carbs", "fat"].map((macro) => (
+                          <View style={styles.circleWrapper} key={macro}>
+                            <CircularProgress
+                              value={
+                                goals.macroUnit === "percent"
+                                  ? Math.min(
+                                      (totals[macro as keyof typeof totals] /
+                                        ((parseFloat(goals.calories) *
+                                          (parseFloat(
+                                            goals[macro as keyof typeof goals]
+                                          ) /
+                                            100)) /
+                                          (macro === "fat" ? 9 : 4))) *
+                                        100,
+                                      100
+                                    )
+                                  : Math.min(
+                                      (totals[macro as keyof typeof totals] /
+                                        parseFloat(
                                           goals[macro as keyof typeof goals]
-                                        ) /
-                                          100)) /
-                                        (macro === "fat" ? 9 : 4))) *
-                                      100,
-                                    100
-                                  )
-                                : Math.min(
-                                    (totals[macro as keyof typeof totals] /
-                                      parseFloat(
-                                        goals[macro as keyof typeof goals]
-                                      )) *
-                                      100,
-                                    100
-                                  )
-                            }
-                            radius={30}
-                            valueSuffix="%"
-                            inActiveStrokeOpacity={0.5}
-                            progressValueColor={"#444"}
-                            maxValue={100}
-                            activeStrokeWidth={5}
-                            inActiveStrokeWidth={5}
-                            inActiveStrokeColor="#939393"
-                            activeStrokeColor={"#775bb5"}
-                            progressValueFontSize={12}
-                            title={
-                              macro.charAt(0).toUpperCase() + macro.slice(1)
-                            }
-                            titleColor={"#222222"}
-                            titleStyle={{
-                              fontSize: 10,
-                              fontFamily: "Main-font",
-                            }}
-                          />
+                                        )) *
+                                        100,
+                                      100
+                                    )
+                              }
+                              radius={30}
+                              valueSuffix="%"
+                              inActiveStrokeOpacity={0.5}
+                              progressValueColor={"#444"}
+                              maxValue={100}
+                              activeStrokeWidth={5}
+                              inActiveStrokeWidth={5}
+                              inActiveStrokeColor="#939393"
+                              activeStrokeColor={"#775bb5"}
+                              progressValueFontSize={12}
+                              title={
+                                macro.charAt(0).toUpperCase() + macro.slice(1)
+                              }
+                              titleColor={"#222222"}
+                              titleStyle={{
+                                fontSize: 10,
+                                fontFamily: "Main-font",
+                              }}
+                            />
+                          </View>
+                        ))}
+                      </View>
+
+                      {/* Macro Grams (Outside CircularContainer) */}
+                      <View style={styles.macrosGramsContainer}>
+                        <Text style={styles.macroGramsTitle}>
+                          Macro Consumption Today:
+                        </Text>
+                        <View style={styles.pillsRow}>
+                          <View
+                            style={[
+                              styles.macroPill,
+                              { backgroundColor: "#FEE2E2" },
+                            ]}
+                          >
+                            <Text style={styles.pillText}>
+                              🍗 {Math.round(totals.protein)}g
+                            </Text>
+                          </View>
+                          <View
+                            style={[
+                              styles.macroPill,
+                              { backgroundColor: "#E0F2FE" },
+                            ]}
+                          >
+                            <Text style={styles.pillText}>
+                              🍞 {Math.round(totals.carbs)}g
+                            </Text>
+                          </View>
+                          <View
+                            style={[
+                              styles.macroPill,
+                              { backgroundColor: "#FEF3C7" },
+                            ]}
+                          >
+                            <Text style={styles.pillText}>
+                              🧈 {Math.round(totals.fat)}g
+                            </Text>
+                          </View>
                         </View>
-                      ))}
-                    </View>
+                      </View>
+                    </>
                   ) : (
                     <Text
                       style={{
@@ -290,5 +333,32 @@ const styles = StyleSheet.create({
   },
   circleWrapper: {
     alignItems: "center",
+  },
+  macrosGramsContainer: {
+    marginTop: 16,
+    alignItems: "center",
+  },
+  macroGramsTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 8,
+  },
+  pillsRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 8,
+  },
+  macroPill: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  pillText: {
+    fontSize: 14,
+    fontFamily: "Comfortaa-Regular",
+    color: "#333",
   },
 });

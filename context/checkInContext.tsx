@@ -1,10 +1,16 @@
 // src/context/checkInContext.tsx
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { auth, db } from "@/config/firebaseConfig";
-import { collection, getDocs, query, orderBy, limit, addDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  limit,
+  addDoc,
+} from "firebase/firestore";
 import dayjs from "dayjs";
 import { Timestamp } from "firebase/firestore";
-
 interface CheckInContextType {
   moodLabel: string | null;
   energyLabel: string | null;
@@ -13,13 +19,17 @@ interface CheckInContextType {
   moodNumeric: number | null;
   logMood: (value: number) => Promise<void>;
   fetchAllMoods: () => Promise<{ date: string; mood: number }[]>;
-  fetchAllCheckIns: () => Promise<{ date: string; mood: number; energy: string; sleep: string }[]>;
+  fetchAllCheckIns: () => Promise<{ date: string; mood: number; sleep: number; energy: number }[]>; // <-- ✨ fix this line
   refreshCheckIn: () => Promise<void>;
 }
 
 const CheckInContext = createContext<CheckInContextType | undefined>(undefined);
 
-export const CheckInProvider = ({ children }: { children: React.ReactNode }) => {
+export const CheckInProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const [moodLabel, setMoodLabel] = useState<string | null>(null);
   const [energyLabel, setEnergyLabel] = useState<string | null>(null);
   const [sleepLabel, setSleepLabel] = useState<string | null>(null);
@@ -68,9 +78,7 @@ export const CheckInProvider = ({ children }: { children: React.ReactNode }) => 
     if (!uid) return [];
 
     try {
-      const snapshot = await getDocs(
-        collection(db, "users", uid, "checkins")
-      );
+      const snapshot = await getDocs(collection(db, "users", uid, "checkins"));
       const moods: { date: string; mood: number }[] = [];
       snapshot.forEach((docSnap) => {
         const data = docSnap.data();
@@ -85,28 +93,32 @@ export const CheckInProvider = ({ children }: { children: React.ReactNode }) => 
       return [];
     }
   };
-
   const fetchAllCheckIns = async () => {
     const uid = auth.currentUser?.uid;
     if (!uid) return [];
 
     try {
-      const snapshot = await getDocs(
-        collection(db, "users", uid, "checkins")
-      );
-      const checkIns: { date: string; mood: number; sleep: string; energy: string }[] = [];
+      const snapshot = await getDocs(collection(db, "users", uid, "checkins"));
+      const checkIns: {
+        date: string;
+        mood: number;
+        sleep: number;
+        energy: number;
+      }[] = []; // <-- FIX types
+
       snapshot.forEach((docSnap) => {
         const data = docSnap.data();
         if (data.timestamp && data.mood && data.sleep && data.energy) {
           const date = dayjs(data.timestamp.toDate()).format("YYYY-MM-DD");
           checkIns.push({
             date,
-            mood: getMoodValue(data.mood),
-            sleep: data.sleep,
-            energy: data.energy,
+            mood: getMoodValue(data.mood), // string to number (already done)
+            sleep: sleepLabelToScore(data.sleep), // string to number (new!)
+            energy: energyLabelToScore(data.energy), // string to number (new!)
           });
         }
       });
+
       return checkIns;
     } catch (error) {
       console.error("Error fetching check-ins:", error);
@@ -145,6 +157,27 @@ export const CheckInProvider = ({ children }: { children: React.ReactNode }) => 
         return 50;
     }
   }
+  function sleepLabelToScore(label: string): number {
+    const map: Record<string, number> = {
+      "Really Struggled": 1,
+      "Not the Best": 2,
+      "Okay Sleep": 3,
+      "Pretty Restful": 4,
+      "Slept Like a Baby": 5,
+    };
+    return map[label] || 3; // default to 3 if label missing
+  }
+
+  function energyLabelToScore(label: string): number {
+    const map: Record<string, number> = {
+      "Running on Empty": 1,
+      "A Little Tired": 2,
+      "Doing Alright": 3,
+      "Feeling Energized": 4,
+      "Ready to Take on the Day": 5,
+    };
+    return map[label] || 3; // default to 3 if label missing
+  }
 
   function getMoodLabel(value: number): string {
     switch (value) {
@@ -175,7 +208,9 @@ export const CheckInProvider = ({ children }: { children: React.ReactNode }) => 
     refreshCheckIn,
   };
 
-  return <CheckInContext.Provider value={value}>{children}</CheckInContext.Provider>;
+  return (
+    <CheckInContext.Provider value={value}>{children}</CheckInContext.Provider>
+  );
 };
 
 export const useCheckInContext = () => {

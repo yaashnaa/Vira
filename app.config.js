@@ -26,6 +26,7 @@ export default {
     },
     plugins: [
       "expo-router",
+       "expo-video",
       // "@react-native-firebase/app",
       [
         "expo-splash-screen",

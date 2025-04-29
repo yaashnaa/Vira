@@ -5,6 +5,7 @@ import SplashScreenComponent from "../components/SplashScreen";
 import useCustomLocalFonts from "@/hooks/useCustomFonts";
 import { Provider } from "react-native-paper";
 import "react-native-get-random-values";
+import FastImage from 'react-native-fast-image';
 
 export default function Index() {
   const router = useRouter();
@@ -14,17 +15,19 @@ export default function Index() {
   useEffect(() => {
     if (!showSplash && fontsLoaded) {
       const checkAndRoute = async () => {
-        const loggedIn = await AsyncStorage.getItem("@loggedIn");
-  
-        console.log("🔐 Logged in?", loggedIn);
-  
-        if (loggedIn === "true") {
-          router.replace("/dashboard");
-        } else {
-          router.replace("/OnBoarding"); // always go to onboarding and let it decide what to show
+        try {
+          const loggedIn = await AsyncStorage.getItem("@loggedIn");
+          if (loggedIn === "true") {
+            router.replace("/dashboard");
+          } else {
+            router.replace("/OnBoarding");
+          }
+        } catch (e) {
+          console.error("Storage error", e);
+          router.replace("/OnBoarding");
         }
       };
-  
+      
       checkAndRoute();
     }
   }, [showSplash, fontsLoaded]);

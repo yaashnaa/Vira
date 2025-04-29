@@ -405,7 +405,7 @@ export default function BasicQuiz() {
                     </View>
                   </View>
                 </TouchableOpacity>
-              ))}
+              ))}                           
             </View>
             <View style={styles.navigationButtons}>
               <Button
@@ -417,7 +417,7 @@ export default function BasicQuiz() {
               >
                 Back
               </Button>
-              <Button
+              <Button                                                                                                                   
                 mode="contained"
                 onPress={handleSubmitForm}
                 textColor="#390a84"

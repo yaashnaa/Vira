@@ -32,10 +32,13 @@ import LottieView from "lottie-react-native";
 import { saveJournalEntry } from "@/utils/journalHelper";
 import Header from "@/components/header";
 import DailyPrompt from "@/components/Journal/dailyPrompt";
+import { useCheckInContext } from "@/context/checkInContext";
+
 
 export default function Journal() {
   const { userPreferences } = useUserPreferences();
-  const { mood, hasLoggedToday } = useMoodContext();
+  const { moodLabel, energyLabel, sleepLabel, hasCheckedInToday } = useCheckInContext();
+
   const today = dayjs().format("YYYY-MM-DD");
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
@@ -90,7 +93,7 @@ export default function Journal() {
 
   const renderEntryExtras = () => {
     if (entryType === "mood") {
-      return <MoodTagSuggestions mood={mood ?? 2} />;
+      return <MoodTagSuggestions mood={moodLabel ?? 2} />;
     }
     if (entryType === "prompt") {
       return (
@@ -183,7 +186,7 @@ export default function Journal() {
               </Text>
               {entryType === "free" && <DailyPrompt />}
               {/* Conditional: If mood mode selected but no check-in */}
-              {entryType === "mood" && !hasLoggedToday ? (
+              {entryType === "mood" && !hasCheckedInToday ? (
                 <View style={styles.checkInNotice}>
                   <Text style={styles.noticeText}>
                     You haven't checked in today. Please do a mood check-in
@@ -203,7 +206,7 @@ export default function Journal() {
                   <JournalEntrySection
                     onFocus={scrollToInput}
                     entryType={entryType as "free" | "prompt" | "mood"}
-                    moodLabel={String(mood ?? "")}
+                    moodLabel={moodLabel ?? ""}
                     onSave={() => {
                       fetchEntries();
                     }}

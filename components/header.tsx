@@ -6,14 +6,12 @@ import { useRouter } from "expo-router";
 interface CustomHeaderProps {
   title: string;
   showSettings?: boolean;
-  useBackFunction?: boolean; // <- optional toggle for router.back()
-  backPath?: string; // fallback if useBackFunction is false
+  backPath?: string; // fallback path if cannot go back
 }
 
 export default function Header({
   title,
   showSettings = true,
-  useBackFunction = true,
   backPath = "/dashboard",
 }: CustomHeaderProps) {
   const router = useRouter();
@@ -53,6 +51,7 @@ export default function Header({
     />
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#f8edeb",

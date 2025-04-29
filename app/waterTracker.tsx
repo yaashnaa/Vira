@@ -132,7 +132,7 @@ export default function WaterTrackerScreen() {
 
   return (
     <>
-     <Header title="Water Tracker"/>
+      <Header title="Water Tracker" />
 
       <SafeAreaView style={styles.container}>
         {showConfetti && (
@@ -146,18 +146,18 @@ export default function WaterTrackerScreen() {
           <View style={styles.goalRow}>
             <IconButton
               icon={() => (
-                <Ionicons name="add-circle" size={25} color="#472608" />
+                <Ionicons name="remove-circle" size={25} color="#472608" />
               )}
-              onPress={() => setWaterGoal(waterGoal + 250)}
+              onPress={() => setWaterGoal(waterGoal - 250)}
               style={{ marginLeft: 0, marginRight: 0 }}
-            />
+            /> 
             <Text style={styles.goalText}>{waterGoal} mL</Text>
 
             <IconButton
               icon={() => (
-                <Ionicons name="remove-circle" size={25} color="#472608" />
+                <Ionicons name="add-circle" size={25} color="#472608" />
               )}
-              onPress={() => setWaterGoal(waterGoal - 250)}
+              onPress={() => setWaterGoal(waterGoal + 250)}
               style={{ marginLeft: 0, marginRight: 0 }}
             />
           </View>

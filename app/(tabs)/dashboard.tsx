@@ -319,13 +319,11 @@ export default function Dashboard() {
 
   return (
     <>
-      <ImageBackground
+      {/* <ImageBackground
         source={require("../../assets/images/dashboard/bg.png")} // your image here
         style={styles.greetingBackground}
         imageStyle={{ borderRadius: 16 }} 
-      >
-
-
+      > */}
         <SafeAreaView style={styles.headerContainer}>
           <FlatList
             data={dashboardSections}
@@ -520,7 +518,7 @@ export default function Dashboard() {
             }}
           />
         </SafeAreaView>
-      </ImageBackground>
+      {/* </ImageBackground> */}
     </>
   );
 }

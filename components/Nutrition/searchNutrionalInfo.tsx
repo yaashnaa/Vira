@@ -45,7 +45,6 @@ interface NutritionSearchProps {
   visible: boolean;
   onDismiss: () => void;
 }
-
 function NutritionSearchModal() {
   const { userPreferences } = useUserPreferences();
   const [query, setQuery] = useState("");
@@ -76,75 +75,74 @@ function NutritionSearchModal() {
   };
 
   return (
-    <View style={styles.container}>
-      {/* <Text style={styles.title}>🔎 Search for Food</Text> */}
-      <View style={styles.searchContainer}>
-        <TextInput
-          placeholder="Search for a food..."
-          value={query}
-          placeholderTextColor={"#888"}
-          onChangeText={setQuery}
-          style={styles.input}
-          onSubmitEditing={handleSearch}
-        />
-        <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-          <Text style={styles.searchButtonText}>Search</Text>
-        </TouchableOpacity>
-      </View>
+    <FlatList
+      ListHeaderComponent={
+        <View style={styles.searchContainer}>
+          <TextInput
+            placeholder="Search for a food..."
+            value={query}
+            placeholderTextColor={"#888"}
+            onChangeText={setQuery}
+            style={styles.input}
+            onSubmitEditing={handleSearch}
+          />
+          <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+            <Text style={styles.searchButtonText}>Search</Text>
+          </TouchableOpacity>
+          {loading && <Text style={styles.loadingText}>Loading...</Text>}
+        </View>
+      }
+      data={results}
+      keyExtractor={(item, index) => `${item.food_name}-${index}`}
+      renderItem={({ item }) => (
+        <Card mode="outlined" style={styles.card}>
+          <Card.Content>
+            <Text style={styles.foodName}>
+              {item.food_name.replace(/\b\w/g, (l) => l.toUpperCase())}
+            </Text>
 
-      {loading && <Text style={styles.loadingText}>Loading...</Text>}
-
-      <FlatList
-        data={results}
-        keyExtractor={(item, index) => `${item.food_name}-${index}`}
-        renderItem={({ item }) => (
-          <Card mode="outlined" style={styles.card}>
-            <Card.Content>
-              <Text style={styles.foodName}>
-                {item.food_name.replace(/\b\w/g, (l) => l.toUpperCase())}
-              </Text>
-
-              {!userPreferences.macroViewing &&
-              !userPreferences.calorieViewing ? (
-                <View style={styles.friendlySummary}>
-                  {getFriendlyNutrientHighlights(item.full_nutrients).map(
-                    (text, index) => (
-                      <Text key={index} style={styles.highlightText}>
-                        🌟 This food is {text}.
-                      </Text>
-                    )
-                  )}
-                </View>
-              ) : (
-                <View style={{ marginTop: 8 }}>
-                  {userPreferences?.calorieViewing && (
-                    <Text style={styles.nutrientText}>
-                      🔥 Calories: {item.nf_calories ?? "N/A"} kcal
+            {!userPreferences.macroViewing &&
+            !userPreferences.calorieViewing ? (
+              <View style={styles.friendlySummary}>
+                {getFriendlyNutrientHighlights(item.full_nutrients).map(
+                  (text, index) => (
+                    <Text key={index} style={styles.highlightText}>
+                      🌟 This food is {text}.
                     </Text>
-                  )}
-                  {userPreferences?.macroViewing && (
-                    <>
-                      <Text style={styles.nutrientText}>
-                        🍗 Protein: {item.nf_protein ?? "N/A"} g
-                      </Text>
-                      <Text style={styles.nutrientText}>
-                        🍞 Carbs: {item.nf_total_carbohydrate ?? "N/A"} g
-                      </Text>
-                      <Text style={styles.nutrientText}>
-                        🧈 Fat: {item.nf_total_fat ?? "N/A"} g
-                      </Text>
-                    </>
-                  )}
-                </View>
-              )}
-            </Card.Content>
-          </Card>
-        )}
-        contentContainerStyle={styles.list}
-      />
-    </View>
+                  )
+                )}
+              </View>
+            ) : (
+              <View style={{ marginTop: 8 }}>
+                {userPreferences?.calorieViewing && (
+                  <Text style={styles.nutrientText}>
+                    🔥 Calories: {item.nf_calories ?? "N/A"} kcal
+                  </Text>
+                )}
+                {userPreferences?.macroViewing && (
+                  <>
+                    <Text style={styles.nutrientText}>
+                      🍗 Protein: {item.nf_protein ?? "N/A"} g
+                    </Text>
+                    <Text style={styles.nutrientText}>
+                      🍞 Carbs: {item.nf_total_carbohydrate ?? "N/A"} g
+                    </Text>
+                    <Text style={styles.nutrientText}>
+                      🧈 Fat: {item.nf_total_fat ?? "N/A"} g
+                    </Text>
+                  </>
+                )}
+              </View>
+            )}
+          </Card.Content>
+        </Card>
+      )}
+      contentContainerStyle={styles.list}
+      style={styles.container}
+    />
   );
 }
+
 
 export default NutritionSearchModal;
 
