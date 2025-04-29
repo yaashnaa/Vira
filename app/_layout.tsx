@@ -5,7 +5,6 @@ import { Stack, useRouter } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../config/firebaseConfig";
 import { UserPreferencesProvider } from "../context/userPreferences";
-import { MoodProvider } from "@/context/moodContext";
 import { Provider } from "react-native-paper";
 import "react-native-get-random-values";
 import { MealLogProvider } from "@/context/mealLogContext";
@@ -82,7 +81,7 @@ export default function RootLayout() {
       <Provider>
         <UserPreferencesProvider>
           <CheckInProvider>
-            <MoodProvider>
+   
               <MealLogProvider>
                 <Stack
                   screenOptions={{
@@ -139,7 +138,7 @@ export default function RootLayout() {
                 </Stack>
                 <Toast />
               </MealLogProvider>
-            </MoodProvider>
+
           </CheckInProvider>
         </UserPreferencesProvider>
       </Provider>

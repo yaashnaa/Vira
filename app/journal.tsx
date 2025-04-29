@@ -22,7 +22,6 @@ import {
 import { useRouter } from "expo-router";
 import { useUserPreferences } from "@/context/userPreferences";
 import { Header as HeaderRNE, Icon } from "@rneui/themed";
-import { useMoodContext } from "@/context/moodContext";
 import dayjs from "dayjs";
 import MoodTagSuggestions from "@/components/Journal/moodTagSuggestions";
 import CBTJournalingInfo from "@/components/Journal/CBTInfo";

@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { Card, SegmentedButtons } from "react-native-paper";
 import { fetchTastyRecipes, TastyRecipe } from "@/utils/api/fetchTastyRecipes";
-import WebView from "react-native-webview";
+
 import NutritionSearch from "@/components/Nutrition/searchNutrionalInfo";
 import NutritionTipsModal from "@/components/Nutrition/NutritionTips";
 

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Dimensions } from "react-native";
+import {  StyleSheet, Dimensions } from "react-native";
 import LogExercise from "../../../components/Exercise/logExercise";
 
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,20 +19,13 @@ export default function logExercise() {
         marginBottom:50
       }}
     >
-      {/* <Text style={styles.title}>🏋️ Log Your Movement</Text> */}
       <LogExercise />
     </SafeAreaView>
   );
 }
-const { width, height } = Dimensions.get("window");
+const { height } = Dimensions.get("window");
 const styles = StyleSheet.create({
-  // container: {
-  //   flex: 1,
-  //   backgroundColor: "#F8F9FA",
-  //   padding: 20,
-  //   justifyContent: "center",
-  //   alignItems: "center",
-  // },
+
   title: {
     fontSize: 24,
     fontFamily: "PatrickHand-Regular",

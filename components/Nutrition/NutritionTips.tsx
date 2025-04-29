@@ -1,6 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
-import { Modal, Portal, Button, Card } from "react-native-paper";
+import {  Text, StyleSheet } from "react-native";
+import {  Card } from "react-native-paper";
 import { useCheckInContext } from "@/context/checkInContext";
 
 const tipsByCheckIn = {

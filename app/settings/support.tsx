@@ -1,6 +1,5 @@
 import React from "react";
 import { View, Text, StyleSheet, Linking, ScrollView } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Card, Button } from "react-native-paper";
 import Header from "@/components/header";
 import { useRouter } from "expo-router";

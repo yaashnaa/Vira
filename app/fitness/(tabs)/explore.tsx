@@ -11,17 +11,16 @@ import {
   Dimensions,
   Image,
 } from "react-native";
-import LottieView from "lottie-react-native";
-import Header from "@/components/header";
+
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import { Button, Card, Modal, Portal, Provider } from "react-native-paper";
-import { useMoodContext } from "@/context/moodContext";
+
 import { useUserPreferences } from "@/context/userPreferences";
-import LogExercise from "@/components/Exercise/logExercise";
+
 import { useCheckInContext } from "@/context/checkInContext";
 import TodaysMovementCard from "@/components/Exercise/todaysMovement";
-// import FitnessScreen from "./findExercises";
+
 import {
   fetchExerciseData,
   ExerciseProps,

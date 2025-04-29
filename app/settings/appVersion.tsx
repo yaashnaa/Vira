@@ -3,7 +3,7 @@ import { View, StyleSheet, Text, Alert, TouchableOpacity } from "react-native";
 import { Button, Card } from "react-native-paper";
 import Constants from "expo-constants";
 import * as Application from "expo-application";
-import { SafeAreaView } from "react-native-safe-area-context";
+
 import Header from "@/components/header";
 import { useRouter } from "expo-router";
 export default function AppVersionScreen() {
@@ -21,7 +21,7 @@ export default function AppVersionScreen() {
     <>
       <Header title="App Version" backPath="/settings"/>
       <View style={styles.container}>
-        {/* <Text style={styles.header}>📱 App Version</Text> */}
+
         <Card style={styles.card}>
           <Card.Content>
             <Text style={styles.label}>Version:</Text>

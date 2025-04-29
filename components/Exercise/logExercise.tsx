@@ -6,64 +6,37 @@ import {
   StyleSheet,
   Alert,
   Image,
-  SafeAreaView,
   Dimensions,
-  ScrollView,
-  KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
+  Animated,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { Button, Card, RadioButton } from "react-native-paper";
-import { auth } from "@/config/firebaseConfig";
-import { saveExerciseLog } from "@/utils/saveExerciseLog";
-import { useMoodContext } from "@/context/moodContext";
-import * as ImagePicker from "expo-image-picker";
-import Toast from "react-native-toast-message";
+import { Button, Card } from "react-native-paper";
 import LottieView from "lottie-react-native";
-import { Animated } from "react-native";
+import Toast from "react-native-toast-message";
+
+import { saveExerciseLog } from "@/utils/saveExerciseLog";
+import { auth } from "@/config/firebaseConfig";
 import Header from "@/components/header";
+
 const moodOptions = [
-  {
-    label: "Low Energy",
-    value: 100,
-    image: require("../../assets/images/exerciseMood/1.png"),
-  },
-  {
-    label: "A Bit Drained",
-    value: 75,
-    image: require("../../assets/images/exerciseMood/2.png"),
-  },
-  {
-    label: "Balanced & Okay",
-    value: 50,
-    image: require("../../assets/images/exerciseMood/3.png"),
-  },
-  {
-    label: "Refreshed & Content",
-    value: 25,
-    image: require("../../assets/images/exerciseMood/4.png"),
-  },
-  {
-    label: "Energized & Uplifted",
-    value: 0,
-    image: require("../../assets/images/exerciseMood/5.png"),
-  },
+  { label: "Low Energy", value: 100, image: require("../../assets/images/exerciseMood/1.png") },
+  { label: "A Bit Drained", value: 75, image: require("../../assets/images/exerciseMood/2.png") },
+  { label: "Balanced & Okay", value: 50, image: require("../../assets/images/exerciseMood/3.png") },
+  { label: "Refreshed & Content", value: 25, image: require("../../assets/images/exerciseMood/4.png") },
+  { label: "Energized & Uplifted", value: 0, image: require("../../assets/images/exerciseMood/5.png") },
 ];
 
 export default function LogExercise() {
+  const router = useRouter();
   const [exerciseText, setExerciseText] = useState("");
-  const [moodAfter, setMoodAfter] = useState("Balanced & Okay"); // ✅ Default matches moodOptions
+  const [moodAfter, setMoodAfter] = useState("Balanced & Okay");
   const [submitting, setSubmitting] = useState(false);
-  const { userId } = useMoodContext();
   const [animation] = useState(new Animated.Value(1));
 
-  const router = useRouter();
-
-  const selectedMood =
-    moodOptions.find((m) => m.label === moodAfter)?.value ?? 50;
+  const selectedMoodValue = moodOptions.find((m) => m.label === moodAfter)?.value ?? 50;
 
   const handleSubmit = async () => {
     if (!exerciseText.trim()) {
@@ -73,19 +46,20 @@ export default function LogExercise() {
 
     setSubmitting(true);
     try {
+      const userId = auth.currentUser?.uid;
+      if (!userId) {
+        throw new Error("No authenticated user found");
+      }
+
       await saveExerciseLog({
-        userId: userId || auth.currentUser?.uid || "",
+        userId,
         description: exerciseText,
-        moodAfter: selectedMood,
+        moodAfter: selectedMoodValue,
       });
 
-      Toast.show({
-        type: "success",
-        text1: "Exercise log saved!👏🏻",
-      });
-
+      Toast.show({ type: "success", text1: "Exercise log saved! 👏🏻" });
       setExerciseText("");
-      setMoodAfter("Balanced & Okay"); // ✅ Reset to default after save
+      setMoodAfter("Balanced & Okay");
       router.replace("/fitness/(tabs)/explore");
     } catch (err) {
       Toast.show({
@@ -102,7 +76,7 @@ export default function LogExercise() {
   return (
     <>
       <Header title="" backPath="/fitness/(tabs)/explore" />
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.container}>
           <LottieView
             source={require("../../assets/animations/exercise.json")}
@@ -110,12 +84,11 @@ export default function LogExercise() {
             loop
             style={{ width: "100%", height: 200 }}
           />
+
           <Card style={styles.card} mode="contained">
             <Card.Title title="🏋️ Log Your Movement" titleStyle={styles.title} />
             <Card.Content>
-              <Text style={styles.label}>
-                What kind of movement did you do?
-              </Text>
+              <Text style={styles.label}>What kind of movement did you do?</Text>
               <TextInput
                 placeholder="e.g. 30 minutes yoga, 15 minutes walking..."
                 value={exerciseText}
@@ -131,7 +104,6 @@ export default function LogExercise() {
                   {moodOptions.map((option, index) => (
                     <TouchableOpacity
                       key={index}
-                      accessibilityLabel={`Select mood: ${option.label}`}
                       onPress={() => {
                         setMoodAfter(option.label);
                         Animated.sequence([
@@ -141,30 +113,21 @@ export default function LogExercise() {
                             useNativeDriver: true,
                           }),
                           Animated.timing(animation, {
-                            toValue: 1, // Back to normal
+                            toValue: 1,
                             duration: 150,
                             useNativeDriver: true,
                           }),
                         ]).start();
                       }}
-                      style={
-                        moodAfter === option.label
-                          ? styles.selectedMood
-                          : styles.moodOption
-                      }
+                      style={moodAfter === option.label ? styles.selectedMood : styles.moodOption}
                     >
-                      <Image source={option.image} style={styles.moodImage} />
-                      {/* <Animated.View
-                        style={{
-                          transform: [
-                            {
-                              scale: moodAfter === option.label ? animation : 1,
-                            },
-                          ],
-                        }}
-                      >
-                        <Image source={option.image} style={styles.moodImage} />
-                      </Animated.View> */}
+                      <Animated.Image
+                        source={option.image}
+                        style={[
+                          styles.moodImage,
+                          moodAfter === option.label && { transform: [{ scale: animation }] },
+                        ]}
+                      />
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -186,10 +149,10 @@ export default function LogExercise() {
                 {submitting ? "Saving..." : "Save Log"}
               </Button>
               <Button
-                mode="contained"
+                mode="outlined"
                 onPress={() => router.replace("/fitness/(tabs)/explore")}
-                textColor="#000"
-                style={[styles.button, { width: "40%", margin: "auto" }]}
+                textColor="#271949"
+                style={[styles.button, { backgroundColor: "#f4f0ff", marginTop: 10 }]}
               >
                 Back
               </Button>
@@ -200,58 +163,27 @@ export default function LogExercise() {
     </>
   );
 }
+
 const { width, height } = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: {
-    // flex: 1,
     backgroundColor: "#ffffff",
     height: height * 0.9,
     width: width,
-
     justifyContent: "center",
     alignItems: "center",
-    margin: 0,
   },
   card: {
-    // margin: 16,
     padding: 10,
     backgroundColor: "#ffffff",
-    // height: height * 0.5,
-    width: width ,
-    justifyContent: "center",
+    width: width,
     alignItems: "center",
   },
-  selectedMoodBox: {
-    // marginTop: 12,
-    // backgroundColor: "#f3e9fc",
-    padding: 10,
-    borderRadius: 10,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  headerRight: {
-    display: "flex",
-    flexDirection: "row",
-    marginTop: 5,
-  },
-  selectedMoodText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#5A3E9B",
-    fontFamily: "Main-font",
-    textAlign: "center",
-  },
-
   title: {
     fontSize: 24,
     color: "#0e0327",
     fontFamily: "PatrickHand-Regular",
   },
-
   input: {
     borderColor: "#ddd",
     borderWidth: 1,
@@ -260,50 +192,21 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     backgroundColor: "#fff",
   },
-  radioRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-    marginVertical: 10,
-    alignItems: "center",
-  },
-  button: {
-    marginTop: 20,
-    width: "80%",
-    alignSelf: "center",
-    backgroundColor: "#FAE1DD",
-  },
-  section: {
-    marginBottom: 15,
-    width: "100%",
-  },
-  moodLabel: {
-    fontSize: 12,
-    marginTop: 6,
-    textAlign: "center",
-    // maxWidth: 70,
-    color: "#333",
-    fontFamily: "Main-font",
-  },
-
-  selectedMoodLabel: {
-    color: "#5A3E9B",
-    fontWeight: "600",
-  },
-
   label: {
     fontWeight: "600",
     marginBottom: 8,
     fontFamily: "Main-font",
   },
-
+  section: {
+    marginBottom: 15,
+    width: "100%",
+  },
   ratingRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "center",
-    gap: 12, 
+    gap: 12,
   },
-  
   moodOption: {
     padding: 8,
   },
@@ -313,18 +216,33 @@ const styles = StyleSheet.create({
     borderColor: "#A084DC",
     borderRadius: 8,
   },
-  emoji: {
-    fontSize: 28,
-  },
-  image: {
-    width: width,
-    height: 150,
-    borderRadius: 10,
-    marginTop: 10,
-  },
   moodImage: {
     width: 40,
     height: 50,
     borderRadius: 10,
+  },
+  selectedMoodBox: {
+    padding: 10,
+    borderRadius: 10,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+    marginTop: 10,
+  },
+  selectedMoodText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#5A3E9B",
+    fontFamily: "Main-font",
+    textAlign: "center",
+  },
+  button: {
+    marginTop: 20,
+    width: "80%",
+    alignSelf: "center",
+    backgroundColor: "#FAE1DD",
   },
 });

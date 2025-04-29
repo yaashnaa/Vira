@@ -1,4 +1,4 @@
-import "dotenv/config"; // loads from .env
+import "dotenv/config";
 
 export default {
   expo: {
@@ -7,13 +7,15 @@ export default {
     version: "1.0.0",
     orientation: "portrait",
     icon: "./assets/images/Vira.png",
-    scheme: "myapp",
+    scheme: "vira",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     ios: {
+      bundleIdentifier: "com.yaashna.vira",
       supportsTablet: true,
     },
     android: {
+      package: "com.yaashna.vira",
       adaptiveIcon: {
         foregroundImage: "./assets/images/Vira.png",
         backgroundColor: "#ffffff",
@@ -22,16 +24,15 @@ export default {
     web: {
       bundler: "metro",
       output: "static",
-      favicon: "./assets/images/vira.png",
+      favicon: "./assets/images/Vira.png",
     },
     plugins: [
       "expo-router",
-       "expo-video",
-      // "@react-native-firebase/app",
+      "expo-video",
       [
         "expo-splash-screen",
         {
-          image: "./assets/images/vira.png",
+          image: "./assets/images/Vira.png",
           imageWidth: 200,
           resizeMode: "contain",
           backgroundColor: "#ffffff",

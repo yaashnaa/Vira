@@ -4,22 +4,18 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
-  Platform,
-  ToastAndroid,
+
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Menu, Button, Provider } from "react-native-paper";
+import { Menu, Button } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 import { useUserPreferences } from "@/context/userPreferences";
 import { doc, setDoc } from "firebase/firestore";
 import { db, auth } from "@/config/firebaseConfig";
 import { useRouter } from "expo-router";
-import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import Toast from "react-native-toast-message";
 import Header from "@/components/header";
 import { scheduleWaterReminders } from "@/utils/waterReminderScheduler";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { scheduleUserNotifications } from "@/utils/notificationScheduler";
 import { checkAndScheduleDailyReminder } from "@/utils/checkAndScheduleReminder";
 const encouragementOptions = [

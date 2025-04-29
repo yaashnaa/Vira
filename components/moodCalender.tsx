@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
-import { useMoodContext } from "../context/moodContext";
+import { useCheckInContext } from "@/context/checkInContext"; // ⬅️ Changed import
 import { Calendar } from "react-native-calendars";
 
 const moodImages = {
@@ -10,6 +10,7 @@ const moodImages = {
   "Not My Best": require("../assets/images/mood/sad.png"),
   "Having a Tough Day": require("../assets/images/mood/vsad.png"),
 };
+
 const moodLabels: Record<number, keyof typeof moodImages> = {
   0: "Feeling Great",
   25: "Pretty Good",
@@ -19,31 +20,34 @@ const moodLabels: Record<number, keyof typeof moodImages> = {
 };
 
 export default function MoodCalendar() {
-  const { fetchAllMoods, userId } = useMoodContext();
+  const { fetchAllMoods } = useCheckInContext(); // ⬅️ Use CheckInContext
   const [markedDates, setMarkedDates] = useState<{ [key: string]: any }>({});
 
   useEffect(() => {
-    if (!userId) return;
-    const load = async () => {
-      const allMoods = await fetchAllMoods();
-      const marked: { [key: string]: any } = {};
+    const loadMoods = async () => {
+      try {
+        const allMoods = await fetchAllMoods();
+        const marked: { [key: string]: any } = {};
 
-      allMoods.forEach((entry) => {
-        const discreteMood = Math.round(entry.mood / 25) * 25;
-        marked[entry.date] = {
-          customStyles: {
-            container: { backgroundColor: "transparent" },
-            text: { display: "none" },
-          },
-          mood: discreteMood,
-        };
-      });
+        allMoods.forEach((entry) => {
+          const discreteMood = Math.round(entry.mood / 25) * 25;
+          marked[entry.date] = {
+            customStyles: {
+              container: { backgroundColor: "transparent" },
+              text: { display: "none" },
+            },
+            mood: discreteMood,
+          };
+        });
 
-      setMarkedDates(marked);
+        setMarkedDates(marked);
+      } catch (error) {
+        console.error("Error loading moods:", error);
+      }
     };
 
-    load();
-  }, [userId]);
+    loadMoods();
+  }, []);
 
   return (
     <View style={styles.container}>

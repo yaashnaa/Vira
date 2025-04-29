@@ -1,6 +1,6 @@
 // app/tools/index.tsx
 
-import React, { useEffect, useState } from "react";
+import React, {  useState } from "react";
 import {
   View,
   Text,
@@ -11,10 +11,8 @@ import {
 } from "react-native";
 import { Card, IconButton, Modal, Portal, Button } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { RelativePathString, ExternalPathString } from "expo-router";
-import { auth, db } from "@/config/firebaseConfig";
+import { auth } from "@/config/firebaseConfig";
 import { useFocusEffect } from "expo-router";
-import CrisisPlanSection from "@/components/crisisPlanSection";
 import {
   addWidget,
   removeWidget as removeWidgetFromStorage,

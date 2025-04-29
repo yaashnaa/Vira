@@ -86,7 +86,7 @@ export default function ExerciseHistoryScreen() {
               renderItem={({ item }) => (
                 <View style={styles.card}>
                   <View style={styles.row}>
-                    <Text style={styles.desc}>🏋️ {item.description}</Text>
+                    <Text style={styles.desc}> {item.description}</Text>
                     <IconButton
                       icon="delete"
                       size={18}
@@ -153,7 +153,6 @@ const styles = StyleSheet.create({
   mood: {
     fontSize: 14,
     color: "#6B46C1",
-    marginTop: 4,
   },
   date: {
     fontSize: 12,
@@ -168,6 +167,6 @@ const styles = StyleSheet.create({
   headerRight: {
     display: "flex",
     flexDirection: "row",
-    marginTop: 5,
+    // marginTop: 5,
   },
 });

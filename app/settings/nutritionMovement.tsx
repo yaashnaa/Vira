@@ -8,18 +8,17 @@ import {
   ScrollView,
   Dimensions,
 } from "react-native";
-import { Icon } from "@rneui/themed";
 import Toast from "react-native-toast-message";
-import { Menu, List, Divider } from "react-native-paper";
+import { Menu, Divider } from "react-native-paper";
 import { useUserPreferences } from "@/context/userPreferences";
 import { auth, db } from "@/config/firebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
 import { Button } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
+
 import { Ionicons } from "@expo/vector-icons";
 import Header from "@/components/header";
-import { Header as HeaderRNE } from "@rneui/themed";
+
 export default function DietMovementScreen() {
   const { userPreferences, updatePreferences } = useUserPreferences();
   const router = useRouter();

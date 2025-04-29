@@ -5,11 +5,9 @@ import {
   deleteFavoriteExercise,
 } from "@/utils/saveFavoriteExercises";
 import { Card, Button } from "react-native-paper";
-import { useFocusEffect } from "expo-router";
+
 import { collection, onSnapshot } from "firebase/firestore";
 import { auth, db } from "@/config/firebaseConfig";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-
 export default function FavoritesScreen() {
   const [favorites, setFavorites] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +20,7 @@ export default function FavoritesScreen() {
 
     const unsubscribe = onSnapshot(favoritesRef, (snapshot) => {
       const exercises = snapshot.docs.map((doc) => ({
-        id: doc.id, // <-- Save the Firestore document id!
+        id: doc.id, 
         ...doc.data(),
       }));
       setFavorites(exercises);

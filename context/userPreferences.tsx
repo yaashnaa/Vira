@@ -8,8 +8,6 @@ import React, {
 import { auth } from "../config/firebaseConfig";
 import { onAuthStateChanged, getAuth } from "firebase/auth";
 import { migrateNameToPreferences } from "@/utils/migrateNameToPreferences";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
 import { saveUserPreferences } from "../utils/firestore";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../config/firebaseConfig";

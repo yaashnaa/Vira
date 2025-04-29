@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   Modal,
-  ScrollView,
   Dimensions,
   Pressable,
   SafeAreaView,

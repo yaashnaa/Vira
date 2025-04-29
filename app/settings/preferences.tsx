@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 import { Ionicons } from "@expo/vector-icons";
-import { Icon } from "@rneui/themed";
 import { Menu, Divider } from "react-native-paper";
 import { useUserPreferences } from "@/context/userPreferences";
 import { auth, db } from "@/config/firebaseConfig";

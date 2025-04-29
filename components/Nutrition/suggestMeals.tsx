@@ -12,10 +12,7 @@ import { fetchTastyRecipes } from "@/utils/api/fetchTastyRecipes";
 import { useUserPreferences } from "@/context/userPreferences";
 import Webview from "react-native-webview";
 import FilterMenu from "./filterMenu";
-import { useMoodContext } from "@/context/moodContext";
-import { auth, db } from "@/config/firebaseConfig";
-import { collection, getDocs } from "firebase/firestore";
-import dayjs from "dayjs";
+import { useCheckInContext } from "@/context/checkInContext"; // ✅ use checkinContext now
 
 export interface TastyRecipe {
   id: number;
@@ -29,11 +26,11 @@ export interface TastyRecipe {
 
 export default function SuggestMeals() {
   const { userPreferences } = useUserPreferences();
+  const { hasCheckedInToday } = useCheckInContext(); // ✅ changed to hasCheckedInToday
   const [wasFetched, setWasFetched] = useState(false);
-  const { hasLoggedToday } = useMoodContext();
   const [recipes, setRecipes] = useState<TastyRecipe[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false); // NEW
+  const [refreshing, setRefreshing] = useState(false);
   const [playingVideoId, setPlayingVideoId] = useState<number | null>(null);
   const [filter, setFilter] = useState("all");
 
@@ -42,7 +39,7 @@ export default function SuggestMeals() {
   const goals = userPreferences?.primaryGoals || [];
   const mentalHealth = userPreferences?.mentalHealthConditions || [];
   const moodCheckInOptedOut = !userPreferences?.moodcCheckInBool;
-  const useMoodTags = hasLoggedToday && !moodCheckInOptedOut;
+  const useMoodTags = hasCheckedInToday && !moodCheckInOptedOut; // ✅ changed this logic
 
   const getRecipes = async () => {
     setLoading(true);
@@ -90,7 +87,7 @@ export default function SuggestMeals() {
       console.error("Recipe fetch failed:", err);
     } finally {
       setLoading(false);
-      setRefreshing(false); // ← Reset refreshing
+      setRefreshing(false);
     }
   };
 
@@ -102,8 +99,9 @@ export default function SuggestMeals() {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    setWasFetched(false); 
+    setWasFetched(false);
   }, []);
+
   const filteredRecipes = recipes.filter((r) => {
     const tagNames = r.tags?.map((tag) => tag.name.toLowerCase()) || [];
     switch (filter.toLowerCase()) {
@@ -175,7 +173,7 @@ export default function SuggestMeals() {
           : "🍽️ Suggested Meals"}
       </Text>
       <FilterMenu onSelect={(value: string) => setFilter(value)} />
-      {!hasLoggedToday && !moodCheckInOptedOut && (
+      {!hasCheckedInToday && !moodCheckInOptedOut && (
         <Text style={styles.subtitle}>
           Log your mood for more personalized suggestions!
         </Text>

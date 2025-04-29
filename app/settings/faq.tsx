@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import {
   ScrollView,
-  View,
+
   Text,
   StyleSheet,
-  TouchableOpacity,
+
 } from "react-native";
 import Header from "@/components/header";
 import { useRouter } from "expo-router";

@@ -10,7 +10,7 @@ import {
   Keyboard,Dimensions
 } from "react-native";
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { Header as HeaderRNE, Icon } from "@rneui/themed";
+
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button, Menu } from "react-native-paper";
 import { useRouter } from "expo-router";

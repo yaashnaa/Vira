@@ -10,11 +10,9 @@ import {
 } from "react-native";
 import { Image } from "react-native";
 import { Button, ProgressBar } from "react-native-paper";
-import { Ionicons } from "@expo/vector-icons";
 import { useUserPreferences } from "../../context/userPreferences";
 import { useRouter } from "expo-router";
 import { auth } from "../../config/firebaseConfig"; // ← Required for currentUser
-import { markQuizComplete } from "@/utils/asyncStorage";
 import { markQuizCompletedInFirestore } from "../../utils/firestore";
 export default function BasicQuiz() {
   const { updatePreferences, userPreferences } = useUserPreferences();
@@ -23,7 +21,7 @@ export default function BasicQuiz() {
   const [error, setError] = useState("");
   const [goalError, setGoalError] = useState("");
   const [loading, setLoading] = useState(false);
-  // Other state variables...
+
   const [medicalConditionsInput, setMedicalConditionsInput] = useState(""); // User enters comma-separated conditions
   const [primaryGoals, setPrimaryGoals] = useState<string[]>([]);
   const [name, setName] = useState("");

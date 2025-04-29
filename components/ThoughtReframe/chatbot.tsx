@@ -8,15 +8,15 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  ActivityIndicator,
-  Linking,
+
+
   TouchableOpacity,
 } from "react-native";
 import { Icon } from "react-native-elements";
 import { Button } from "react-native-paper";
 import axios from "axios";
 import Constants from "expo-constants";
-import Collapsible from "react-native-collapsible";
+
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db, auth } from "@/config/firebaseConfig";
 import { KeyboardAwareFlatList } from "react-native-keyboard-aware-scroll-view";

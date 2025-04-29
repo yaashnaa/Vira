@@ -9,14 +9,13 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   Alert,
-  ActivityIndicator,
   Dimensions,
 } from "react-native";
 import { Dialog } from "react-native-paper";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import Feather from "@expo/vector-icons/Feather";
 import { ScrollView } from "react-native-gesture-handler";
-import { Modal, Portal, Button, Tooltip } from "react-native-paper";
+import { Modal, Portal, Button } from "react-native-paper";
 import LottieView from "lottie-react-native";
 import { db, auth } from "@/config/firebaseConfig";
 import { Avatar } from "react-native-paper";
@@ -24,7 +23,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
   collection,
-  addDoc,
+
   query,
   onSnapshot,
   orderBy,
@@ -44,7 +43,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function CommunityScreen() {
   const [postText, setPostText] = useState("");
   const [infoVisible, setInfoVisible] = useState(false);
-  const [hasAcknowledgedRules, setHasAcknowledgedRules] = useState(false);
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -55,7 +53,7 @@ export default function CommunityScreen() {
   const [editedText, setEditedText] = useState<string>("");
   const [isPostModalVisible, setIsPostModalVisible] = useState(false);
   const [posting, setPosting] = useState(false);
-  const [isInfoModalVisible, setIsInfoModalVisible] = useState(false);
+
 
   const TAG_OPTIONS = [
     "All",

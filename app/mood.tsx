@@ -4,7 +4,6 @@ import { SegmentedButtons } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import Header from "@/components/header";
-import MoodLogger from "@/components/moodLog"; // update the path as needed
 import MoodCalendar from "@/components/moodCalender"; // update the path as needed
 import TrendChart from "@/components/trendChart"; // update the path as needed
 export default function Mood() {

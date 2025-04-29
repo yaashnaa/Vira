@@ -24,23 +24,20 @@ import {
 } from "react-native";
 import { Button } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { loginUser } from "../../utils/auth"; // Firebase authentication function
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { loginUser } from "../../utils/auth"; 
 import { fetchUserPreferences } from "@/utils/firestore";
-import { useGoogleAuth } from "@/utils/googleAuth"; // or wherever you placed the hook
-
 import { useUserPreferences } from "@/context/userPreferences"; // Custom hook for user preferences
 import { ensureUserDocumentExists } from "../../utils/firestore"; // Function to ensure user document exists
 export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { promptAsync, request } = useGoogleAuth();
+
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
 
-  const { updatePreferences, updatePreferencesFromFirestore } =
+  const { updatePreferences } =
     useUserPreferences();
 
   const handleLogin = async () => {
@@ -90,7 +87,7 @@ export default function LoginScreen() {
         });
       }
     } finally {
-      setIsLoading(false); // Always stop spinner
+      setIsLoading(false); 
     }
   };
 
@@ -179,14 +176,12 @@ export default function LoginScreen() {
                 buttonColor="#86508f"
                 textColor="#fefefe"
                 onPress={handleLogin}
-                loading={isLoading} // ✨ This will show spinner!
-                disabled={isLoading} // Optional: disable while loading
+                loading={isLoading} 
+                disabled={isLoading} 
               >
                 LOGIN
               </Button>
-              {/* <Button style={{ marginTop: 50 }} onPress={() => promptAsync()}>
-                Log in with google
-              </Button> */}
+          
             </View>
           </ScrollView>
         </TouchableWithoutFeedback>
@@ -293,7 +288,6 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: "#150b01",
     borderStyle: "solid",
-    // backgroundColor: lightTheme.accent, // Use secondary color for the button
   },
   loginText: {
     color: "#f5f0f9",

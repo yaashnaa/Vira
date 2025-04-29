@@ -1,6 +1,0 @@
-      <Text style={styles.title}>Today's Quote</Text>
-
-        title:{
-    fontSize: 28,
-    fontFamily: "Cookie-Regular",
-  },

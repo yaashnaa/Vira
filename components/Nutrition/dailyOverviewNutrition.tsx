@@ -8,7 +8,7 @@ import { useMealLog } from "@/context/mealLogContext";
 import CircularProgress from "react-native-circular-progress-indicator";
 import CalorieGoalsModal from "./goalsModal";
 import { fetchMealsAndTotals } from "@/utils/fetchMealsAndTotals";
-import Toast from "react-native-toast-message";
+
 
 export default function DailyOverviewNutrition({
   totalMeals,

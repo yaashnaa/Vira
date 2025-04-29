@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Dimensions } from "react-native";
+import { Text, StyleSheet, Dimensions } from "react-native";
 import { Card, Button } from "react-native-paper";
 import { useRouter } from "expo-router";
 

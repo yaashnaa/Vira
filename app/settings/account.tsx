@@ -5,7 +5,6 @@ import {
   TextInput,
   StyleSheet,
   Alert,
-  Platform,
   TouchableOpacity,
   Dimensions,
 } from "react-native";
@@ -18,12 +17,11 @@ import {
 } from "firebase/auth";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "@/components/header";
-import { Header as HeaderRNE, Icon } from "@rneui/themed";
-import { auth, db } from "@/config/firebaseConfig";
+
+import { auth } from "@/config/firebaseConfig";
 import { deleteAccount, logoutUser } from "@/utils/auth";
 import { useRouter } from "expo-router";
-import { useEffect } from "react";
-import { getDoc, doc } from "firebase/firestore";
+
 import { useUserPreferences } from "@/context/userPreferences";
 export default function AccountSettingsSection() {
   const user = auth.currentUser;
@@ -244,12 +242,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: "PatrickHand-Regular",
     color: "#3e2a6e",
-    // marginBottom: 12,
-    // marginTop: 32,
-    // borderWidth: 1,
-    // borderColor: "#865dff",
-    // padding: 8,
-    // borderRadius: 8,
   },
   sectionTitle: {
     fontSize: 20,
@@ -257,10 +249,10 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     color: "#3e2a6e",
     fontFamily: "Main-font",
-    // fontFamily: Platform.select({ ios: "Helvetica", android: "Roboto" }),
+
   },
   label: {
-    // fontWeight: "500",
+
     marginTop: 10,
     marginBottom: 6,
     color: "#333",

@@ -9,22 +9,17 @@ import {
   Dimensions,
 } from "react-native";
 import {
-  Modal,
-  Portal,
   Button,
   RadioButton,
   IconButton,
-  Provider,
+
 } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { logMealToFirestore } from "@/utils/firestore";
-import * as ImagePicker from "expo-image-picker";
-import { uploadImageAsync } from "@/utils/uploadImage";
-import { fetchNutritionData } from "@/utils/api/fetchNutritionData";
-import { auth, db } from "@/config/firebaseConfig";
-import { useMealLog } from "@/context/mealLogContext";
 
-import { collection, doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { fetchNutritionData } from "@/utils/api/fetchNutritionData";
+import { auth } from "@/config/firebaseConfig";
+import { useMealLog } from "@/context/mealLogContext";
 import Toast from "react-native-toast-message";
 const mealOptions = [
   "Breakfast",
@@ -62,7 +57,7 @@ interface LogMealCardModalProps {
 }
 
 export default function LogMealCardModal({ onLog }: LogMealCardModalProps) {
-  const [selectedSegment, setSelectedSegment] = useState("log");
+
   const [mealTypeError, setMealTypeError] = useState(false);
   const [mealDescription, setMealDescription] = useState("");
   const [mealType, setMealType] = useState("Breakfast");
@@ -74,18 +69,6 @@ export default function LogMealCardModal({ onLog }: LogMealCardModalProps) {
   const { triggerRefresh } = useMealLog();
   const [loading, setLoading] = useState(false);
 
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images"],
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.6,
-    });
-
-    if (!result.canceled) {
-      setImageUri(result.assets[0].uri);
-    }
-  };
 
   const handleLogMeal = async () => {
     if (!mealDescription.trim()) {
@@ -123,14 +106,12 @@ export default function LogMealCardModal({ onLog }: LogMealCardModalProps) {
         return;
       }
 
-      const imageUrl = imageUri ? await uploadImageAsync(imageUri, uid) : null;
 
       await logMealToFirestore(uid, {
         description: mealDescription,
         mood,
         type: mealType,
         satisfaction,
-        imageUrl,
         nutrition,
         calories: nutrition.calories ?? 0,
         protein: nutrition.protein ?? 0,
