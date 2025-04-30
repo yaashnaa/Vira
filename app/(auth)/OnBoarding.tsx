@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Image, StyleSheet, Dimensions } from "react-native";
+import { View, StyleSheet, Dimensions } from "react-native";
 import Onboarding from "react-native-onboarding-swiper";
 import { useRouter } from "expo-router";
 import LottieView from "lottie-react-native";

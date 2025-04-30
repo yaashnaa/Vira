@@ -1,4 +1,3 @@
-// utils/firestore.ts
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../config/firebaseConfig";
 
@@ -19,7 +18,11 @@ export const migrateNameToPreferences = async (uid: string) => {
         console.log("✅ Migrated name to preferences/main");
       }
     }
-  } catch (err) {
-    console.error("⚠️ Error migrating name to preferences:", err);
+  } catch (err: any) {
+    if (err.message?.includes("client is offline")) {
+      console.warn("⚠️ Skipped name migration — client offline.");
+    } else {
+      console.error("⚠️ Error migrating name to preferences:", err);
+    }
   }
 };

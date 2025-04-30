@@ -1,11 +1,9 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useState, useEffect } from "react";
 import { darkTheme, lightTheme } from "@/config/theme";
-import Header from "@/components/header";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { auth } from "../../config/firebaseConfig";
-import * as AuthSession from "expo-auth-session";
 import Toast from "react-native-toast-message";
 import {
   StyleSheet,
@@ -14,7 +12,6 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
-  Alert,
   Dimensions,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
@@ -125,7 +122,7 @@ export default function LoginScreen() {
               )}
               <Image
                 style={styles.image}
-                source={require("../../assets/images/Vira.png")}
+                source={require("../../assets/images/vira.png")}
                 onLoadEnd={() => setImageLoading(false)} // hide loader once loaded
               />
             </View>

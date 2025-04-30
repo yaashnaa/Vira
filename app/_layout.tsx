@@ -14,6 +14,7 @@ import { registerForPushNotificationsAsync } from "@/utils/notifications"; // yo
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/config/firebaseConfig";
 import * as Notifications from "expo-notifications";
+import { OfflineWrapper } from "@/components/OfflineWrapper";
 import { CheckInProvider } from "@/context/checkInContext";
 LogBox.ignoreLogs([
   "Support for defaultProps will be removed from function components",
@@ -77,11 +78,11 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <Provider>
-        <UserPreferencesProvider>
-          <CheckInProvider>
-   
+    <OfflineWrapper>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <Provider>
+          <UserPreferencesProvider>
+            <CheckInProvider>
               <MealLogProvider>
                 <Stack
                   screenOptions={{
@@ -138,10 +139,10 @@ export default function RootLayout() {
                 </Stack>
                 <Toast />
               </MealLogProvider>
-
-          </CheckInProvider>
-        </UserPreferencesProvider>
-      </Provider>
-    </GestureHandlerRootView>
+            </CheckInProvider>
+          </UserPreferencesProvider>
+        </Provider>
+      </GestureHandlerRootView>
+    </OfflineWrapper>
   );
 }

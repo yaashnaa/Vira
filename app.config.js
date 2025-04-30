@@ -42,7 +42,7 @@ export default {
     experiments: {
       typedRoutes: true,
     },
-    devClient: false,
+    devClient: true,
     extra: {
       eas: {
         projectId: "edd0899f-b5dc-488c-9013-81fe43cf72fc",

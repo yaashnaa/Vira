@@ -3,6 +3,8 @@ import { db } from "../config/firebaseConfig";
 import { UserPreferences } from "../context/userPreferences";
 import dayjs from "dayjs";
 import { auth } from "../config/firebaseConfig";
+import { safeGetDoc } from "./firestoreSafe";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const saveUserPreferences = async (userId: string, preferences: UserPreferences) => {
   try {
@@ -45,15 +47,18 @@ export const markQuizCompletedInFirestore = async (uid: string) => {
 };
 
 export const isQuizCompletedInFirestore = async (uid: string): Promise<boolean> => {
-  try {
-    const docRef = doc(db, "users", uid);
-    const snap = await getDoc(docRef);
-    return snap.exists() && snap.data().quizCompleted === true;
-  } catch (e) {
-    console.error("Error checking quiz completion in Firestore:", e);
-    return false;
-  }
+  /* ❶ first look in AsyncStorage (instant, offline-safe) */
+  const flag = await AsyncStorage.getItem("@quizDone");
+  if (flag === "true") return true;
+
+  /* ❷ otherwise ask Firestore, but through safe wrapper */
+  const data = await safeGetDoc<{ quizCompleted?: boolean }>(doc(db, "users", uid));
+  const done = data?.quizCompleted === true;
+
+  if (done) await AsyncStorage.setItem("@quizDone", "true");
+  return done;
 };
+
 export const markScreeningQuizCompleted = async (uid: string) => {
   try {
     await setDoc(
@@ -68,14 +73,14 @@ export const markScreeningQuizCompleted = async (uid: string) => {
 };
 
 export const isScreeningQuizCompleted = async (uid: string): Promise<boolean> => {
-  try {
-    const docRef = doc(db, "users", uid);
-    const snap = await getDoc(docRef);
-    return snap.exists() && snap.data().screeningQuizCompleted === true;
-  } catch (e) {
-    console.error("Error checking screening quiz completion:", e);
-    return false;
-  }
+  const flag = await AsyncStorage.getItem("@screeningDone");
+  if (flag === "true") return true;
+
+  const data = await safeGetDoc<{ screeningQuizCompleted?: boolean }>(doc(db, "users", uid));
+  const done = data?.screeningQuizCompleted === true;
+
+  if (done) await AsyncStorage.setItem("@screeningDone", "true");
+  return done;
 };
 
 
@@ -135,8 +140,11 @@ export const fetchUserPreferences = async (uid: string) => {
     const docRef = doc(db, "users", uid, "preferences", "main");
     const snapshot = await getDoc(docRef);
     return snapshot.exists() ? snapshot.data() : null;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error fetching user preferences:", error);
+    if (error.message?.includes("client is offline")) {
+      return null; // fallback: return null or cached value
+    }
     return null;
   }
 };

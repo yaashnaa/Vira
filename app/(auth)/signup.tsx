@@ -4,7 +4,6 @@ import { darkTheme, lightTheme } from "@/config/theme";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { auth } from "../../config/firebaseConfig";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message"; // ✨ Added
 import {
   StyleSheet,
@@ -119,8 +118,8 @@ export default function SignupScreen() {
               )}
               <Image
                 style={styles.image}
-                source={require("../../assets/images/Vira.png")}
-                onLoadEnd={() => setImageLoading(false)} // ✨
+                source={require("../../assets/images/vira.png")}
+                onLoadEnd={() => setImageLoading(false)} 
               />
             </View>
 

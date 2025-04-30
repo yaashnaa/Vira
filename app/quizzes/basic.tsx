@@ -9,6 +9,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Image } from "react-native";
+import { OfflineWrapper } from "@/components/OfflineWrapper";
 import { Button, ProgressBar } from "react-native-paper";
 import { useUserPreferences } from "../../context/userPreferences";
 import { useRouter } from "expo-router";
@@ -157,164 +158,168 @@ export default function BasicQuiz() {
     switch (step) {
       case 0:
         return (
-          <>
-            <SafeAreaView>
-              <View style={{ marginBottom: 20, marginTop: 20 }}>
-                <ProgressBar
-                  progress={(step + 1) / totalSteps}
-                  color="#A084DC"
-                  style={{ height: 10, borderRadius: 5 }}
-                />
-                <Text
-                  style={{ textAlign: "center", fontSize: 16, marginTop: 5 }}
-                >
-                  Step {step + 1} of {totalSteps}
+
+            <OfflineWrapper>
+              <SafeAreaView>
+                <View style={{ marginBottom: 20, marginTop: 20 }}>
+                  <ProgressBar
+                    progress={(step + 1) / totalSteps}
+                    color="#A084DC"
+                    style={{ height: 10, borderRadius: 5 }}
+                  />
+                  <Text
+                    style={{ textAlign: "center", fontSize: 16, marginTop: 5 }}
+                  >
+                    Step {step + 1} of {totalSteps}
+                  </Text>
+                </View>
+                <Text style={styles.sectionTitle}>Let's get to know you✨</Text>
+                <Text style={styles.question}>
+                  What’s your name or preferred display name?
                 </Text>
-              </View>
-              <Text style={styles.sectionTitle}>Let's get to know you✨</Text>
-              <Text style={styles.question}>
-                What’s your name or preferred display name?
-              </Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your name"
-                value={name}
-                onChangeText={(text) => {
-                  setName(text);
-                  if (text.trim()) {
-                    setError("");
-                  }
-                }}
-              />
-              {error ? <Text style={styles.errorText}>{error}</Text> : null}
-              <Text style={styles.question}>What is your age group?</Text>
-              <View style={styles.optionContainer}>
-                {[
-                  "Under 18",
-                  "18–25",
-                  "26–40",
-                  "41–55",
-                  "56+",
-                  "Prefer not to say",
-                ].map((group) => (
-                  <TouchableOpacity
-                    key={group}
-                    style={[
-                      styles.optionButton,
-                      ageGroup === group && styles.selectedOption,
-                    ]}
-                    onPress={() => setAgeGroup(group)}
-                  >
-                    <Text>{group}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <Text style={styles.question}>
-                What is your current activity level?
-              </Text>
-              <View style={styles.optionContainer}>
-                {[
-                  "Sedentary (little or no exercise)",
-                  "Lightly active (1–3 days/week)",
-                  "Moderately active (3–5 days/week)",
-                  "Very active (6–7 days/week)",
-                  "Prefer not to say",
-                ].map((level) => (
-                  <TouchableOpacity
-                    key={level}
-                    style={[
-                      styles.optionButton,
-                      activityLevel === level && styles.selectedOption,
-                    ]}
-                    onPress={() => setactivityLevel(level)}
-                  >
-                    <Text>{level}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <Text style={styles.question}>
-                Do you have any medical conditions or injuries that might affect
-                exercise choices?
-              </Text>
-              <View style={styles.optionContainer}>
-                {["Yes", "No", "Prefer not to say"].map((option) => (
-                  <TouchableOpacity
-                    key={option}
-                    style={[
-                      styles.optionButton,
-                      medicalConditions === option && styles.selectedOption,
-                    ]}
-                    onPress={() => setMedicalConditions(option)}
-                  >
-                    <Text>{option}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              {medicalConditions.includes("Yes") && (
                 <TextInput
                   style={styles.input}
-                  placeholder="Please specify"
-                  value={customMedicalConditions}
-                  onChangeText={setCustomMedicalConditions}
-                />
-              )}
-              <Text style={styles.question}>Mental Health Conditions</Text>
-              <View style={styles.optionContainer}>
-                {[
-                  "Depression",
-                  "Anxiety",
-                  "Bipolar Disorder",
-                  "Post-Traumatic Stress Disorder (PTSD)",
-                  "Eating Disorder",
-                  "Obsessive-Compulsive Disorder (OCD)",
-                  "None of the above",
-                  "Prefer not to say",
-                  "Other",
-                ].map((option) => (
-                  <TouchableOpacity
-                    key={option}
-                    style={[
-                      styles.optionButton,
-                      mentalDisorder.includes(option) && styles.selectedOption,
-                    ]}
-                    onPress={() =>
-                      setMentalDisorder((prev) =>
-                        prev.includes(option)
-                          ? prev.filter((item) => item !== option)
-                          : [...prev, option]
-                      )
+                  placeholder="Enter your name"
+                  value={name}
+                  onChangeText={(text) => {
+                    setName(text);
+                    if (text.trim()) {
+                      setError("");
                     }
-                  >
-                    <Text>{option}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              {mentalDisorder.includes("Other") && (
-                <TextInput
-                  style={styles.input}
-                  placeholder="Please specify"
-                  value={customDisorder}
-                  onChangeText={setCustomDisorder}
+                  }}
                 />
-              )}
-              <View style={styles.navigationButtons}>
-                <Button
-                  mode="contained"
-                  onPress={handleNext}
-                  textColor="#390a84"
-                  style={{ marginRight: 10, left: 250 }}
-                  theme={{ colors: { primary: "#C3B1E1" } }}
-                >
-                  Next
-                </Button>
-              </View>
-            </SafeAreaView>
-          </>
+                {error ? <Text style={styles.errorText}>{error}</Text> : null}
+                <Text style={styles.question}>What is your age group?</Text>
+                <View style={styles.optionContainer}>
+                  {[
+                    "Under 18",
+                    "18–25",
+                    "26–40",
+                    "41–55",
+                    "56+",
+                    "Prefer not to say",
+                  ].map((group) => (
+                    <TouchableOpacity
+                      key={group}
+                      style={[
+                        styles.optionButton,
+                        ageGroup === group && styles.selectedOption,
+                      ]}
+                      onPress={() => setAgeGroup(group)}
+                    >
+                      <Text>{group}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                <Text style={styles.question}>
+                  What is your current activity level?
+                </Text>
+                <View style={styles.optionContainer}>
+                  {[
+                    "Sedentary (little or no exercise)",
+                    "Lightly active (1–3 days/week)",
+                    "Moderately active (3–5 days/week)",
+                    "Very active (6–7 days/week)",
+                    "Prefer not to say",
+                  ].map((level) => (
+                    <TouchableOpacity
+                      key={level}
+                      style={[
+                        styles.optionButton,
+                        activityLevel === level && styles.selectedOption,
+                      ]}
+                      onPress={() => setactivityLevel(level)}
+                    >
+                      <Text>{level}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                <Text style={styles.question}>
+                  Do you have any medical conditions or injuries that might
+                  affect exercise choices?
+                </Text>
+                <View style={styles.optionContainer}>
+                  {["Yes", "No", "Prefer not to say"].map((option) => (
+                    <TouchableOpacity
+                      key={option}
+                      style={[
+                        styles.optionButton,
+                        medicalConditions === option && styles.selectedOption,
+                      ]}
+                      onPress={() => setMedicalConditions(option)}
+                    >
+                      <Text>{option}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                {medicalConditions.includes("Yes") && (
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Please specify"
+                    value={customMedicalConditions}
+                    onChangeText={setCustomMedicalConditions}
+                  />
+                )}
+                <Text style={styles.question}>Mental Health Conditions</Text>
+                <View style={styles.optionContainer}>
+                  {[
+                    "Depression",
+                    "Anxiety",
+                    "Bipolar Disorder",
+                    "Post-Traumatic Stress Disorder (PTSD)",
+                    "Eating Disorder",
+                    "Obsessive-Compulsive Disorder (OCD)",
+                    "None of the above",
+                    "Prefer not to say",
+                    "Other",
+                  ].map((option) => (
+                    <TouchableOpacity
+                      key={option}
+                      style={[
+                        styles.optionButton,
+                        mentalDisorder.includes(option) &&
+                          styles.selectedOption,
+                      ]}
+                      onPress={() =>
+                        setMentalDisorder((prev) =>
+                          prev.includes(option)
+                            ? prev.filter((item) => item !== option)
+                            : [...prev, option]
+                        )
+                      }
+                    >
+                      <Text>{option}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                {mentalDisorder.includes("Other") && (
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Please specify"
+                    value={customDisorder}
+                    onChangeText={setCustomDisorder}
+                  />
+                )}
+                <View style={styles.navigationButtons}>
+                  <Button
+                    mode="contained"
+                    onPress={handleNext}
+                    textColor="#390a84"
+                    style={{ marginRight: 10, left: 250 }}
+                    theme={{ colors: { primary: "#C3B1E1" } }}
+                  >
+                    Next
+                  </Button>
+                </View>
+              </SafeAreaView>
+            </OfflineWrapper>
+    
         );
 
       case 1:
         return (
-          <>
+   
+          <OfflineWrapper>
             <View style={{ marginBottom: 20 }}>
               <ProgressBar
                 progress={(step + 1) / totalSteps}
@@ -403,7 +408,7 @@ export default function BasicQuiz() {
                     </View>
                   </View>
                 </TouchableOpacity>
-              ))}                           
+              ))}
             </View>
             <View style={styles.navigationButtons}>
               <Button
@@ -415,7 +420,7 @@ export default function BasicQuiz() {
               >
                 Back
               </Button>
-              <Button                                                                                                                   
+              <Button
                 mode="contained"
                 onPress={handleSubmitForm}
                 textColor="#390a84"
@@ -425,7 +430,8 @@ export default function BasicQuiz() {
                 {loading ? "Submitting..." : "Submit"}
               </Button>
             </View>
-          </>
+            </OfflineWrapper>
+
         );
 
       default:
