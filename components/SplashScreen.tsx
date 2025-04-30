@@ -39,7 +39,7 @@ export default function SplashScreenComponent({ onFinish }: SplashScreenProps) {
     <View style={styles.container}>
       <Video
         ref={videoRef}
-        source={require("../assets/images/vira.mp4")}
+        source={require("../assets/images/Vira.mp4")}
         style={styles.video}
         resizeMode={ResizeMode.CONTAIN}
         shouldPlay

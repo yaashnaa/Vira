@@ -6,7 +6,7 @@ export default {
     slug: "vira",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/images/Vira.png",
+    icon: "./assets/images/vira.png",
     scheme: "vira",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
@@ -17,14 +17,14 @@ export default {
     android: {
       package: "com.yaashna.vira",
       adaptiveIcon: {
-        foregroundImage: "./assets/images/Vira.png",
+        foregroundImage: "./assets/images/vira.png",
         backgroundColor: "#ffffff",
       },
     },
     web: {
       bundler: "metro",
       output: "static",
-      favicon: "./assets/images/Vira.png",
+      favicon: "./assets/images/vira.png",
     },
     plugins: [
       "expo-router",
@@ -32,7 +32,7 @@ export default {
       [
         "expo-splash-screen",
         {
-          image: "./assets/images/Vira.png",
+          image: "./assets/images/vira.png",
           imageWidth: 200,
           resizeMode: "contain",
           backgroundColor: "#ffffff",
