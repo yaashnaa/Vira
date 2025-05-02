@@ -13,8 +13,8 @@ export default {
     ios: {
       bundleIdentifier: "com.yaashna.vira",
       supportsTablet: true,
-      buildNumber: "4" 
-      
+      buildNumber: "19" 
+
     },
     android: {
       package: "com.yaashna.vira",
