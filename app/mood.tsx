@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { View, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import { SegmentedButtons } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import Header from "@/components/header";
 import MoodCalendar from "@/components/moodCalender"; // update the path as needed
 import TrendChart from "@/components/trendChart"; // update the path as needed
@@ -55,6 +54,7 @@ export default function Mood() {
 const styles = StyleSheet.create({
   container: {
     padding: 20,
+    backgroundColor: "#ffffff",
   },
   headerRight: {
     flexDirection: "row",

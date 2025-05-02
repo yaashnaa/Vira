@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Dimensions,
 } from "react-native";
+
 import { Divider } from "react-native-paper";
 import AntDesign from "@expo/vector-icons/AntDesign";
 interface TakeQuizButtonProps {
@@ -31,7 +32,7 @@ export default function TakeQuiz({ onPress }: TakeQuizButtonProps) {
               width: "100%",
             }}
           >
-            Personalise your experience
+            Personalize your experience
           </Text>
           <Text
             style={{

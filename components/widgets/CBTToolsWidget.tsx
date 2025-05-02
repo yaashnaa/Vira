@@ -1,7 +1,8 @@
 import WidgetCard from "../widgetCard";
 import { useRouter } from "expo-router";
 import { Pressable, StyleSheet, View } from "react-native";
-import { Icon } from "@rneui/themed";
+import { Feather } from "@expo/vector-icons";
+
 export default function CBTToolsWidget({
   onRemove,
 }: {
@@ -12,7 +13,8 @@ export default function CBTToolsWidget({
     <View style={styles.container}>
       {onRemove && (
         <Pressable onPress={onRemove} style={styles.removeIcon}>
-          <Icon name="minus-circle" type="feather" color="#c13e6a" size={20} />
+       <Feather name="minus-circle" color="#c13e6a" size={20} />
+
         </Pressable>
       )} 
       <WidgetCard

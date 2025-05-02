@@ -9,11 +9,10 @@ import {
   ActivityIndicator,
   FlatList,
   Dimensions,
-  Image,
+  Image, TouchableOpacity,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
-import { TouchableOpacity } from "react-native-gesture-handler";
-import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import { Button, Card, Modal, Portal, Provider } from "react-native-paper";
 
 import { useUserPreferences } from "@/context/userPreferences";
@@ -137,9 +136,8 @@ export default function Explore() {
                   ? "Gathering mindful moves..."
                   : "Show Me Today's suggestions"}
               </Text>
-              <Icon
+              <Ionicons
                 name="chevron-down"
-                type="ionicon"
                 size={20}
                 color="#271949"
                 style={styles.buttonIcon}

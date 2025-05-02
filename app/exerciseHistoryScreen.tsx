@@ -7,8 +7,6 @@ import dayjs from "dayjs";
 import { deleteDoc, doc } from "firebase/firestore";
 import { IconButton } from "react-native-paper";
 import { Alert } from "react-native";
-import { Header as HeaderRNE, Icon } from "@rneui/themed";
-import { TouchableOpacity } from "react-native-gesture-handler";
 import { useRouter } from "expo-router";
 import Header from "@/components/header";
 const moodOptions = [

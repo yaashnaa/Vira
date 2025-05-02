@@ -1,6 +1,6 @@
 import React from "react";
 import { View, StyleSheet, Pressable } from "react-native";
-import { Icon } from "@rneui/themed";
+import { Feather } from "@expo/vector-icons";
 import WidgetCard from "./widgetCard";
 
 interface WidgetCardWithActionProps {
@@ -24,7 +24,7 @@ export default function WidgetCardWithAction({
     <View style={styles.container}>
       {onAction && (
         <Pressable onPress={onAction} style={styles.icon}>
-          <Icon name={actionIcon} type="feather" color={actionColor} size={20} />
+          <Feather name={actionIcon} type="feather" color={actionColor} size={20} />
         </Pressable>
       )}
       <WidgetCard title={title} imageSource={imageSource} onPress={onPress} />

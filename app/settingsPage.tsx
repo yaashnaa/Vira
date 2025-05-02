@@ -5,7 +5,7 @@ import {
   StyleSheet,
   TextInput,
   ScrollView,
-  SafeAreaView,
+  SafeAreaView,TouchableOpacity
 } from "react-native";
 
 import {
@@ -17,7 +17,7 @@ import {
   Divider,
   Button,
   Portal,
-  Modal,
+  Modal
 } from "react-native-paper";
 
 import { EmailAuthProvider, reauthenticateWithCredential } from "firebase/auth";
@@ -25,8 +25,8 @@ import { isScreeningQuizCompleted } from "@/utils/firestore";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { resetOnboarding } from "@/utils/resetOnboarding";
-import { Header as HeaderRNE, HeaderProps, Icon } from "@rneui/themed";
-import { TouchableOpacity } from "react-native-gesture-handler";
+
+import Header from "@/components/header";
 import { doc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../config/firebaseConfig"; // adjust path as needed
 import { getAuth } from "firebase/auth";
@@ -243,7 +243,7 @@ export default function Settings() {
       // Delete account
       await deleteUser(user);
       setConfirmDelete(false);
-      router.replace("/signup");
+      router.replace("/(auth)/signup");
       alert("Your account has been deleted.");
     } catch (error: any) {
       console.error("🔥 Delete account failed:", error);
@@ -342,37 +342,7 @@ export default function Settings() {
   };
   return (
     <Provider>
-      <HeaderRNE
-        containerStyle={{
-          backgroundColor: "#f8edeb", // soft lilac or any color you want
-          borderBottomWidth: 0,
-          paddingTop: 10,
-        }}
-        leftComponent={
-          <TouchableOpacity onPress={handleBackPress}>
-            <Icon name="arrow-back" size={25} type="ionicon" color="#150b01" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "SETTINGS",
-          style: {
-            color: "#271949",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "PatrickHand-Regular",
-          },
-        }}
-        rightComponent={
-          <View style={styles.headerRight}>
-            <TouchableOpacity
-              style={{ marginLeft: 12 }}
-              onPress={handleBackPress}
-            >
-              <Icon name="settings" size={25} type="feather" color="#150b01" />
-            </TouchableOpacity>
-          </View>
-        }
-      />
+      <Header title="Settings" backPath="/dashboard" />
       <SafeAreaView style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.container}>
           <View>

@@ -6,7 +6,7 @@ export default {
     slug: "vira",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/images/vira.png",
+    icon: "./assets/images/icon.png",
     scheme: "vira",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
@@ -28,7 +28,13 @@ export default {
     },
     plugins: [
       "expo-router",
-      "expo-video",
+      [
+        "expo-video",
+        {
+          supportsBackgroundPlayback: true,
+          supportsPictureInPicture: true,
+        },
+      ],
       [
         "expo-splash-screen",
         {
@@ -39,6 +45,7 @@ export default {
         },
       ],
     ],
+    
     experiments: {
       typedRoutes: true,
     },

@@ -1,12 +1,18 @@
 import React from "react";
-import { View, TouchableOpacity, StyleSheet } from "react-native";
-import { Header as HeaderRNE, Icon } from "@rneui/themed";
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Text,
+  Dimensions, SafeAreaView
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
 interface CustomHeaderProps {
   title: string;
   showSettings?: boolean;
-  backPath?: string; // fallback path if cannot go back
+  backPath?: string;
 }
 
 export default function Header({
@@ -23,40 +29,43 @@ export default function Header({
       router.back();
     }
   };
-  
 
   return (
-    <HeaderRNE
-      containerStyle={styles.container}
-      leftComponent={
-        <TouchableOpacity
-          style={{
-            justifyContent: "center",
-            alignItems: "center",
-            height: 30,
-          }}
-          onPress={handleBack}
-        >
-          <Icon name="arrow-back" size={25} type="ionicon" color="#271949" />
-        </TouchableOpacity>
-      }
-      centerComponent={{
-        text: title,
-        style: styles.title,
-      }}
-      centerContainerStyle={{
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    />
+    <SafeAreaView style={{ backgroundColor: "#f8edeb" }}>
+    <View style={styles.container}>
+      <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+        <Ionicons name="arrow-back" size={25} color="#271949" />
+      </TouchableOpacity>
+      <View style={styles.centerContainer}>
+        <Text style={styles.title}>{title}</Text>
+      </View>
+    </View>
+    </SafeAreaView>
+
   );
 }
+
+const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#f8edeb",
-    borderBottomWidth: 0,
     paddingTop: 10,
+    paddingHorizontal: 16,
+    paddingBottom: 10,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  backButton: {
+    justifyContent: "center",
+    alignItems: "center",
+    height: 30,
+  },
+  centerContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    flex: 1,
+    marginLeft: -30, // center alignment compensation
   },
   title: {
     color: "#271949",

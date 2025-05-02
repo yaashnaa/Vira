@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   Dimensions,
 } from "react-native";
+import Toast from "react-native-toast-message";
+
 import { Button } from "react-native-paper";
 import {
   updatePassword,
@@ -36,6 +38,15 @@ export default function AccountSettingsSection() {
 
   const [showEmailSection, setShowEmailSection] = useState(false);
   const [showPasswordSection, setShowPasswordSection] = useState(false);
+  useEffect(() => {
+    setTimeout(() => {
+      Toast.show({
+        type: "info",
+        text1: "Test Toast",
+        text2: "Does this show on this screen?",
+      });
+    }, 1000);
+  }, []);
 
   const handleChangePassword = async () => {
     if (newPassword !== confirmPassword) {
@@ -44,7 +55,6 @@ export default function AccountSettingsSection() {
     }
 
     if (!user?.email) return;
-
     try {
       setLoading(true);
       const credential = EmailAuthProvider.credential(
@@ -53,12 +63,25 @@ export default function AccountSettingsSection() {
       );
       await reauthenticateWithCredential(user, credential);
       await updatePassword(user, newPassword);
-      Alert.alert("Success", "Password updated.");
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: "Password updated successfully.",
+        position: "bottom",
+      });
+
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (error: any) {
-      Alert.alert("Error", error.message);
+      console.log("🔥 Toast should trigger now:", error.message);
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: error.message || "Something went wrong",
+        position: "bottom",
+        visibilityTime: 4000,
+      });
     } finally {
       setLoading(false);
     }
@@ -77,7 +100,14 @@ export default function AccountSettingsSection() {
       await updateEmail(user, newEmail);
       Alert.alert("Success", "Email updated.");
     } catch (error: any) {
-      Alert.alert("Error", error.message);
+      console.log("🔥 Toast should trigger now:", error.message);
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: error.message || "Something went wrong",
+        position: "bottom",
+        visibilityTime: 4000,
+      });
     } finally {
       setLoading(false);
     }
@@ -103,6 +133,7 @@ export default function AccountSettingsSection() {
   const handleLogout = async () => {
     try {
       await logoutUser();
+      router.replace("/(auth)/login");    
     } catch (err: any) {
       Alert.alert("Error", err.message || "Failed to log out.");
     }
@@ -110,7 +141,8 @@ export default function AccountSettingsSection() {
 
   return (
     <>
-<Header title="Account"/>
+      <Header title="Account" />
+
       <View style={styles.section}>
         <Text style={styles.nameLabel}> Welcome, {userPreferences.name}</Text>
         <TouchableOpacity
@@ -129,7 +161,7 @@ export default function AccountSettingsSection() {
           <>
             <Text style={styles.label}>
               Current email:
-              <Text style={{ marginBottom: 15}}>{user?.email}</Text>
+              <Text style={{ marginBottom: 15 }}>{user?.email}</Text>
             </Text>
             <TextInput
               style={styles.input}
@@ -158,18 +190,17 @@ export default function AccountSettingsSection() {
             </Button>
           </>
         )}
-<TouchableOpacity
-  style={styles.collapsibleHeader}
-  onPress={() => setShowPasswordSection((prev) => !prev)}
->
-  <Text style={styles.sectionHeading}>Change Password</Text>
-  <Ionicons
-    name={showPasswordSection ? "chevron-up" : "chevron-down"}
-    size={20}
-    color="#3e2a6e"
-  />
-</TouchableOpacity>
-
+        <TouchableOpacity
+          style={styles.collapsibleHeader}
+          onPress={() => setShowPasswordSection((prev) => !prev)}
+        >
+          <Text style={styles.sectionHeading}>Change Password</Text>
+          <Ionicons
+            name={showPasswordSection ? "chevron-up" : "chevron-down"}
+            size={20}
+            color="#3e2a6e"
+          />
+        </TouchableOpacity>
 
         {showPasswordSection && (
           <>
@@ -236,7 +267,7 @@ const styles = StyleSheet.create({
     // marginTop: 24,
     backgroundColor: "#fff",
     height: height,
-    marginBottom: 75
+    marginBottom: 75,
   },
   sectionHeading: {
     fontSize: 20,
@@ -249,10 +280,8 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     color: "#3e2a6e",
     fontFamily: "Main-font",
-
   },
   label: {
-
     marginTop: 10,
     marginBottom: 6,
     color: "#333",
@@ -273,7 +302,7 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 10,
   },
-  
+
   input: {
     borderWidth: 1,
     borderColor: "#ccc",

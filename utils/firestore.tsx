@@ -51,7 +51,7 @@ export const isQuizCompletedInFirestore = async (uid: string): Promise<boolean> 
   const flag = await AsyncStorage.getItem("@quizDone");
   if (flag === "true") return true;
 
-  /* ❷ otherwise ask Firestore, but through safe wrapper */
+
   const data = await safeGetDoc<{ quizCompleted?: boolean }>(doc(db, "users", uid));
   const done = data?.quizCompleted === true;
 
@@ -66,6 +66,7 @@ export const markScreeningQuizCompleted = async (uid: string) => {
       { screeningQuizCompleted: true },
       { merge: true }
     );
+    
     console.log("✅ Screening quiz marked as completed in Firestore");
   } catch (e) {
     console.error("❌ Error marking screening quiz as completed:", e);
@@ -80,6 +81,7 @@ export const isScreeningQuizCompleted = async (uid: string): Promise<boolean> =>
   const done = data?.screeningQuizCompleted === true;
 
   if (done) await AsyncStorage.setItem("@screeningDone", "true");
+  
   return done;
 };
 

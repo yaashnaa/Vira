@@ -24,7 +24,15 @@ export const OfflineWrapper = ({ children }: { children: ReactNode }) => {
     return (
       <View style={styles.container}>
         <Text style={styles.text}>🔌 You're offline.</Text>
-        <ActivityIndicator size="large" color="#888" style={{ marginTop: 10 }} />
+        <Text style={styles.subtext}>
+          Please connect to the internet to continue enjoying Vira's features 💜
+        </Text>
+
+        <ActivityIndicator
+          size="large"
+          color="#888"
+          style={{ marginTop: 10 }}
+        />
         <Text style={styles.subtext}>Trying to reconnect...</Text>
       </View>
     );

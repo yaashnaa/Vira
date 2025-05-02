@@ -7,7 +7,7 @@ import { auth } from "@/config/firebaseConfig";
 import { useRouter } from "expo-router";
 import ViewLoggedMeals from "@/components/Nutrition/viewLoggedMeals";
 
-export default function Recipes() {
+export default function Overview() {
   const { userPreferences } = useUserPreferences();
   const [modalVisible, setModalVisible] = useState(false);
   const [mealsLogged, setMealsLogged] = useState(0);

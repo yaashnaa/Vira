@@ -12,7 +12,7 @@ import {
   Dimensions,
 } from "react-native";
 import { Dialog } from "react-native-paper";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
 import { ScrollView } from "react-native-gesture-handler";
 import { Modal, Portal, Button } from "react-native-paper";
@@ -23,7 +23,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
   collection,
-
   query,
   onSnapshot,
   orderBy,
@@ -53,7 +52,6 @@ export default function CommunityScreen() {
   const [editedText, setEditedText] = useState<string>("");
   const [isPostModalVisible, setIsPostModalVisible] = useState(false);
   const [posting, setPosting] = useState(false);
-
 
   const TAG_OPTIONS = [
     "All",
@@ -380,7 +378,11 @@ export default function CommunityScreen() {
                     }
                   >
                     <View style={styles.commentRow}>
-                      <Icon name="comment-outline" size={18} color="#007bff" />
+                      <MaterialCommunityIcons
+                        name="comment-outline"
+                        size={18}
+                        color="#007bff"
+                      />
                       <Text style={styles.commentText}>
                         {item.commentCount ?? 0} Comments
                       </Text>

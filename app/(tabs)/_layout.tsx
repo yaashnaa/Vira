@@ -1,7 +1,6 @@
 import { Tabs } from "expo-router";
-import { Icon } from "@rneui/themed";
-import { BottomTabNavigationOptions } from "@react-navigation/bottom-tabs";
-import "react-native-reanimated";
+import { Feather } from "@expo/vector-icons";
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 export default function TabLayout() {
   return (
@@ -9,6 +8,7 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: "#6b4c9a",
         headerShown: false,
+        animation: "fade",
       }}
     >
       <Tabs.Screen
@@ -22,7 +22,7 @@ export default function TabLayout() {
         options={{
           tabBarLabel: "Home",
           tabBarIcon: ({ color, size }: { color: string; size: number }) => (
-            <Icon name="home" type="feather" color={color} size={size} />
+            <Feather name="home" color={color} size={size} />
           ),
         }}
       />
@@ -32,7 +32,7 @@ export default function TabLayout() {
         options={{
           tabBarLabel: "Community",
           tabBarIcon: ({ color, size }: { color: string; size: number }) => (
-            <Icon name="users" type="feather" color={color} size={size} />
+            <Feather name="users" color={color} size={size} />
           ),
         }}
       />
@@ -41,7 +41,7 @@ export default function TabLayout() {
         options={{
           tabBarLabel: "Widgets",
           tabBarIcon: ({ color, size }: { color: string; size: number }) => (
-            <Icon name="grid" type="feather" color={color} size={size} />
+            <Feather name="grid" color={color} size={size} />
           ),
         }}
       />
@@ -50,7 +50,7 @@ export default function TabLayout() {
         options={{
           tabBarLabel: "Settings",
           tabBarIcon: ({ color, size }: { color: string; size: number }) => (
-            <Icon name="settings" type="feather" color={color} size={size} />
+            <Ionicons name="settings" color={color} size={size + 3} />
           ),
         }}
       />

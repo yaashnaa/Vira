@@ -7,7 +7,7 @@ import { useRouter } from "expo-router";
 export default function SupportScreen() {
     const router = useRouter();
     const handleEmailSupport = () => {
-        const email = "yaashna.gupta@nyu.edu"; // ✅ replace with your support email
+        const email = "yaashna.gupta@nyu.edu"; 
         const subject = "Need help with the app";
         const body = "Hi Vira Team,\n\nI need help with...";
       

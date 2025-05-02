@@ -10,6 +10,7 @@ export default function NutritionTabsLayout() {
       screenOptions={{
         tabBarActiveTintColor: "#A084DC",
         tabBarInactiveTintColor: "#8e8e8e",
+        animation: "fade",
       }}
     >
       <Tabs.Screen

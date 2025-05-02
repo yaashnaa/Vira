@@ -20,53 +20,41 @@ const moodLabels: Record<number, keyof typeof moodImages> = {
 };
 
 export default function MoodCalendar() {
-  const { fetchAllMoods } = useCheckInContext(); // ⬅️ Use CheckInContext
+  const { fetchAllMoods } = useCheckInContext();
   const [markedDates, setMarkedDates] = useState<{ [key: string]: any }>({});
 
   useEffect(() => {
-    const loadMoods = async () => {
-      try {
-        const allMoods = await fetchAllMoods();
-        const marked: { [key: string]: any } = {};
-
-        allMoods.forEach((entry) => {
-          const discreteMood = Math.round(entry.mood / 25) * 25;
-          marked[entry.date] = {
-            customStyles: {
-              container: { backgroundColor: "transparent" },
-              text: { display: "none" },
-            },
-            mood: discreteMood,
-          };
-        });
-
-        setMarkedDates(marked);
-      } catch (error) {
-        console.error("Error loading moods:", error);
-      }
-    };
-
-    loadMoods();
+    (async () => {
+      const allMoods = await fetchAllMoods();
+      const marked: { [key: string]: any } = {};
+      allMoods.forEach(({ date, mood }) => {
+        const discrete = Math.round(mood / 25) * 25;
+        marked[date] = {
+          customStyles: {
+            container: { backgroundColor: "transparent" },
+            text: { display: "none" },
+          },
+          mood: discrete,
+        };
+      });
+      setMarkedDates(marked);
+    })();
   }, []);
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Mood Calendar</Text>
       <Calendar
-        markingType={"custom"}
+        markingType="custom"
         markedDates={markedDates}
-        dayComponent={({
-          date,
-          marking,
-        }: {
-          date: { day: number };
-          marking?: { mood?: number };
-        }) => {
-          const mood = marking?.mood;
+        dayComponent={(props) => {
+          // TS now knows props.date is DateData, props.marking is your custom object
+          const { date, marking } = props;
+          const mood = (marking as any).mood as number | undefined;
           return (
             <View style={styles.dayContainer}>
-              <Text style={styles.dayText}>{date.day}</Text>
-              {mood !== undefined && (
+              {date && <Text style={styles.dayText}>{date.day}</Text>}
+              {typeof mood === "number" && (
                 <Image
                   source={moodImages[moodLabels[mood]]}
                   style={styles.moodIcon}

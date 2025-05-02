@@ -6,12 +6,13 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   StyleSheet,
-  Dimensions,
+  Dimensions, Button,
   Text,
 } from "react-native";
 import { OfflineWrapper } from "@/components/OfflineWrapper";
 import { useFocusEffect, useRouter } from "expo-router";
 import { auth } from "@/config/firebaseConfig";
+import Toast from "react-native-toast-message";
 import {
   getEnabledWidgets,
   addWidget,
@@ -30,13 +31,14 @@ import { useCheckInData } from "@/hooks/useCheckInData";
 import PinnedWidgetsSection from "@/components/dashboard/pinnedWidgets";
 import OfflineNotice from "@/components/offlineComponent";
 import { addTaskToQueue } from "@/utils/firebaseOfflineQueue";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import 'react-native-reanimated';
 
 import LogMoodButton from "@/components/Buttons/logMoodBtn";
 import TakeQuizButton from "@/components/takeQuiz";
 import CombinedCheckInCard from "../combinedCheckInCard";
 import LogoutButton from "@/components/Buttons/logoutButton";
 import { lightTheme } from "@/config/theme";
-import * as Network from "expo-network";
 
 const { width, height } = Dimensions.get("window");
 const dashboardSections = [
@@ -74,11 +76,33 @@ export default function Dashboard() {
   //     checkNetwork();
   //   }, [])
   // );
-
+  useEffect(() => {
+    const logAsyncStorageData = async () => {
+      try {
+        const onboardingComplete = await AsyncStorage.getItem('onboardingComplete');
+        console.log('📦 onboardingComplete:', onboardingComplete);
+  
+        const userPreferences = await AsyncStorage.getItem('userPreferences');
+        console.log('📦 userPreferences:', JSON.parse(userPreferences || '{}'));
+      } catch (error) {
+        console.error('❌ Error reading from AsyncStorage:', error);
+      }
+    };
+  
+    logAsyncStorageData();
+  }, []);
+  const dumpAsyncStorage = async () => {
+    const keys = await AsyncStorage.getAllKeys();
+    const items = await AsyncStorage.multiGet(keys);
+    items.forEach(([key, value]) => {
+      console.log(`🧾 ${key}:`, value);
+    });
+  };
+    
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setAuthReady(true);
-      if (!user) router.replace("/(auth)/login");
+      if (!user) router.replace("/login");
     });
     return unsubscribe;
   }, []);
@@ -89,22 +113,24 @@ export default function Dashboard() {
       if (!uid) return;
       const onboarded = await isOnboardingComplete();
       const quizDone = await isQuizCompletedInFirestore(uid);
-      if (!onboarded) router.replace("/(auth)/OnBoarding");
+      if (!onboarded) router.replace("/OnBoarding");
       else if (!quizDone) router.replace("/quizzes/basic");
     };
     checkProgress();
   }, []);
 
-  useEffect(() => {
-    const checkScreening = async () => {
-      const uid = auth.currentUser?.uid;
-      if (!uid) return;
-      const completed = await isScreeningQuizCompleted(uid);
-      setHasCompletedScreening(completed);
-    };
-    checkScreening();
-  }, []);
-
+  useFocusEffect(
+    useCallback(() => {
+      const checkScreening = async () => {
+        const uid = auth.currentUser?.uid;
+        if (!uid) return;
+        const completed = await isScreeningQuizCompleted(uid);
+        setHasCompletedScreening(completed);
+      };
+      checkScreening();
+    }, [])
+  );
+  
   useFocusEffect(
     useCallback(() => {
       const loadWidgets = async () => {
@@ -128,6 +154,7 @@ export default function Dashboard() {
     await removeWidgetFromStorage(uid, widgetId);
     setWidgetChangeTrigger((prev) => prev + 1);
   };
+
 
   if (loading || !userPreferences?.name || !authReady || !auth.currentUser) {
     return (
@@ -167,6 +194,7 @@ export default function Dashboard() {
           style={styles.background}
           resizeMode="cover"
         >
+
           <FlatList
             data={dashboardSections}
             keyExtractor={(item) => item}
@@ -181,6 +209,7 @@ export default function Dashboard() {
                   return (
                     <View style={styles.section}>
                       <CombinedCheckInCard />
+
                     </View>
                   );
                 case "logMood":
@@ -191,6 +220,7 @@ export default function Dashboard() {
                       onPress={() => router.push("/checkInScreen")}
                     >
                       <LogMoodButton latestCheckIn={latestCheckIn} />
+                      {/* <Button onPress={()=> dumpAsyncStorage()} title="Dump AsyncStorage" /> */}
                     </TouchableOpacity>
                   );
                 case "quiz":
@@ -250,14 +280,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F9F8FC", // soft white background (gentle vibe for Vira)
+    backgroundColor: "#F9F8FC", 
     paddingHorizontal: 20,
   },
   offlineText: {
     fontSize: 18,
-    color: "#5A3E9B", // Vira's gentle purple theme
+    color: "#5A3E9B", 
     textAlign: "center",
-    fontFamily: "Main-font", // or whatever font you're using
+    fontFamily: "Main-font", 
     marginTop: 10,
   },
 });

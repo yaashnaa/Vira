@@ -1,65 +1,60 @@
-import React, { useEffect, useRef } from "react";
-import { View, StyleSheet, Dimensions, LogBox } from "react-native";
-import { Video, ResizeMode } from "expo-av";
+// components/SplashScreen.tsx
+import React, { useEffect } from "react";
+import { View, StyleSheet, Dimensions } from "react-native";
+import { useVideoPlayer, VideoView } from "expo-video";
 import * as SplashScreen from "expo-splash-screen";
 
 const { width } = Dimensions.get("window");
 
-LogBox.ignoreLogs([
-  "Support for defaultProps will be removed from function components",
-  "Text strings must be rendered within a <Text> component."
-]);
+export default function SplashScreenComponent({ onFinish }: { onFinish(): void }) {
+  const player = useVideoPlayer(require("../assets/images/Vira.mp4"));
 
-interface SplashScreenProps {
-  onFinish: () => void;
-}
+  // 1️⃣ Start playback as soon as the player instance is available
+  useEffect(() => {
+    // set looping off if you like
+    player.loop = false;
+    // start playback
+    player.play();
+  }, [player]);
 
-export default function SplashScreenComponent({ onFinish }: SplashScreenProps) {
-  const videoRef = useRef<Video>(null);
+  // your existing splash‐hiding logic…
+  useEffect(() => {
+    let fallback = setTimeout(async () => {
+      await SplashScreen.hideAsync();
+      onFinish();
+    }, 7000);
+    SplashScreen.preventAutoHideAsync().catch(() => {});
+    return () => clearTimeout(fallback);
+  }, [onFinish]);
 
   useEffect(() => {
-    const prepareSplash = async () => {
-      try {
-        await SplashScreen.preventAutoHideAsync();
-      } catch (e) {
-        console.error("Error preventing splash hide:", e);
-      }
-    };
-    prepareSplash();
-  }, []);
-
-  const handlePlaybackStatusUpdate = (status: any) => {
-    if (status.didJustFinish) {
+    const sub = player.addListener("playToEnd", async () => {
+      await SplashScreen.hideAsync();
       onFinish();
-      SplashScreen.hideAsync();
-    }
-  };
+    });
+    return () => sub.remove();
+  }, [player, onFinish]);
 
   return (
     <View style={styles.container}>
-      <Video
-        ref={videoRef}
-        source={require("../assets/images/Vira.mp4")}
+      <VideoView
+        player={player}
         style={styles.video}
-        resizeMode={ResizeMode.CONTAIN}
-        shouldPlay
-        isLooping={false} // 🔥 important: not looping anymore
-        onPlaybackStatusUpdate={handlePlaybackStatusUpdate} // 🟣 listen for finish
-        useNativeControls={false}
+        allowsFullscreen={false}
+        allowsPictureInPicture={false}
       />
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#ffffff", // Match your app's background color
   },
   video: {
     width: width,
-    height: width,
+    height: width
   },
 });

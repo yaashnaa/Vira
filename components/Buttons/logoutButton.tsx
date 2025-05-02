@@ -13,7 +13,7 @@ export default function LogoutButton() {
       await logoutUser();
       await AsyncStorage.removeItem('@user');
       // Navigate the user to the login screen.
-      router.replace('/(auth)/login');
+      router.replace('/login');
     } catch (error) {
       console.error('Error during logout:', error);
     }

@@ -1,7 +1,8 @@
 import React from "react";
 import { useRouter, Link } from "expo-router";
 import WidgetCard from "../widgetCard";
-import { Icon } from "@rneui/themed";
+import { Feather } from "@expo/vector-icons";
+
 import { Pressable, StyleSheet, View } from "react-native";
 interface JournalWidgetProps {
   onRemove?: () => void;
@@ -16,7 +17,7 @@ const JournalWidget: React.FC<JournalWidgetProps> = ({ onRemove }) => {
     <View style={styles.container}>
     {onRemove && (
       <Pressable onPress={onRemove} style={styles.removeIcon}>
-        <Icon name="minus-circle" type="feather" color="#c13e6a" size={20} />
+       <Feather name="minus-circle" color="#c13e6a" size={20} />
       </Pressable>
     )}
     <WidgetCard

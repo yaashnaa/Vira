@@ -1,10 +1,10 @@
-// 1. DashboardHeader.tsx
+
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import dayjs from "dayjs";
 import dayOfYear from "dayjs/plugin/dayOfYear";
 
-dayjs.extend(dayOfYear); // ⬅️ this line must come immediately after the import
+dayjs.extend(dayOfYear); 
 
 
 const greetings = [
@@ -32,6 +32,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.5)",
     padding: 16,
     borderRadius: 16,
+    marginBottom: 20,
   },
   greetingText: {
     fontSize: 26,

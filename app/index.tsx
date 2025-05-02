@@ -3,9 +3,8 @@ import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import SplashScreenComponent from "../components/SplashScreen";
 import useCustomLocalFonts from "@/hooks/useCustomFonts";
-import { Provider } from "react-native-paper";
 import "react-native-get-random-values";
-import FastImage from 'react-native-fast-image';
+import 'react-native-reanimated';
 
 export default function Index() {
   const router = useRouter();

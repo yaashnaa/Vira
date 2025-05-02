@@ -21,14 +21,12 @@ import {
 } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { useUserPreferences } from "@/context/userPreferences";
-import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import dayjs from "dayjs";
 import MoodTagSuggestions from "@/components/Journal/moodTagSuggestions";
 import CBTJournalingInfo from "@/components/Journal/CBTInfo";
 import JournalEntrySection from "@/components/Journal/JournalEntrySection";
 import CBTPromptSelector from "@/components/Journal/CBTPromptSelector";
 import LottieView from "lottie-react-native";
-import { saveJournalEntry } from "@/utils/journalHelper";
 import Header from "@/components/header";
 import DailyPrompt from "@/components/Journal/dailyPrompt";
 import { useCheckInContext } from "@/context/checkInContext";

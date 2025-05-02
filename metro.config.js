@@ -1,12 +1,19 @@
+// metro.config.js
 const { wrapWithReanimatedMetroConfig } = require("react-native-reanimated/metro-config");
-const { getDefaultConfig } = require("@expo/metro-config");
+const { getDefaultConfig } = require("expo/metro-config");
 
-const defaultConfig = getDefaultConfig(__dirname);
+// start from Expo’s default
+const config = getDefaultConfig(__dirname);
 
-// ✅ Add support for .html files as assets
-defaultConfig.resolver.assetExts.push("html");
+// support .html as assets
+config.resolver.assetExts.push("html");
 
-// ✅ Fix: Also ensure .cjs files work for Reanimated or other deps
-defaultConfig.resolver.sourceExts.push("cjs");
+// support .cjs modules
+config.resolver.sourceExts.push("cjs");
 
-module.exports = wrapWithReanimatedMetroConfig(defaultConfig);
+// ←–– This is the important bit from SO:
+// disable the new package-exports resolver so Firebase’s native modules
+// get registered properly under Hermes
+config.resolver.unstable_enablePackageExports = false;
+
+module.exports = wrapWithReanimatedMetroConfig(config);

@@ -10,6 +10,7 @@ export default function FitnessTabsLayout() {
       screenOptions={{
         tabBarActiveTintColor: "#A084DC",
         tabBarInactiveTintColor: "#8e8e8e",
+        animation: "fade",
       }}
     >
       <Tabs.Screen
