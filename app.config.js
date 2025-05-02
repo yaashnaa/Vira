@@ -14,6 +14,7 @@ export default {
       bundleIdentifier: "com.yaashna.vira",
       supportsTablet: true,
       buildNumber: "4" 
+      
     },
     android: {
       package: "com.yaashna.vira",
