@@ -28,6 +28,7 @@ export default {
     },
     plugins: [
       "expo-router",
+      ["expo-font"],
       [
         "expo-video",
         {
@@ -45,7 +46,7 @@ export default {
         },
       ],
     ],
-    
+
     experiments: {
       typedRoutes: true,
     },
@@ -67,7 +68,8 @@ export default {
       X_API_KEY: process.env.X_API_KEY,
       GEMINI_API_KEY: process.env.GEMINI_API_KEY,
       EXPO_PUSH_NOTIFICATION_KEY: process.env.EXPO_PUSH_NOTIFICATION_KEY,
-      expoClientId: "379116480076-fm59utduk6k817ojgvtrhsqjh9m3cner.apps.googleusercontent.com"
+      expoClientId:
+        "379116480076-fm59utduk6k817ojgvtrhsqjh9m3cner.apps.googleusercontent.com",
     },
   },
 };
