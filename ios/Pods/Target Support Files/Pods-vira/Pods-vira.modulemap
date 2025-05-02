@@ -1,0 +1,6 @@
+module Pods_vira {
+  umbrella header "Pods-vira-umbrella.h"
+
+  export *
+  module * { export * }
+}

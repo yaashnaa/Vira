@@ -28,6 +28,15 @@ export default {
     },
     plugins: [
       "expo-router",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static",
+            "modularHeaders": true
+          }
+        }
+      ],
       ["expo-font"],
       [
         "expo-video",
