@@ -1,6 +1,6 @@
 // app/tools/index.tsx
 
-import React, {  useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -120,20 +120,20 @@ const tools = [
 ];
 
 export default function ToolsScreen() {
-    useEffect(() => {
-      const enforceAgreement = async () => {
-        const user = auth.currentUser;
-        if (!user) return;
-    
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (!userDoc.exists() || !userDoc.data().agreedToTerms) {
-          router.replace("/termsOfUse");
-        }
-      };
-    
-      enforceAgreement();
-    }, []);
-    
+  useEffect(() => {
+    const enforceAgreement = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (!userDoc.exists() || !userDoc.data().agreedToTerms) {
+        router.replace("/termsOfUse");
+      }
+    };
+
+    enforceAgreement();
+  }, []);
+
   const router = useRouter();
   const [pinned, setPinned] = useState<string[]>([]);
   const [crisisModalVisible, setCrisisModalVisible] = useState(false);
@@ -180,18 +180,25 @@ export default function ToolsScreen() {
             >
               <Card style={styles.card}>
                 <View style={styles.cardContent}>
-                  <Image source={tool.icon} style={styles.icon} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.label}>{tool.label}</Text>
-                    <Text style={styles.description}>{tool.description}</Text>
+                  <View style={{ padding: 12, flexDirection: "row", gap: 12, width: "80%" }}>
+                    <View style={{ justifyContent: "center" }}>
+                      <Image source={tool.icon} style={styles.icon} />
+                    </View>
+                    <View style={{  }}>
+                      <Text style={styles.label}>{tool.label}</Text>
+                      <Text style={styles.description}>{tool.description}</Text>
+                    </View>
                   </View>
-                  <IconButton
-                    icon={pinned.includes(tool.id) ? "pin" : "pin-outline"}
-                    size={20}
-                    // style={{ alignContent: "flex" }}
-                    iconColor="#635b75"
-                    onPress={() => togglePin(tool.id)}
-                  />
+
+                  <View style={{ top: 0, right: 0 }}>
+                    <IconButton
+                      icon={pinned.includes(tool.id) ? "pin" : "pin-outline"}
+                      size={20}
+                      // style={{ alignContent: "flex" }}
+                      iconColor="#635b75"
+                      onPress={() => togglePin(tool.id)}
+                    />
+                  </View>
                 </View>
               </Card>
             </TouchableOpacity>
@@ -225,6 +232,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#fff",
     paddingTop: 35,
+    height: "100%",
   },
   sectionTitle: {
     fontSize: 22,
@@ -235,22 +243,25 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   card: {
-    marginBottom: 12,
+    marginBottom: 20,
     borderRadius: 12,
     backgroundColor: "#fef6f9",
-    padding: 16,
-    justifyContent: "center",
+    // padding: 16,
+    // justifyContent: "space-between",
+    // flexDirection: "row",
   },
   cardContent: {
     flexDirection: "row",
     gap: 12,
-    alignItems: "center",
+    // padding: 16,
+    // alignItems: "center",
+    justifyContent: "space-between",
   },
   icon: {
     width: 40,
     height: 40,
     resizeMode: "contain",
-    marginTop: 4,
+    // marginTop: 4,
   },
   label: {
     fontSize: 16,
@@ -279,7 +290,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignSelf: "center",
   },
-  
+
   modalContent: {
     backgroundColor: "#fff",
     width: "100%",
