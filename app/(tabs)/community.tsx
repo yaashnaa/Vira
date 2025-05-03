@@ -1,4 +1,4 @@
-import React, { useState, useEffect , useMemo} from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -263,7 +263,6 @@ export default function CommunityScreen() {
   const visiblePosts = useMemo(() => {
     return posts.filter((post) => !blockedUserIds.includes(post.userId));
   }, [posts, blockedUserIds]);
-  
 
   const handleDelete = async (post: any) => {
     Alert.alert("Delete Post", "Are you sure?", [
@@ -425,17 +424,36 @@ export default function CommunityScreen() {
                               justifyContent: "space-between",
                             }}
                           >
-                            <Text style={styles.author}>
-                              Posted by {item.name}
-                            </Text>
-                            {item.userId !== auth.currentUser?.uid && (
+                            <View style={{ flexDirection: "row", alignItems: "center", gap:15 }}>
+                              <Text style={styles.author}>
+                                Posted by {item.name}
+                              </Text>
+                              {isFirstPostByUser && (
                               <TouchableOpacity
-                                onPress={() => handleBlock(item.userId)}
+                                onPress={() => setInfoVisible(true)}
                               >
-                                <Feather name="slash" size={18} color="#888" />
+                                <Feather
+                                  name="info"
+                                  size={16}
+                                  color="#888"
+                                  style={{ marginLeft: 6 }}
+                                />
                               </TouchableOpacity>
                             )}
-
+                              {item.userId !== auth.currentUser?.uid && (
+                                <TouchableOpacity
+                                  onPress={() => handleBlock(item.userId)}
+                                >
+                                  <Feather
+                                    name="slash"
+                                    size={18}
+                                    color="#888"
+                                  />
+                                  
+                                </TouchableOpacity>
+                                
+                              )}
+                            </View>
                             <View style={styles.actions}>
                               {item.userId !== auth.currentUser?.uid && (
                                 <TouchableOpacity
@@ -448,10 +466,11 @@ export default function CommunityScreen() {
                                   />
                                 </TouchableOpacity>
                               )}
+                              
                               {item.userId === auth.currentUser?.uid &&
                                 editingPostId !== item.id && (
                                   <View
-                                    style={{ flexDirection: "row", gap: 10 }}
+                                    style={{ flexDirection: "row", gap: 10, justifyContent: "flex-end" }}
                                   >
                                     <TouchableOpacity
                                       onPress={() => handleEdit(item)}
@@ -475,18 +494,7 @@ export default function CommunityScreen() {
                                 )}
                             </View>
 
-                            {isFirstPostByUser && (
-                              <TouchableOpacity
-                                onPress={() => setInfoVisible(true)}
-                              >
-                                <Feather
-                                  name="info"
-                                  size={16}
-                                  color="#888"
-                                  style={{ marginLeft: 6 }}
-                                />
-                              </TouchableOpacity>
-                            )}
+                    
                           </View>
 
                           <Text style={styles.time}>
