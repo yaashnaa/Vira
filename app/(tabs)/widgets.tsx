@@ -162,7 +162,15 @@ export default function ToolsScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={{
+        flexGrow: 1,
+        backgroundColor: "#ffff",
+        padding: 12,
+        paddingTop: 35,
+      }}
+    >
       {tools.map((section, i) => (
         <View key={i}>
           <Text style={styles.sectionTitle}>{section.category}</Text>
@@ -180,11 +188,18 @@ export default function ToolsScreen() {
             >
               <Card style={styles.card}>
                 <View style={styles.cardContent}>
-                  <View style={{ padding: 12, flexDirection: "row", gap: 12, width: "80%" }}>
+                  <View
+                    style={{
+                      padding: 12,
+                      flexDirection: "row",
+                      gap: 12,
+                      width: "80%",
+                    }}
+                  >
                     <View style={{ justifyContent: "center" }}>
                       <Image source={tool.icon} style={styles.icon} />
                     </View>
-                    <View style={{  }}>
+                    <View style={{}}>
                       <Text style={styles.label}>{tool.label}</Text>
                       <Text style={styles.description}>{tool.description}</Text>
                     </View>
@@ -232,7 +247,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#fff",
     paddingTop: 35,
-    height: "100%",
+    // height: "100%",
   },
   sectionTitle: {
     fontSize: 22,

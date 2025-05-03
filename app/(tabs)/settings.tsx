@@ -25,7 +25,10 @@ export default function SettingsScreen() {
   }, []);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={{ flexGrow: 1, backgroundColor: "#ffff", padding: 12 }}
+    >
       <List.Section>
         <List.Subheader style={styles.subheader}>Profile</List.Subheader>
         <SettingsItem
@@ -129,6 +132,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingLeft: 8,
     // height: height,
+    // height: "100%",
     backgroundColor: "#ffffff",
   },
   subheader: {
