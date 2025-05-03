@@ -1,8 +1,9 @@
 import React from "react";
-import { ScrollView, StyleSheet } from "react-native";
+import { ScrollView, StyleSheet, Dimensions } from "react-native";
 import { List, Divider } from "react-native-paper";
 import SettingsItem from "@/components/settingsItem"; // make sure you have this component created!
-
+const { width } = Dimensions.get("window");
+const {height} = Dimensions.get("window");
 export default function SettingsScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -66,6 +67,7 @@ const styles = StyleSheet.create({
   container: {
     paddingVertical: 16,
     paddingLeft: 8,
+    height: height,
     backgroundColor: "#ffffff",
   },
   subheader: {

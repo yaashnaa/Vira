@@ -16,9 +16,9 @@ export default function BreathingExercise({ onBack }: BreathingExerciseProps) {
   const [exhaleDuration, setExhaleDuration] = useState(4);
 
   useEffect(() => {
-    let timeout1: NodeJS.Timeout;
-    let timeout2: NodeJS.Timeout;
-    let timeout3: NodeJS.Timeout;
+    let timeout1: number;
+    let timeout2: number;
+    let timeout3: number;
   
     const startBreathingCycle = () => {
       setPhase("Inhale");

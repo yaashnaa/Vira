@@ -27,7 +27,7 @@ export default function RootLayout() {
   }
 
   return (
-    <OfflineWrapper>
+
       <GestureHandlerRootView style={{ flex: 1 }}>
         <PaperProvider>
           <UserPreferencesProvider>
@@ -40,6 +40,6 @@ export default function RootLayout() {
           </UserPreferencesProvider>
         </PaperProvider>
       </GestureHandlerRootView>
-    </OfflineWrapper>
+
   );
 }

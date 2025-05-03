@@ -19,5 +19,5 @@ export default function LogoutButton() {
     }
   };
 
-  return <Button title="Logout" onPress={handleLogout} />;
+  return <Button title="Logout" onPress={handleLogout} color="#ffff" />;
 }

@@ -17,11 +17,12 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
-  Platform, ActivityIndicator
+  Platform,
+  ActivityIndicator,
 } from "react-native";
 import { Button } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { loginUser,resetPassword } from "../../utils/auth"; 
+import { loginUser, resetPassword } from "../../utils/auth";
 import { fetchUserPreferences } from "@/utils/firestore";
 import { useUserPreferences } from "@/context/userPreferences"; // Custom hook for user preferences
 import { ensureUserDocumentExists } from "../../utils/firestore"; // Function to ensure user document exists
@@ -34,21 +35,20 @@ export default function LoginScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
 
-  const { updatePreferences } =
-    useUserPreferences();
-    const handleReset = async () => {
-      try {
-        await resetPassword(email);
-        router.push("/(auth)/login");
-      } catch {
-        Toast.show({
-          type: "error",
-          text1: "Failed to reset password. Please try again.",
-          visibilityTime: 2000,
-        });
-      }
-    };
-  
+  const { updatePreferences } = useUserPreferences();
+  const handleReset = async () => {
+    try {
+      await resetPassword(email);
+      router.push("/(auth)/login");
+    } catch {
+      Toast.show({
+        type: "error",
+        text1: "Failed to reset password. Please try again.",
+        visibilityTime: 2000,
+      });
+    }
+  };
+
   const handleLogin = async () => {
     setErrorMessage("");
     setIsLoading(true); // Start spinner
@@ -96,7 +96,7 @@ export default function LoginScreen() {
         });
       }
     } finally {
-      setIsLoading(false); 
+      setIsLoading(false);
     }
   };
 
@@ -118,7 +118,7 @@ export default function LoginScreen() {
             contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={{ position: "relative", width: 350, height: 300 }}>
+            <View>
               {imageLoading && (
                 <ActivityIndicator
                   size="large"
@@ -181,16 +181,15 @@ export default function LoginScreen() {
                 <Text style={styles.forgot_button}>Forgot Password?</Text>
               </TouchableOpacity>
               <Button
-                mode="contained-tonal"  
+                mode="contained-tonal"
                 buttonColor="#86508f"
                 textColor="#fefefe"
                 onPress={handleLogin}
-                loading={isLoading} 
-                disabled={isLoading} 
+                loading={isLoading}
+                disabled={isLoading}
               >
                 LOGIN
               </Button>
-          
             </View>
           </ScrollView>
         </TouchableWithoutFeedback>
@@ -214,6 +213,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     margin: 0,
+    width: width,
+
     color: lightTheme.accent,
   },
   link: {
@@ -237,6 +238,7 @@ const styles = StyleSheet.create({
     height: 300,
     width: 350,
     bottom: 80,
+    alignSelf: "center",
     marginBottom: 10,
   },
 

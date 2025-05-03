@@ -286,9 +286,10 @@ export default function AccountSettingsSection() {
 
         <Button
           mode="text"
+          
           onPress={handleLogout}
           style={styles.logoutButton}
-          labelStyle={{ color: "#865dff" }}
+          labelStyle={{ color: "#ffffff" }}
         >
           Log Out
         </Button>
@@ -353,7 +354,8 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     marginTop: 10,
-    backgroundColor: "#865dff",
+    color: "#fff",
+    backgroundColor: "#885291",
     borderRadius: 8,
   },
   outlinedButton: {
@@ -363,5 +365,6 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     marginTop: 12,
+    backgroundColor: "#885291",
   },
 });

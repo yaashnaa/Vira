@@ -8,7 +8,8 @@ import {
   StyleSheet,
   Dimensions,
   Button,
-  Text, Image, 
+  Text,
+  Image,
 } from "react-native";
 import { OfflineWrapper } from "@/components/OfflineWrapper";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -162,7 +163,7 @@ export default function Dashboard() {
       <View style={styles.loadingContainer}>
         <View style={styles.card}>
           <Image
-            source={require("../../assets/images/loading.png")} 
+            source={require("../../assets/images/loading.png")}
             style={styles.mascot}
           />
           <Text style={styles.loadingText}>
@@ -174,9 +175,9 @@ export default function Dashboard() {
             color={lightTheme.primary}
             style={styles.spinner}
           />
-          <View style={styles.logoutButton}>
+            <View style={styles.logoutButton}>
             <LogoutButton />
-          </View>
+            </View>
         </View>
       </View>
     );
@@ -284,16 +285,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+    height: height,
+    width: width,
   },
   card: {
     backgroundColor: "#ffffff",
     borderRadius: 20,
     padding: 24,
+    width: "100%",
+    height: "100%",
     alignItems: "center",
     shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 10,
     elevation: 5,
+    alignSelf: "center",
   },
   mascot: {
     width: 80,
@@ -302,6 +308,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 18,
+    alignSelf: "center",
     textAlign: "center",
     color: "#86508f",
     fontFamily: "PatrickHand-Regular",
@@ -312,7 +319,8 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   logoutButton: {
-    backgroundColor: "#f8d7da",
+    backgroundColor: "#885291",
+    color: "#ffffff",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 8,

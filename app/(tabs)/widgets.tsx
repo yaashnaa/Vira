@@ -172,7 +172,7 @@ export default function ToolsScreen() {
                   <IconButton
                     icon={pinned.includes(tool.id) ? "pin" : "pin-outline"}
                     size={20}
-                    style={{ position: "absolute", left: 290, bottom: 40 }}
+                    // style={{ alignContent: "flex" }}
                     iconColor="#635b75"
                     onPress={() => togglePin(tool.id)}
                   />

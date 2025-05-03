@@ -222,6 +222,6 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     marginTop: 8,
-    backgroundColor: "#c3a5f1",
+    backgroundColor: "#885291",
   },
 });
