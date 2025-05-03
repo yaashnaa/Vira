@@ -203,7 +203,7 @@ export default function Dashboard() {
                   return (
                     <View style={styles.section}>
                       <CombinedCheckInCard />
-                      <Button onPress={()=> dumpAsyncStorage()} title="Dump AsyncStorage" />
+                      {/* <Button onPress={()=> dumpAsyncStorage()} title="Dump AsyncStorage" /> */}
                       
                     </View>
                   );
@@ -251,13 +251,13 @@ export default function Dashboard() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    width: width,
+    // width: width,
     backgroundColor: "transparent",
   },
   background: {
     flex: 1,
-    width: width,
-    height: height,
+    // width: width,
+    // height: height,
   },
 
   section: {
