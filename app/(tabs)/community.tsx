@@ -11,6 +11,8 @@ import {
   Alert,
   Dimensions,
 } from "react-native";
+import { Filter } from "bad-words";
+
 import { Dialog } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
@@ -27,20 +29,25 @@ import {
   onSnapshot,
   orderBy,
   doc,
+  getDoc,
   getDocs,
   updateDoc,
   deleteDoc,
   collectionGroup,
   writeBatch,
+  addDoc,
+  serverTimestamp,
 } from "firebase/firestore";
 import { formatDistanceToNow } from "date-fns";
 import Toast from "react-native-toast-message";
 import CommentSection from "@/components/community/commentSection";
 import { createPost } from "@/utils/community";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import { Modal as RNModal } from "react-native";
+import { useRouter } from "expo-router";
 export default function CommunityScreen() {
   const [postText, setPostText] = useState("");
+  const router = useRouter();
   const [infoVisible, setInfoVisible] = useState(false);
   const [showRulesModal, setShowRulesModal] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
@@ -52,6 +59,51 @@ export default function CommunityScreen() {
   const [editedText, setEditedText] = useState<string>("");
   const [isPostModalVisible, setIsPostModalVisible] = useState(false);
   const [posting, setPosting] = useState(false);
+  const filter = new Filter();
+  const [reportModalVisible, setReportModalVisible] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [postToReport, setPostToReport] = useState<any>(null);
+  const openReportModal = (post: any) => {
+    setPostToReport(post);
+    setReportReason("");
+    setReportModalVisible(true);
+  };
+
+  const submitReport = async () => {
+    if (!reportReason.trim()) {
+      Toast.show({ type: "error", text1: "Please provide a reason." });
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, "reports"), {
+        reportedPostId: postToReport.id,
+        reportedBy: auth.currentUser?.uid,
+        reason: reportReason.trim(),
+        timestamp: serverTimestamp(),
+        postText: postToReport.text || "",
+      });
+
+      Toast.show({ type: "success", text1: "Report submitted." });
+      setReportModalVisible(false);
+    } catch (error) {
+      console.error("Error submitting report:", error);
+      Toast.show({ type: "error", text1: "Failed to submit report." });
+    }
+  };
+  useEffect(() => {
+    const enforceAgreement = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (!userDoc.exists() || !userDoc.data().agreedToTerms) {
+        router.replace("/termsOfUse");
+      }
+    };
+
+    enforceAgreement();
+  }, []);
 
   const TAG_OPTIONS = [
     "All",
@@ -136,9 +188,22 @@ export default function CommunityScreen() {
       });
       return;
     }
+
     try {
-      setPosting(true);
-      await createPost(selectedTag, postText.trim(), selectedTag);
+      const cleanText = postText.trim();
+
+      // Check for bad language
+      if (filter.isProfane(cleanText)) {
+        Toast.show({
+          type: "error",
+          text1: "Please remove inappropriate language before posting.",
+        });
+        return;
+      }
+
+      setPosting(true); // ✅ Move this up
+      await createPost(selectedTag, cleanText, selectedTag);
+
       Toast.show({ type: "success", text1: "Post shared 🎉" });
       setPostText("");
       setSelectedTag(null);
@@ -324,13 +389,53 @@ export default function CommunityScreen() {
                             style={{
                               flexDirection: "row",
                               alignItems: "center",
+                              width: "98%",
+                              justifyContent: "space-between",
                             }}
                           >
                             <Text style={styles.author}>
                               Posted by {item.name}
                             </Text>
 
-                            {/* ✅ Show info button ONLY if it's the user's first post */}
+                            <View style={styles.actions}>
+                              {item.userId !== auth.currentUser?.uid && (
+                                <TouchableOpacity
+                                  onPress={() => openReportModal(item)}
+                                >
+                                  <Feather
+                                    name="flag"
+                                    size={20}
+                                    color="#d9534f"
+                                  />
+                                </TouchableOpacity>
+                              )}
+                              {item.userId === auth.currentUser?.uid &&
+                                editingPostId !== item.id && (
+                                  <View
+                                    style={{ flexDirection: "row", gap: 10 }}
+                                  >
+                                    <TouchableOpacity
+                                      onPress={() => handleEdit(item)}
+                                    >
+                                      <Feather
+                                        name="edit"
+                                        size={20}
+                                        color="black"
+                                      />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                      onPress={() => handleDelete(item)}
+                                    >
+                                      <Feather
+                                        name="trash-2"
+                                        size={21}
+                                        color="#b92626"
+                                      />
+                                    </TouchableOpacity>
+                                  </View>
+                                )}
+                            </View>
+
                             {isFirstPostByUser && (
                               <TouchableOpacity
                                 onPress={() => setInfoVisible(true)}
@@ -357,19 +462,6 @@ export default function CommunityScreen() {
                       <Text style={styles.postText}>{item.text}</Text>
                     </>
                   )}
-
-                  {/* Edit/Delete Buttons (only if not editing) */}
-                  {item.userId === auth.currentUser?.uid &&
-                    editingPostId !== item.id && (
-                      <View style={styles.actions}>
-                        <TouchableOpacity onPress={() => handleEdit(item)}>
-                          <Feather name="edit" size={20} color="black" />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => handleDelete(item)}>
-                          <Feather name="trash-2" size={21} color="#b92626" />
-                        </TouchableOpacity>
-                      </View>
-                    )}
 
                   {/* Comments Button */}
                   <TouchableOpacity
@@ -402,11 +494,6 @@ export default function CommunityScreen() {
               );
             }}
           />
-
-          {/* FAB to open post modal */}
-          <TouchableOpacity style={styles.fab} onPress={openPost}>
-            <Text style={styles.fabText}>+</Text>
-          </TouchableOpacity>
 
           <Portal>
             <Modal
@@ -453,7 +540,12 @@ export default function CommunityScreen() {
                   <Button
                     mode="contained"
                     onPress={handlePostSubmit}
-                    style={{ marginTop: 10, backgroundColor: "#ac91d4" }}
+                    style={{
+                      marginTop: 10,
+                      backgroundColor: "#ac91d4",
+                      width: "30%",
+                      alignSelf: "center",
+                    }}
                   >
                     {posting ? "Posting..." : "Post"}
                   </Button>
@@ -469,6 +561,8 @@ export default function CommunityScreen() {
               </TouchableWithoutFeedback>
             </Modal>
           </Portal>
+
+          {/* Info Modal for username */}
           <Portal>
             <Dialog
               visible={infoVisible}
@@ -501,32 +595,38 @@ export default function CommunityScreen() {
               </Dialog.Actions>
             </Dialog>
           </Portal>
-          <Portal>
-            <Modal
-              visible={showRulesModal}
-              onDismiss={() => setShowRulesModal(false)}
-              contentContainerStyle={styles.respectModal}
-            >
-              <View style={{ alignItems: "center" }}>
-                <Text style={styles.respectEmoji}>🛡️</Text>
-                <Text style={styles.respectTitle}>Community Guidelines</Text>
-                <Text style={styles.respectText}>
-                  Please be respectful, supportive, and kind. Avoid sharing
-                  personal information like your phone number, address, or full
-                  name. Let's keep our community safe and welcoming! 🤝
-                </Text>
-
-                <Button
-                  mode="contained"
-                  onPress={handleAcknowledgeRules}
-                  style={styles.respectButton}
-                  labelStyle={{ fontWeight: "bold" }}
-                >
-                  I Understand
-                </Button>
+          <RNModal
+            animationType="fade"
+            transparent
+            visible={showRulesModal}
+            onRequestClose={() => setShowRulesModal(false)}
+          >
+            <View style={styles.overlay}>
+              <View style={styles.respectModal}>
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                  <View>
+                    <Text style={styles.respectEmoji}>🛡️</Text>
+                    <Text style={styles.respectTitle}>
+                      Community Guidelines
+                    </Text>
+                    <Text style={styles.respectText}>
+                      Please be respectful, supportive, and kind. Avoid sharing
+                      personal information like your phone number, address, or
+                      full name. Let's keep our community safe and welcoming! 🤝
+                    </Text>
+                    <Button
+                      mode="contained"
+                      onPress={handleAcknowledgeRules}
+                      style={styles.respectButton}
+                      labelStyle={{ fontWeight: "bold" }}
+                    >
+                      I Understand
+                    </Button>
+                  </View>
+                </TouchableWithoutFeedback>
               </View>
-            </Modal>
-          </Portal>
+            </View>
+          </RNModal>
           <Portal>
             <Modal
               visible={showWelcomeModal}
@@ -555,6 +655,51 @@ export default function CommunityScreen() {
               </View>
             </Modal>
           </Portal>
+          <Portal>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+       
+                <Modal
+                  visible={reportModalVisible}
+                  onDismiss={() => setReportModalVisible(false)}
+                  contentContainerStyle={styles.modalBox}
+                >
+                  <Text style={styles.modalTitle}>Report Post</Text>
+                  <TextInput
+                    placeholder="Why are you reporting this post?"
+                    value={reportReason}
+                    onChangeText={setReportReason}
+                    multiline
+                    style={styles.input}
+                    placeholderTextColor="#888"
+                  />
+                  <Button
+                    mode="contained"
+                    onPress={submitReport}
+                    textColor="#fff"
+                    style={{  backgroundColor: "#b7524f" }}
+                  >
+                    Submit Report
+                  </Button>
+                  <Button
+                    mode="text"
+                    onPress={() => setReportModalVisible(false)}
+                    style={{ marginTop: 10 }}
+                  >
+                    Cancel
+                  </Button>
+                </Modal>
+       
+            </TouchableWithoutFeedback>
+          </Portal>
+
+          {/* FAB to open post modal */}
+          {!isPostModalVisible && !showRulesModal && !showWelcomeModal && !reportModalVisible && (
+            <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
+              <TouchableOpacity style={styles.fab} onPress={openPost}>
+                <Text style={styles.fabText}>+</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </SafeAreaView>
       </TouchableWithoutFeedback>
     </>
@@ -563,7 +708,7 @@ export default function CommunityScreen() {
 const { height } = Dimensions.get("window");
 const { width } = Dimensions.get("window");
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: { flex: 1, height: height, backgroundColor: "#fff" },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
@@ -585,6 +730,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
     padding: 15,
     marginVertical: 8,
+    // height: height,
     borderRadius: 8,
   },
   postText: { fontSize: 16, marginBottom: 8 },
@@ -609,6 +755,7 @@ const styles = StyleSheet.create({
     display: "flex",
     marginLeft: 10,
     marginTop: 5,
+    width: "90%",
     flexDirection: "column",
   },
   author: {
@@ -629,7 +776,10 @@ const styles = StyleSheet.create({
     right: 30,
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 9999,
+    elevation: 10,
   },
+
   fabText: { color: "#fff", fontSize: 30 },
   modalContent: {
     flex: 1,
@@ -646,9 +796,11 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: "row",
     marginTop: 8,
-    bottom: 85,
-    left: 310,
+    marginRight: 10,
+    justifyContent: "flex-end",
+    top: 0,
     gap: 10,
+    // width: "50%",
   },
   actionButton: { color: "#FF6B6B", marginHorizontal: 10, fontWeight: "bold" },
   tagSelector: {
@@ -698,12 +850,22 @@ const styles = StyleSheet.create({
     padding: 20,
     margin: 20,
     borderRadius: 16,
+    zIndex: 9999,
   },
   respectEmoji: {
     fontSize: 48,
     marginBottom: 10,
+    alignSelf: "center",
   },
   respectTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#5c469c",
+    marginBottom: 10,
+    fontFamily: "Main-font",
+    textAlign: "center",
+  },
+  modalTitle: {
     fontSize: 20,
     fontWeight: "bold",
     color: "#5c469c",
@@ -754,5 +916,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 12,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

@@ -7,6 +7,7 @@ import {
   isOnboardingComplete,
   markOnboardingComplete,
 } from "@/utils/asyncStorage";
+import { InteractionManager } from "react-native";
 
 const welcome = require("../../assets/animations/7.json");
 const mindfulTracking = require("../../assets/animations/4.json");
@@ -42,12 +43,22 @@ export default function OnBoardingScreen() {
 
     checkOnboarding();
   }, []);
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setShouldShowOnboarding(true);
+      setLoading(false);
+    }, 300); // 300ms delay helps avoid race conditions on iPad
+  
+    return () => clearTimeout(timeout);
+  }, []);
+  
+  
 
   const handleFinishOnboarding = async () => {
     try {
       await markOnboardingComplete();
       // console.log("✅ Onboarding marked complete");
-      router.replace("/(auth)/signup");
+      router.replace("/termsOfUse");
     } catch (error) {
       console.error("❌ Error saving onboarding status:", error);
     }
@@ -57,10 +68,12 @@ export default function OnBoardingScreen() {
     return null
   }
 
-  if (shouldShowOnboarding) {
+  if (shouldShowOnboarding  && !loading) {
     return (
       <View style={styles.container}>
         <Onboarding
+          key="onboarding-ipad-safe"
+       
           onDone={handleFinishOnboarding}
           onSkip={handleFinishOnboarding}
           titleStyles={{

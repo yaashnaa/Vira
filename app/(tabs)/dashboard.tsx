@@ -15,12 +15,15 @@ import { OfflineWrapper } from "@/components/OfflineWrapper";
 import { useFocusEffect, useRouter } from "expo-router";
 import { auth } from "@/config/firebaseConfig";
 import Toast from "react-native-toast-message";
+import { db } from "@/config/firebaseConfig";
+import { doc, getDoc, } from "firebase/firestore";
 import {
   getEnabledWidgets,
   addWidget,
   removeWidget as removeWidgetFromStorage,
 } from "@/utils/widgetStorage";
 import { isOnboardingComplete } from "@/utils/asyncStorage";
+import {resetAllAsyncStorage} from "@/utils/asyncStorage";
 import {
   isQuizCompletedInFirestore,
   isScreeningQuizCompleted,
@@ -31,8 +34,6 @@ import { ImageBackground } from "react-native";
 import DashboardHeader from "@/components/dashboard/dashboardHader";
 import { useCheckInData } from "@/hooks/useCheckInData";
 import PinnedWidgetsSection from "@/components/dashboard/pinnedWidgets";
-import OfflineNotice from "@/components/offlineComponent";
-import { addTaskToQueue } from "@/utils/firebaseOfflineQueue";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import "react-native-reanimated";
 
@@ -52,6 +53,20 @@ const dashboardSections = [
 ];
 
 export default function Dashboard() {
+  useEffect(() => {
+    const enforceAgreement = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+  
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (!userDoc.exists() || !userDoc.data().agreedToTerms) {
+        router.replace("/termsOfUse");
+      }
+    };
+  
+    enforceAgreement();
+  }, []);
+  
   const router = useRouter();
   const { userPreferences, loading } = useUserPreferences();
   const { hasCheckedInToday } = useCheckInContext();
@@ -63,21 +78,7 @@ export default function Dashboard() {
   const latestCheckIn = useCheckInData(widgetChangeTrigger);
   const [isOffline, setIsOffline] = useState(false);
   const [isConnected, setIsConnected] = useState<boolean | null>(null); // 👈
-  // async function checkConnection() {
-  //   const networkState = await Network.getNetworkStateAsync();
-  //   console.log("Is connected?", networkState.isConnected);
-  // }
 
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     async function checkNetwork() {
-  //       const networkState = await Network.getNetworkStateAsync();
-  //       setIsConnected(networkState.isConnected ?? false);
-  //     }
-
-  //     checkNetwork();
-  //   }, [])
-  // );
   useEffect(() => {
     const logAsyncStorageData = async () => {
       try {
@@ -95,12 +96,9 @@ export default function Dashboard() {
     logAsyncStorageData();
   }, []);
   const dumpAsyncStorage = async () => {
-    const keys = await AsyncStorage.getAllKeys();
-    const items = await AsyncStorage.multiGet(keys);
-    items.forEach(([key, value]) => {
-      console.log(`🧾 ${key}:`, value);
-    });
+    await resetAllAsyncStorage();
   };
+
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -205,6 +203,8 @@ export default function Dashboard() {
                   return (
                     <View style={styles.section}>
                       <CombinedCheckInCard />
+                      <Button onPress={()=> dumpAsyncStorage()} title="Dump AsyncStorage" />
+                      
                     </View>
                   );
                 case "logMood":

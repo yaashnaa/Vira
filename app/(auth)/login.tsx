@@ -1,10 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import React, { useState, useEffect } from "react";
-import { darkTheme, lightTheme } from "@/config/theme";
-import { AntDesign } from "@expo/vector-icons";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { auth } from "../../config/firebaseConfig";
-import Toast from "react-native-toast-message";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -12,34 +7,53 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
-  Dimensions,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
   Platform,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/config/firebaseConfig";
 import { Button } from "react-native-paper";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { loginUser, resetPassword } from "../../utils/auth";
-import { fetchUserPreferences } from "@/utils/firestore";
-import { useUserPreferences } from "@/context/userPreferences"; // Custom hook for user preferences
-import { ensureUserDocumentExists } from "../../utils/firestore"; // Function to ensure user document exists
+import Toast from "react-native-toast-message";
+
+import { auth } from "@/config/firebaseConfig";
+import { loginUser, resetPassword } from "@/utils/auth";
+import {
+  ensureUserDocumentExists,
+  fetchUserPreferences,
+} from "@/utils/firestore";
+import { useUserPreferences } from "@/context/userPreferences";
+
+const width = Dimensions.get("window").width;
+const height = Dimensions.get("window").height;
+
 export default function LoginScreen() {
+  const user = auth.currentUser;
+
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
 
   const { updatePreferences } = useUserPreferences();
+
   const handleReset = async () => {
     try {
       await resetPassword(email);
-      router.push("/(auth)/login");
+      Toast.show({
+        type: "success",
+        text1: "Password reset email sent",
+        visibilityTime: 2000,
+      });
     } catch {
       Toast.show({
         type: "error",
@@ -48,50 +62,49 @@ export default function LoginScreen() {
       });
     }
   };
-
+  const checkAgreement = async () => {
+    if (!user) return;
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    if (userDoc.exists()) {
+      const agreed = userDoc.data().agreedToTerms;
+      if (!agreed) {
+        router.replace("/termsOfUse");
+      } else {
+        router.replace("/dashboard");
+      }
+    }
+  };
   const handleLogin = async () => {
-    setErrorMessage("");
-    setIsLoading(true); // Start spinner
-
+    setIsLoading(true);
     try {
       await loginUser(email, password);
-
       const currentUser = auth.currentUser;
-      if (!currentUser) {
-        Toast.show({
-          type: "error",
-          text1: "User not found",
-          visibilityTime: 2000,
-        });
-        return;
-      }
-
+      if (!currentUser) throw new Error("User not found");
       await ensureUserDocumentExists();
       const prefs = await fetchUserPreferences(currentUser.uid);
-      if (prefs) {
-        updatePreferences(prefs);
-      }
+      if (prefs) updatePreferences(prefs);
+      await loginUser(email, password);
+      await checkAgreement();
 
       router.replace("/dashboard");
     } catch (error) {
       const message = (error as Error).message;
-
       if (message.includes("auth/wrong-password")) {
         Toast.show({
           type: "error",
-          text1: "Invalid password. Please try again.",
+          text1: "Invalid password.",
           visibilityTime: 2000,
         });
       } else if (message.includes("auth/user-not-found")) {
         Toast.show({
           type: "error",
-          text1: "No account found with this email.",
+          text1: "No account found.",
           visibilityTime: 2000,
         });
       } else {
         Toast.show({
           type: "error",
-          text1: "Login failed. Please check your details.",
+          text1: "Login failed.",
           visibilityTime: 2000,
         });
       }
@@ -100,22 +113,20 @@ export default function LoginScreen() {
     }
   };
 
-  useEffect(() => {
-    const redirectUri = "https://auth.expo.io/@yg2348/vira";
-
-    console.log("✅ Redirect URI to add in Google Cloud:", redirectUri);
-  }, []);
-
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <StatusBar style="auto" />
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <ScrollView
-            contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+            contentContainerStyle={{
+              flexGrow: 1,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
             keyboardShouldPersistTaps="handled"
           >
             <View>
@@ -135,28 +146,26 @@ export default function LoginScreen() {
               <Image
                 style={styles.image}
                 source={require("../../assets/images/vira.png")}
-                onLoadEnd={() => setImageLoading(false)} // hide loader once loaded
+                onLoadEnd={() => setImageLoading(false)}
               />
             </View>
 
             <View style={styles.insideCont}>
-              {errorMessage !== "" && (
-                <Text style={styles.errorText}>{errorMessage}</Text>
-              )}
               <View style={styles.inputs}>
                 <View style={styles.inputView}>
                   <AntDesign
                     name="user"
                     size={24}
-                    color="#150b01"
+                    color="black"
                     style={{ marginLeft: 10 }}
                   />
                   <TextInput
                     style={styles.TextInput}
                     placeholder="Email"
                     placeholderTextColor="#003f5c"
-                    onChangeText={(text) => setEmail(text)}
+                    onChangeText={setEmail}
                     keyboardType="email-address"
+                    autoCapitalize="none"
                   />
                 </View>
 
@@ -170,20 +179,22 @@ export default function LoginScreen() {
                   <TextInput
                     style={styles.TextInput}
                     placeholder="Password"
-                    placeholderTextColor="#0c5e84"
+                    placeholderTextColor="#003f5c"
                     secureTextEntry
-                    onChangeText={(text) => setPassword(text)}
+                    onChangeText={setPassword}
                   />
                 </View>
               </View>
 
               <TouchableOpacity onPress={handleReset}>
-                <Text style={styles.forgot_button}>Forgot Password?</Text>
+                <Text style={styles.signupText}>Forgot Password?</Text>
               </TouchableOpacity>
+
               <Button
                 mode="contained-tonal"
+                style={{ marginTop: 20 }}
                 buttonColor="#86508f"
-                textColor="#fefefe"
+                textColor="#fffdfb"
                 onPress={handleLogin}
                 loading={isLoading}
                 disabled={isLoading}
@@ -191,20 +202,21 @@ export default function LoginScreen() {
                 LOGIN
               </Button>
             </View>
+
+            <View style={styles.link}>
+              <TouchableOpacity onPress={() => router.push("/signup")}>
+                <Text style={styles.signupText}>
+                  Don't have an account? Sign up
+                </Text>
+              </TouchableOpacity>
+            </View>
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
-
-      <View style={styles.link}>
-        <TouchableOpacity onPress={() => router.push("/(auth)/signup")}>
-          <Text style={styles.signupText}>Don't have an account? Sign up</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
-const width = Dimensions.get("window").width;
 const styles = StyleSheet.create({
   container: {
     display: "flex",
@@ -212,39 +224,22 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     alignItems: "center",
     justifyContent: "center",
-    margin: 0,
-    width: width,
-
-    color: lightTheme.accent,
-  },
-  link: {
-    bottom: 65,
-    position: "absolute",
-  },
-  button: {
-    // bottom: 120,
   },
   insideCont: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    // top: 50,
-    alignSelf: "center",
-    bottom: 0,
     width: width * 0.7,
+    marginTop: 10,
+  },
+  link: {
+    marginTop: 30,
   },
   image: {
-    height: 300,
-    width: 350,
-    bottom: 80,
-    alignSelf: "center",
-    marginBottom: 10,
-  },
-
-  mainText: {
-    color: "#150b01",
-    marginBottom: 10,
+    height: height * 0.4,
+    width: width * 0.7,
+    resizeMode: "contain",
   },
   inputView: {
     display: "flex",
@@ -252,57 +247,28 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 50,
     marginBottom: 20,
-
     alignItems: "center",
     flexDirection: "row",
     gap: 1,
     borderBottomWidth: 1.5,
-    borderBottomColor: lightTheme.accent3,
+    borderBottomColor: "#86508f",
     elevation: 5,
   },
   TextInput: {
     height: 50,
     flex: 1,
     padding: 5,
+
     width: "100%",
     color: "black",
-  },
-  forgot_button: {
-    height: 30,
-    // marginBottom: 30,
-    color: "#003f5c",
-  },
-  errorText: {
-    color: "red",
-    fontSize: 14,
-    // marginTop: 12,
-    fontFamily: "Main-font",
-    textAlign: "center",
   },
   inputs: {
     display: "flex",
     gap: 20,
     color: "black",
     width: "100%",
-    alignItems: "center",
-    // justifyContent: "center",
-    // position: "absolute",
-  },
-  signupBtn: {
-    width: "40%",
-    borderRadius: 15,
-    height: 50,
-    alignItems: "center",
-    justifyContent: "center",
     marginTop: 20,
-    color: "black",
-    borderWidth: 3,
-    borderColor: "#150b01",
-    borderStyle: "solid",
-  },
-  loginText: {
-    color: "#f5f0f9",
-    fontWeight: "bold",
+    alignItems: "center",
   },
   signupText: {
     marginTop: 20,

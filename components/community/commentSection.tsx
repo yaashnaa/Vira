@@ -18,6 +18,8 @@ import { increment, updateDoc } from "firebase/firestore";
 import { db, auth } from "@/config/firebaseConfig";
 import Feather from "@expo/vector-icons/Feather";
 import Toast from "react-native-toast-message";
+import { Filter } from "bad-words";
+
 export default function CommentSection({
   category,
   postId,
@@ -32,6 +34,7 @@ export default function CommentSection({
   const flatListRef = useRef<FlatList>(null);
   const currentUid = auth.currentUser?.uid;
   const [isPosting, setIsPosting] = useState(false);
+  const filter = new Filter();
 
   useEffect(() => {
     const unsubscribe = listenToComments(category, postId, (newComments) => {
@@ -41,11 +44,27 @@ export default function CommentSection({
   }, [category, postId]);
 
   const handlePostComment = async () => {
-    if (!newComment.trim()) return; // extra safety
+    if (!newComment.trim()) {
+      Toast.show({
+        type: "error",
+        text1: "Comment cannot be empty.",
+      });
+      return;
+    }
 
-    setIsPosting(true);
+    const cleanText = newComment.trim();
+
+    if (filter.isProfane(cleanText)) {
+      Toast.show({
+        type: "error",
+        text1: "Please remove inappropriate language before commenting.",
+      });
+      return;
+    }
+
     try {
-      await createComment(category, postId, newComment);
+      setIsPosting(true);
+      await createComment(category, postId, cleanText);
       setNewComment("");
       onCommentPosted?.();
       setTimeout(
@@ -66,6 +85,7 @@ export default function CommentSection({
       setIsPosting(false);
     }
   };
+
   const confirmDelete = (commentId: string) => {
     Alert.alert(
       "Delete Comment",
@@ -86,19 +106,34 @@ export default function CommentSection({
       await deleteDoc(
         doc(db, "discussions", category, "posts", postId, "comments", commentId)
       );
-  
-      // 🛠 Decrease commentCount by 1
+
       const postRef = doc(db, "discussions", category, "posts", postId);
       await updateDoc(postRef, {
         commentCount: increment(-1),
       });
-  
+
       onCommentPosted?.();
     } catch (err) {
       console.error("Failed to delete comment:", err);
     }
   };
-  
+
+  const handleReportComment = (comment: any) => {
+    Alert.alert("Report Comment", `Report this comment by ${comment.name}?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Report",
+        style: "destructive",
+        onPress: () => {
+          // Placeholder for reporting logic (e.g. save to Firestore "reports")
+          Toast.show({
+            type: "success",
+            text1: "Thanks, we'll review it shortly.",
+          });
+        },
+      },
+    ]);
+  };
 
   return (
     <KeyboardAvoidingView
@@ -122,11 +157,18 @@ export default function CommentSection({
             <View style={styles.commentBubble}>
               <View style={styles.headerRow}>
                 <Text style={styles.name}>{item.name || "Anonymous"}</Text>
-                {item.userId === currentUid && (
-                  <TouchableOpacity onPress={() => confirmDelete(item.id)}>
-                    <Feather name="trash-2" size={16} color="#b92626" />
-                  </TouchableOpacity>
-                )}
+                <View style={{ flexDirection: "row", gap: 8 }}>
+                  {item.userId !== currentUid && (
+                    <TouchableOpacity onPress={() => handleReportComment(item)}>
+                      <Feather name="flag" size={16} color="#d9534f" />
+                    </TouchableOpacity>
+                  )}
+                  {item.userId === currentUid && (
+                    <TouchableOpacity onPress={() => confirmDelete(item.id)}>
+                      <Feather name="trash-2" size={16} color="#b92626" />
+                    </TouchableOpacity>
+                  )}
+                </View>
               </View>
               <Text style={styles.text}>{item.text}</Text>
             </View>
@@ -150,7 +192,7 @@ export default function CommentSection({
         <Button
           onPress={handlePostComment}
           style={styles.button}
-          disabled={!newComment.trim() || isPosting} // 👈 add isPosting
+          disabled={!newComment.trim() || isPosting}
           labelStyle={{
             fontFamily: "Main-font",
             fontSize: 14,
@@ -159,7 +201,7 @@ export default function CommentSection({
             color: "#000",
           }}
         >
-          {isPosting ? "Posting..." : "Post"} {/* Optional: change text too */}
+          {isPosting ? "Posting..." : "Post"}
         </Button>
       </View>
     </KeyboardAvoidingView>

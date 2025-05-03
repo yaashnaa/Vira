@@ -14,6 +14,7 @@ interface TakeQuizButtonProps {
   onPress: () => void;
 }
 const { width } = Dimensions.get("window");
+const height = Dimensions.get("window").height;
 export default function TakeQuiz({ onPress }: TakeQuizButtonProps) {
   return (
     <View style={{width: width }}>
@@ -67,11 +68,10 @@ export default function TakeQuiz({ onPress }: TakeQuizButtonProps) {
 const styles = StyleSheet.create({
   button: {
     marginTop: 20,
-    width: width ,
+    width: "100%",
     justifyContent: "center",
-    margin: "auto",
     alignItems: "center",
-    height: 200,
+    height: height * 0.2,
     display: "flex",
     flexDirection: "row",
     // borderTopWidth: 1,
@@ -79,24 +79,27 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     borderRadius: 10,
     // Optional shadow/elevation
-    // shadowColor: "#000",
-    // shadowOffset: { width: 2, height: 2 },
-    // shadowOpacity: 0.15,
-    // shadowRadius: 4,
-    // elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
   textContainer: {
     display: "flex",
     flexDirection: "column",
-    justifyContent: "center",
-
-    width: "60%",
+    justifyContent: "flex-start",
+    marginLeft: 0,
+    // width: "30%",
+    alignSelf: "center",
   },
   image: {
-    width: "50%",
-    height: 110,
+    width: "35%",
+
+    height: height * 0.17,
     resizeMode: "contain",
     marginBottom: 8,
+    marginRight: 10,
     marginLeft: 10,
   },
   text: {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, FlatList, ScrollView } from "react-native";
+import { View, Text, StyleSheet, FlatList, ScrollView, Dimensions } from "react-native";
 import DailyOverviewNutrition from "@/components/Nutrition/dailyOverviewNutrition";
 import { useUserPreferences } from "@/context/userPreferences";
 import { fetchMealLogs } from "@/utils/firestore";
@@ -80,11 +80,16 @@ export default function Overview() {
     </>
   );
 }
-
+const { width, height } = Dimensions.get("window");
 const styles = StyleSheet.create({
   container: {
     padding: 20,
     flex: 1,
+    height: height,
+    width: width,
+    alignSelf: "center",
+    backgroundColor: "#f8f6f4",
+   alignItems: "center",
   },
   sectionTitle: {
     fontSize: 20,

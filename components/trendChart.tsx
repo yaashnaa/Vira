@@ -54,7 +54,7 @@ export default function TrendChart({
   }
 
   return (
-    <View>
+    <View style={{alignSelf: "center", marginTop: 16}}>
       <LineChart
         data={{
           labels,
@@ -62,6 +62,7 @@ export default function TrendChart({
         }}
         width={screenWidth - 40}
         height={220}
+        style={{ alignSelf: "center", marginVertical: 8 }}
         chartConfig={{
           backgroundGradientFrom: "#fff",
           backgroundGradientTo: "#fff",
@@ -88,7 +89,7 @@ export default function TrendChart({
           },
         }}
         bezier
-        style={{ borderRadius: 16 }}
+
       />
 
       <Text style={styles.insight}>{generateInsight(metric, data)}</Text>

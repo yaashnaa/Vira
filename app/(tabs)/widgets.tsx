@@ -1,6 +1,6 @@
 // app/tools/index.tsx
 
-import React, {  useState } from "react";
+import React, {  useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,8 @@ import { Card, IconButton, Modal, Portal, Button } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { auth } from "@/config/firebaseConfig";
 import { useFocusEffect } from "expo-router";
+import { db } from "@/config/firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
 import {
   addWidget,
   removeWidget as removeWidgetFromStorage,
@@ -118,6 +120,20 @@ const tools = [
 ];
 
 export default function ToolsScreen() {
+    useEffect(() => {
+      const enforceAgreement = async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+    
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (!userDoc.exists() || !userDoc.data().agreedToTerms) {
+          router.replace("/termsOfUse");
+        }
+      };
+    
+      enforceAgreement();
+    }, []);
+    
   const router = useRouter();
   const [pinned, setPinned] = useState<string[]>([]);
   const [crisisModalVisible, setCrisisModalVisible] = useState(false);

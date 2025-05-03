@@ -7,6 +7,7 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
+  Dimensions,
 } from "react-native";
 import { Image } from "react-native";
 import { OfflineWrapper } from "@/components/OfflineWrapper";
@@ -158,292 +159,294 @@ export default function BasicQuiz() {
     switch (step) {
       case 0:
         return (
-
-            <OfflineWrapper>
-              <SafeAreaView>
-                <View style={{ marginBottom: 20, marginTop: 20 }}>
-                  <ProgressBar
-                    progress={(step + 1) / totalSteps}
-                    color="#A084DC"
-                    style={{ height: 10, borderRadius: 5 }}
-                  />
-                  <Text
-                    style={{ textAlign: "center", fontSize: 16, marginTop: 5 }}
-                  >
-                    Step {step + 1} of {totalSteps}
-                  </Text>
-                </View>
-                <Text style={styles.sectionTitle}>Let's get to know you✨</Text>
-                <Text style={styles.question}>
-                  What’s your name or preferred display name?
+          <OfflineWrapper>
+            <SafeAreaView>
+              <View style={{ marginBottom: 20, marginTop: 20 }}>
+                <ProgressBar
+                  progress={(step + 1) / totalSteps}
+                  color="#A084DC"
+                  style={{ height: 10, borderRadius: 5 }}
+                />
+                <Text
+                  style={{ textAlign: "center", fontSize: 16, marginTop: 5 }}
+                >
+                  Step {step + 1} of {totalSteps}
                 </Text>
+              </View>
+              <Text style={styles.sectionTitle}>Let's get to know you✨</Text>
+              <Text style={styles.question}>
+                What’s your name or preferred display name?
+              </Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your name"
+                value={name}
+                onChangeText={(text) => {
+                  setName(text);
+                  if (text.trim()) {
+                    setError("");
+                  }
+                }}
+              />
+              {error ? <Text style={styles.errorText}>{error}</Text> : null}
+              <Text style={styles.question}>What is your age group?</Text>
+              <View style={styles.optionContainer}>
+                {[
+                  "Under 18",
+                  "18–25",
+                  "26–40",
+                  "41–55",
+                  "56+",
+                  "Prefer not to say",
+                ].map((group) => (
+                  <TouchableOpacity
+                    key={group}
+                    style={[
+                      styles.optionButton,
+                      ageGroup === group && styles.selectedOption,
+                    ]}
+                    onPress={() => setAgeGroup(group)}
+                  >
+                    <Text>{group}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text style={styles.question}>
+                What is your current activity level?
+              </Text>
+              <View style={styles.optionContainer}>
+                {[
+                  "Sedentary (little or no exercise)",
+                  "Lightly active (1–3 days/week)",
+                  "Moderately active (3–5 days/week)",
+                  "Very active (6–7 days/week)",
+                  "Prefer not to say",
+                ].map((level) => (
+                  <TouchableOpacity
+                    key={level}
+                    style={[
+                      styles.optionButton,
+                      activityLevel === level && styles.selectedOption,
+                    ]}
+                    onPress={() => setactivityLevel(level)}
+                  >
+                    <Text>{level}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <Text style={styles.question}>
+                Do you have any medical conditions or injuries that might affect
+                exercise choices?
+              </Text>
+              <View style={styles.optionContainer}>
+                {["Yes", "No", "Prefer not to say"].map((option) => (
+                  <TouchableOpacity
+                    key={option}
+                    style={[
+                      styles.optionButton,
+                      medicalConditions === option && styles.selectedOption,
+                    ]}
+                    onPress={() => setMedicalConditions(option)}
+                  >
+                    <Text>{option}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              {medicalConditions.includes("Yes") && (
                 <TextInput
                   style={styles.input}
-                  placeholder="Enter your name"
-                  value={name}
-                  onChangeText={(text) => {
-                    setName(text);
-                    if (text.trim()) {
-                      setError("");
-                    }
-                  }}
+                  placeholder="Please specify"
+                  value={customMedicalConditions}
+                  onChangeText={setCustomMedicalConditions}
                 />
-                {error ? <Text style={styles.errorText}>{error}</Text> : null}
-                <Text style={styles.question}>What is your age group?</Text>
-                <View style={styles.optionContainer}>
-                  {[
-                    "Under 18",
-                    "18–25",
-                    "26–40",
-                    "41–55",
-                    "56+",
-                    "Prefer not to say",
-                  ].map((group) => (
-                    <TouchableOpacity
-                      key={group}
-                      style={[
-                        styles.optionButton,
-                        ageGroup === group && styles.selectedOption,
-                      ]}
-                      onPress={() => setAgeGroup(group)}
-                    >
-                      <Text>{group}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-                <Text style={styles.question}>
-                  What is your current activity level?
-                </Text>
-                <View style={styles.optionContainer}>
-                  {[
-                    "Sedentary (little or no exercise)",
-                    "Lightly active (1–3 days/week)",
-                    "Moderately active (3–5 days/week)",
-                    "Very active (6–7 days/week)",
-                    "Prefer not to say",
-                  ].map((level) => (
-                    <TouchableOpacity
-                      key={level}
-                      style={[
-                        styles.optionButton,
-                        activityLevel === level && styles.selectedOption,
-                      ]}
-                      onPress={() => setactivityLevel(level)}
-                    >
-                      <Text>{level}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-                <Text style={styles.question}>
-                  Do you have any medical conditions or injuries that might
-                  affect exercise choices?
-                </Text>
-                <View style={styles.optionContainer}>
-                  {["Yes", "No", "Prefer not to say"].map((option) => (
-                    <TouchableOpacity
-                      key={option}
-                      style={[
-                        styles.optionButton,
-                        medicalConditions === option && styles.selectedOption,
-                      ]}
-                      onPress={() => setMedicalConditions(option)}
-                    >
-                      <Text>{option}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-                {medicalConditions.includes("Yes") && (
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Please specify"
-                    value={customMedicalConditions}
-                    onChangeText={setCustomMedicalConditions}
-                  />
-                )}
-                <Text style={styles.question}>Mental Health Conditions</Text>
-                <View style={styles.optionContainer}>
-                  {[
-                    "Depression",
-                    "Anxiety",
-                    "Bipolar Disorder",
-                    "Post-Traumatic Stress Disorder (PTSD)",
-                    "Eating Disorder",
-                    "Obsessive-Compulsive Disorder (OCD)",
-                    "None of the above",
-                    "Prefer not to say",
-                    "Other",
-                  ].map((option) => (
-                    <TouchableOpacity
-                      key={option}
-                      style={[
-                        styles.optionButton,
-                        mentalDisorder.includes(option) &&
-                          styles.selectedOption,
-                      ]}
-                      onPress={() =>
-                        setMentalDisorder((prev) =>
-                          prev.includes(option)
-                            ? prev.filter((item) => item !== option)
-                            : [...prev, option]
-                        )
-                      }
-                    >
-                      <Text>{option}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-                {mentalDisorder.includes("Other") && (
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Please specify"
-                    value={customDisorder}
-                    onChangeText={setCustomDisorder}
-                  />
-                )}
-                <View style={styles.navigationButtons}>
-                  <Button
-                    mode="contained"
-                    onPress={handleNext}
-                    textColor="#390a84"
-                    style={{ marginRight: 10, left: 250 }}
-                    theme={{ colors: { primary: "#C3B1E1" } }}
+              )}
+              <Text style={styles.question}>Mental Health Conditions</Text>
+              <View style={styles.optionContainer}>
+                {[
+                  "Depression",
+                  "Anxiety",
+                  "Bipolar Disorder",
+                  "Post-Traumatic Stress Disorder (PTSD)",
+                  "Eating Disorder",
+                  "Obsessive-Compulsive Disorder (OCD)",
+                  "None of the above",
+                  "Prefer not to say",
+                  "Other",
+                ].map((option) => (
+                  <TouchableOpacity
+                    key={option}
+                    style={[
+                      styles.optionButton,
+                      mentalDisorder.includes(option) && styles.selectedOption,
+                    ]}
+                    onPress={() =>
+                      setMentalDisorder((prev) =>
+                        prev.includes(option)
+                          ? prev.filter((item) => item !== option)
+                          : [...prev, option]
+                      )
+                    }
                   >
-                    Next
-                  </Button>
-                </View>
-              </SafeAreaView>
-            </OfflineWrapper>
-    
+                    <Text>{option}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              {mentalDisorder.includes("Other") && (
+                <TextInput
+                  style={styles.input}
+                  placeholder="Please specify"
+                  value={customDisorder}
+                  onChangeText={setCustomDisorder}
+                />
+              )}
+              <View style={styles.navigationButtons}>
+                <Button
+                  mode="contained"
+                  onPress={handleNext}
+                  textColor="#390a84"
+                  style={{ marginRight: 10, left: 250 }}
+                  theme={{ colors: { primary: "#C3B1E1" } }}
+                >
+                  Next
+                </Button>
+              </View>
+            </SafeAreaView>
+          </OfflineWrapper>
         );
 
       case 1:
         return (
-   
           <OfflineWrapper>
-            <View style={{ marginBottom: 20 }}>
-              <ProgressBar
-                progress={(step + 1) / totalSteps}
-                color="#A084DC"
-                style={{ height: 10, borderRadius: 5 }}
-              />
-              <Text style={{ textAlign: "center", fontSize: 16, marginTop: 5 }}>
-                Step {step + 1} of {totalSteps}
-              </Text>
-            </View>
-            <Text style={styles.sectionTitle}>Personal Goals</Text>
-            <Text style={styles.question}>
-              What are your primary reasons for using this app? (Select up to 3)
-            </Text>
-            <View style={styles.optionContainer}>
-              {goalError ? (
-                <Text style={{ color: "red", marginBottom: 10 }}>
-                  {goalError}
-                </Text>
-              ) : null}
-              {[
-                {
-                  label: "General fitness/health",
-                  image: require("../../assets/images/goals/6124333.png"),
-                },
-                {
-                  label: "Weight management or body recomposition",
-                  image: require("../../assets/images/goals/general.png"),
-                },
-                {
-                  label: "Improve mental well-being",
-                  image: require("../../assets/images/goals/mind.png"),
-                },
-                {
-                  label: "Build consistent eating habits",
-                  image: require("../../assets/images/goals/learn.png"),
-                },
-                {
-                  label: "Enhance social connections or community support",
-                  image: require("../../assets/images/goals/social.png"),
-                },
-                {
-                  label: "Learn about nutrition and healthy eating",
-                  image: require("../../assets/images/goals/nutrition.png"),
-                },
-                {
-                  label: "Track progress and set goals",
-                  image: require("../../assets/images/goals/6124333.png"),
-                },
-                {
-                  label: "Improve mindfulness or self-care habits",
-                  image: require("../../assets/images/goals/mindfullness.png"),
-                },
-              ].map((option) => (
-                <TouchableOpacity
-                  key={option.label}
-                  style={[
-                    styles.optionButton,
-                    primaryGoals.includes(option.label) &&
-                      styles.selectedOption,
-                  ]}
-                  onPress={() =>
-                    setPrimaryGoals((prev) =>
-                      prev.includes(option.label)
-                        ? prev.filter((g) => g !== option.label)
-                        : prev.length < 3
-                          ? [...prev, option.label]
-                          : prev
-                    )
-                  }
+            <View>
+              <View style={{ marginBottom: 20}}>
+                <ProgressBar
+                  progress={(step + 1) / totalSteps}
+                  color="#A084DC"
+                  style={{ height: 10, borderRadius: 5 }}
+                />
+                <Text
+                  style={{ textAlign: "center", fontSize: 16, marginTop: 5 }}
                 >
-                  <View style={styles.optionContent}>
-                    <Image
-                      source={option.image}
-                      style={{ width: 30, height: 30, marginRight: 10 }}
-                    />
-                    <View
-                      style={{
-                        flex: 1,
-                        flexWrap: "wrap",
-                        justifyContent: "center",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Text style={styles.optionText}>{option.label}</Text>
+                  Step {step + 1} of {totalSteps}
+                </Text>
+              </View>
+              <Text style={styles.sectionTitle}>Personal Goals</Text>
+              <Text style={styles.question}>
+                What are your primary reasons for using this app? (Select up to
+                3)
+              </Text>
+              <View style={styles.optionContainer}>
+                {goalError ? (
+                  <Text style={{ color: "red", marginBottom: 10 }}>
+                    {goalError}
+                  </Text>
+                ) : null}
+                {[
+                  {
+                    label: "General fitness/health",
+                    image: require("../../assets/images/goals/6124333.png"),
+                  },
+                  {
+                    label: "Weight management or body recomposition",
+                    image: require("../../assets/images/goals/general.png"),
+                  },
+                  {
+                    label: "Improve mental well-being",
+                    image: require("../../assets/images/goals/mind.png"),
+                  },
+                  {
+                    label: "Build consistent eating habits",
+                    image: require("../../assets/images/goals/learn.png"),
+                  },
+                  {
+                    label: "Enhance social connections or community support",
+                    image: require("../../assets/images/goals/social.png"),
+                  },
+                  {
+                    label: "Learn about nutrition and healthy eating",
+                    image: require("../../assets/images/goals/nutrition.png"),
+                  },
+                  {
+                    label: "Track progress and set goals",
+                    image: require("../../assets/images/goals/6124333.png"),
+                  },
+                  {
+                    label: "Improve mindfulness or self-care habits",
+                    image: require("../../assets/images/goals/mindfullness.png"),
+                  },
+                ].map((option) => (
+                  <TouchableOpacity
+                    key={option.label}
+                    style={[
+                      styles.optionButton,
+                      primaryGoals.includes(option.label) &&
+                        styles.selectedOption,
+                    ]}
+                    onPress={() =>
+                      setPrimaryGoals((prev) =>
+                        prev.includes(option.label)
+                          ? prev.filter((g) => g !== option.label)
+                          : prev.length < 3
+                            ? [...prev, option.label]
+                            : prev
+                      )
+                    }
+                  >
+                    <View style={styles.optionContent}>
+                      <Image
+                        source={option.image}
+                        style={{ width: 30, height: 30, marginRight: 10 }}
+                      />
+                      <View
+                        style={{
+                          flex: 1,
+                          flexWrap: "wrap",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Text style={styles.optionText}>{option.label}</Text>
+                      </View>
                     </View>
-                  </View>
-                </TouchableOpacity>
-              ))}
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <View style={styles.navigationButtons}>
+                <Button
+                  mode="contained"
+                  onPress={handleBack}
+                  textColor="#390a84"
+                  style={{ marginRight: 10 }}
+                  theme={{ colors: { primary: "#C3B1E1" } }}
+                >
+                  Back
+                </Button>
+                <Button
+                  mode="contained"
+                  onPress={handleSubmitForm}
+                  textColor="#390a84"
+                  theme={{ colors: { primary: "#C3B1E1" } }}
+                  disabled={loading}
+                >
+                  {loading ? "Submitting..." : "Submit"}
+                </Button>
+              </View>
             </View>
-            <View style={styles.navigationButtons}>
-              <Button
-                mode="contained"
-                onPress={handleBack}
-                textColor="#390a84"
-                style={{ marginRight: 10 }}
-                theme={{ colors: { primary: "#C3B1E1" } }}
-              >
-                Back
-              </Button>
-              <Button
-                mode="contained"
-                onPress={handleSubmitForm}
-                textColor="#390a84"
-                theme={{ colors: { primary: "#C3B1E1" } }}
-                disabled={loading}
-              >
-                {loading ? "Submitting..." : "Submit"}
-              </Button>
-            </View>
-            </OfflineWrapper>
-
+          </OfflineWrapper>
         );
 
       default:
         return <Text>Unknown Step</Text>;
     }
   };
-
+  const height = Dimensions.get("window").height;
+  const width = Dimensions.get("window").width;
   const styles = StyleSheet.create({
     container: {
       flexGrow: 1,
       padding: 15,
       backgroundColor: "#F8F9FA",
+      height: height,
     },
     errorText: {
       color: "red",
@@ -477,6 +480,8 @@ export default function BasicQuiz() {
       flexWrap: "wrap",
       marginBottom: 15,
       marginLeft: 0,
+
+      justifyContent: "space-between",
     },
     optionContent: {
       flexDirection: "row",

@@ -43,7 +43,7 @@ export default function Mood() {
           }}
         />
 
-        <View style={{ marginTop: 20 }}>
+        <View style={{ marginTop: 20, alignSelf: "center" }}>
           <TrendChart metric={selectedSegment} />
         </View>
       </ScrollView>

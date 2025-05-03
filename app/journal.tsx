@@ -8,7 +8,7 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
-  Platform,
+  Platform, Dimensions
 } from "react-native";
 import { db, auth } from "@/config/firebaseConfig";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
@@ -105,37 +105,7 @@ export default function Journal() {
 
   return (
     <>
-      {/* <HeaderRNE
-        containerStyle={{
-          backgroundColor: "#f8edeb",
-          borderBottomWidth: 0,
-          paddingTop: 10,
-        }}
-        leftComponent={
-          <TouchableOpacity onPress={handleBackPress}>
-            <Icon name="arrow-back" size={25} type="ionicon" color="#271949" />
-          </TouchableOpacity>
-        }
-        centerComponent={{
-          text: "JOURNAL",
-          style: {
-            color: "#271949",
-            fontSize: 20,
-            fontWeight: "bold",
-            fontFamily: "PatrickHand-Regular",
-          },
-        }}
-        rightComponent={
-          <View style={styles.headerRight}>
-            <TouchableOpacity
-              style={{ marginLeft: 12 }}
-              onPress={() => router.replace("/settings")}
-            >
-              <Icon name="settings" size={25} type="feather" color="#271949" />
-            </TouchableOpacity>
-          </View>
-        }
-      /> */}
+      
       <Header title="Journal" />
 
       <Provider>
@@ -155,12 +125,8 @@ export default function Journal() {
                 source={require("../assets/animations/write.json")}
                 autoPlay
                 loop
-                style={{
-                  width: 150,
-                  height: 150,
-                  alignSelf: "center",
-                  marginBottom: 10,
-                }}
+                
+                style={styles.lottie}
               />
               <Text style={styles.sectionTitle}>
                 What kind of journaling today?
@@ -230,12 +196,16 @@ export default function Journal() {
     </>
   );
 }
-
+const width = Dimensions.get("window").width;
+const height = Dimensions.get("window").height;
 const styles = StyleSheet.create({
   container: {
     padding: 20,
     backgroundColor: "#ffffff",
     flexGrow: 1,
+    height: height,
+
+
   },
   segmentedContainer: {
     flexDirection: "row",
@@ -289,6 +259,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#94618e",
     marginVertical: 10,
+  },
+  lottie:{
+    width: width *0.7 || 400,
+    height: height *0.21|| 400,
+    marginTop: 25,
+    alignSelf: "center",
+    
   },
   checkInNotice: {
     marginTop: 12,

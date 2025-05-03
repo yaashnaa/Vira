@@ -3,6 +3,14 @@ import { View, Text, StyleSheet, Image } from "react-native";
 import { useCheckInContext } from "@/context/checkInContext"; // ⬅️ Changed import
 import { Calendar } from "react-native-calendars";
 
+type MoodMarking = {
+  customStyles: {
+    container?: object;
+    text?: object;
+  };
+  mood?: number;
+};
+
 const moodImages = {
   "Feeling Great": require("../assets/images/mood/vhappy.png"),
   "Pretty Good": require("../assets/images/mood/happy.png"),
@@ -21,7 +29,9 @@ const moodLabels: Record<number, keyof typeof moodImages> = {
 
 export default function MoodCalendar() {
   const { fetchAllMoods } = useCheckInContext();
-  const [markedDates, setMarkedDates] = useState<{ [key: string]: any }>({});
+  const [markedDates, setMarkedDates] = useState<{
+    [key: string]: MoodMarking;
+  }>({});
 
   useEffect(() => {
     (async () => {
@@ -47,14 +57,14 @@ export default function MoodCalendar() {
       <Calendar
         markingType="custom"
         markedDates={markedDates}
-        dayComponent={(props) => {
-          // TS now knows props.date is DateData, props.marking is your custom object
-          const { date, marking } = props;
-          const mood = (marking as any).mood as number | undefined;
+        dayComponent={({ date, marking }) => {
+          const customMarking = marking as MoodMarking;
+          const mood = customMarking?.mood;
+
           return (
             <View style={styles.dayContainer}>
-              {date && <Text style={styles.dayText}>{date.day}</Text>}
-              {typeof mood === "number" && (
+              <Text style={styles.dayText}>{date?.day ?? ""}</Text>
+              {typeof mood === "number" && moodImages[moodLabels[mood]] && (
                 <Image
                   source={moodImages[moodLabels[mood]]}
                   style={styles.moodIcon}

@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, Image, StyleSheet, Dimensions } from "react-native";
 import { Card, Divider, Button } from "react-native-paper";
 import { useRouter } from "expo-router";
-
+import LottieView from "lottie-react-native";
 interface MoodSuggestionsCardProps {
   latestCheckIn: Record<string, any> | null;
 }
@@ -79,14 +79,20 @@ export default function MoodSuggestionsCard({
   return (
     <Card onPress={() => router.push("/checkInScreen")} style={styles.card}>
       <Card.Content style={styles.cardContent}>
-        <View style={{flexDirection: "row", alignItems: "center", justifyContent: "center"}}>
+        <View style={{flexDirection: "column", alignItems: "center", width: "90%"}}>
+          <LottieView
+            source={require("../../assets/animations/checkin.json")}
+            autoPlay
+            loop
+            style={styles.image}
+          />
           <Text style={styles.heading}>
-            Check in to get personalized suggestions ✨
+            Check in to get personalized suggestions✨
           </Text>
-          <Image
+          {/* <Image
             source={require("../../assets/images/dashboard/checkin.png")}
             style={{ width: 50, height: 60, marginLeft: 10 }}
-          />
+          /> */}
         </View>
 
         <Divider style={styles.divider} />
@@ -101,7 +107,7 @@ export default function MoodSuggestionsCard({
 
 const styles = StyleSheet.create({
   recommendationBox: {
-    width: width * 0.9,
+    width: width * 0.8,
     backgroundColor: "#f8edeb",
     padding: 16,
     borderRadius: 16,
@@ -138,13 +144,15 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     alignItems: "center",
+    justifyContent: "space-between",
   },
   heading: {
     fontFamily: "PatrickHand-Regular",
     fontSize: 20,
     marginBottom: 10,
     textAlign: "center",
-    width: "80%",
+    width: "100%",
+
   },
   divider: {
     width: "80%",
@@ -152,7 +160,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: 320,
-    height: 90,
+    height: 100,
     resizeMode: "contain",
     marginBottom: 10,
   },

@@ -13,9 +13,26 @@ export default {
     ios: {
       bundleIdentifier: "com.yaashna.vira",
       supportsTablet: true,
-      buildNumber: "23" 
-
-    },    
+      buildNumber: "23",
+      infoPlist: {
+        NSAppTransportSecurity: {
+          NSExceptionDomains: {
+            "firebaseapp.com": {
+              NSIncludesSubdomains: true,
+              NSTemporaryExceptionAllowsInsecureHTTPLoads: true,
+              NSTemporaryExceptionMinimumTLSVersion: "TLSv1.2"
+            },
+            "googleapis.com": {
+              NSIncludesSubdomains: true,
+              NSTemporaryExceptionAllowsInsecureHTTPLoads: true,
+              NSTemporaryExceptionMinimumTLSVersion: "TLSv1.2"
+            }
+          }
+        }
+      }
+      
+    },
+       
     android: {
       package: "com.yaashna.vira",
       versionCode: 23,

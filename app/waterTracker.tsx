@@ -5,13 +5,12 @@ import {
   View,
   SafeAreaView,
   Animated,
-  TouchableOpacity,
+  TouchableOpacity, Dimensions,
   Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import ConfettiCannon from "react-native-confetti-cannon";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Header as HeaderRNE, Icon } from "@rneui/themed";
 import { AddRemoveButton } from "../components/addRemoveButton";
 import Header from "@/components/header";
 import { IconButton, MD3Colors } from "react-native-paper";
@@ -211,12 +210,14 @@ export default function WaterTrackerScreen() {
     </>
   );
 }
-
+const { height } = Dimensions.get("window");
+const width = Dimensions.get("window").width;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f8f6f4",
     alignItems: "center",
+    gap: 20,
   },
   character: {
     width: 140,
@@ -238,8 +239,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     display: "flex",
     flexDirection: "row",
-    justifyContent: "center",
-    margin: "auto",
+    // justifyContent: "center",
+    // margin: "auto",
     // paddingVertical: 30,
   },
   brownTitle: {
@@ -263,7 +264,7 @@ const styles = StyleSheet.create({
   },
   progressSection: {
     flexDirection: "row",
-    width: "90%",
+    width: "100%",
     justifyContent: "space-around",
     alignItems: "center",
   },
@@ -271,7 +272,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     borderWidth: 1,
     width: 40,
-    height: 300,
+    height: height *0.3,
     justifyContent: "flex-end",
     overflow: "hidden",
     borderColor: "#e2d6cc",
@@ -298,7 +299,7 @@ const styles = StyleSheet.create({
   waterButtonsContainer: {
     flexDirection: "row",
     paddingVertical: 12,
-    width: "90%",
+    width: width * 0.9,
     justifyContent: "space-between",
   },
   headerRight: {

@@ -102,7 +102,7 @@ export default function SignupScreen() {
             }}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={{ position: "relative", width: 350, height: 300 }}>
+            <View style={{  }}>
               {imageLoading && (
                 <ActivityIndicator
                   size="large"
@@ -201,6 +201,7 @@ export default function SignupScreen() {
 }
 
 const width = Dimensions.get("window").width;
+const height = Dimensions.get("window").height;
 
 const styles = StyleSheet.create({
   container: {
@@ -224,8 +225,9 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   image: {
-    height: 300,
-    width: 350,
+    height: height * 0.4,
+    width: width * 0.7,
+    resizeMode: "contain",
   },
   inputView: {
     display: "flex",

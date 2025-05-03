@@ -254,6 +254,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 1,
     borderColor: "#eee",
+    // width: "80%",
   },
   mealName: {
     fontSize: 16,

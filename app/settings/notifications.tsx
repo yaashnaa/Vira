@@ -230,13 +230,7 @@ export default function NotificationsScreen() {
           </Text>
         </TouchableOpacity>
 
-        <Text style={styles.label}>Enable Water Reminders</Text>
-        <TouchableOpacity
-          style={styles.checkboxRow}
-          onPress={() => setWaterReminderEnabled(!waterReminderEnabled)}
-        >
-          {/* checkbox UI */}
-        </TouchableOpacity>
+    
 
         {!waterReminderEnabled && (
           <Text style={styles.helperText}>
