@@ -1,8 +1,8 @@
 import "dotenv/config";
 
 export default {
-  expo: {
-    name: "vira",
+  expo: { 
+    name: "Vira",
     slug: "vira",
     version: "1.0.1",
     orientation: "portrait",

@@ -6,8 +6,9 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   StyleSheet,
-  Dimensions, Button,
-  Text,
+  Dimensions,
+  Button,
+  Text, Image, 
 } from "react-native";
 import { OfflineWrapper } from "@/components/OfflineWrapper";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -31,8 +32,8 @@ import { useCheckInData } from "@/hooks/useCheckInData";
 import PinnedWidgetsSection from "@/components/dashboard/pinnedWidgets";
 import OfflineNotice from "@/components/offlineComponent";
 import { addTaskToQueue } from "@/utils/firebaseOfflineQueue";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import 'react-native-reanimated';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import "react-native-reanimated";
 
 import LogMoodButton from "@/components/Buttons/logMoodBtn";
 import TakeQuizButton from "@/components/takeQuiz";
@@ -79,16 +80,17 @@ export default function Dashboard() {
   useEffect(() => {
     const logAsyncStorageData = async () => {
       try {
-        const onboardingComplete = await AsyncStorage.getItem('onboardingComplete');
-        console.log('📦 onboardingComplete:', onboardingComplete);
-  
-        const userPreferences = await AsyncStorage.getItem('userPreferences');
-        console.log('📦 userPreferences:', JSON.parse(userPreferences || '{}'));
+        const onboardingComplete =
+          await AsyncStorage.getItem("onboardingComplete");
+        console.log("📦 onboardingComplete:", onboardingComplete);
+
+        const userPreferences = await AsyncStorage.getItem("userPreferences");
+        console.log("📦 userPreferences:", JSON.parse(userPreferences || "{}"));
       } catch (error) {
-        console.error('❌ Error reading from AsyncStorage:', error);
+        console.error("❌ Error reading from AsyncStorage:", error);
       }
     };
-  
+
     logAsyncStorageData();
   }, []);
   const dumpAsyncStorage = async () => {
@@ -98,7 +100,7 @@ export default function Dashboard() {
       console.log(`🧾 ${key}:`, value);
     });
   };
-    
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setAuthReady(true);
@@ -130,7 +132,7 @@ export default function Dashboard() {
       checkScreening();
     }, [])
   );
-  
+
   useFocusEffect(
     useCallback(() => {
       const loadWidgets = async () => {
@@ -155,36 +157,30 @@ export default function Dashboard() {
     setWidgetChangeTrigger((prev) => prev + 1);
   };
 
-
   if (loading || !userPreferences?.name || !authReady || !auth.currentUser) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={lightTheme.primary} />
-        <LogoutButton />
+        <View style={styles.card}>
+          <Image
+            source={require("../../assets/images/loading.png")} 
+            style={styles.mascot}
+          />
+          <Text style={styles.loadingText}>
+            Hey {userPreferences?.name || "friend"}!{"\n"}Loading your cozy
+            space…
+          </Text>
+          <ActivityIndicator
+            size="large"
+            color={lightTheme.primary}
+            style={styles.spinner}
+          />
+          <View style={styles.logoutButton}>
+            <LogoutButton />
+          </View>
+        </View>
       </View>
     );
   }
-  // if (isOffline) {
-  //   return <OfflineNotice />;
-  // }
-  // if (isConnected === false) {
-  //   return (
-  //     <SafeAreaView style={styles.centered}>
-  //       <Text style={styles.offlineText}>
-  //         You're offline. Please reconnect to use Vira.
-  //       </Text>
-  //     </SafeAreaView>
-  //   );
-  // }
-
-  // if (isConnected === null) {
-  //   return (
-  //     <SafeAreaView style={styles.centered}>
-  //       <ActivityIndicator size="large" />
-  //       <Text style={styles.offlineText}> You are not connected</Text>
-  //     </SafeAreaView>
-  //   );
-  // }
 
   return (
     <OfflineWrapper>
@@ -194,7 +190,6 @@ export default function Dashboard() {
           style={styles.background}
           resizeMode="cover"
         >
-
           <FlatList
             data={dashboardSections}
             keyExtractor={(item) => item}
@@ -209,7 +204,6 @@ export default function Dashboard() {
                   return (
                     <View style={styles.section}>
                       <CombinedCheckInCard />
-
                     </View>
                   );
                 case "logMood":
@@ -265,12 +259,6 @@ const styles = StyleSheet.create({
     height: height,
   },
 
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
   section: {
     marginBottom: 30,
     alignItems: "center",
@@ -280,14 +268,53 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F9F8FC", 
+    backgroundColor: "#F9F8FC",
     paddingHorizontal: 20,
   },
   offlineText: {
     fontSize: 18,
-    color: "#5A3E9B", 
+    color: "#5A3E9B",
     textAlign: "center",
-    fontFamily: "Main-font", 
+    fontFamily: "Main-font",
     marginTop: 10,
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: "#fff7fb",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  card: {
+    backgroundColor: "#ffffff",
+    borderRadius: 20,
+    padding: 24,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  mascot: {
+    width: 80,
+    height: 80,
+    marginBottom: 16,
+  },
+  loadingText: {
+    fontSize: 18,
+    textAlign: "center",
+    color: "#86508f",
+    fontFamily: "PatrickHand-Regular",
+    marginBottom: 16,
+    lineHeight: 24,
+  },
+  spinner: {
+    marginBottom: 24,
+  },
+  logoutButton: {
+    backgroundColor: "#f8d7da",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
 });

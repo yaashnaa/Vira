@@ -3,7 +3,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
-  deleteUser,
+  deleteUser, sendPasswordResetEmail
 } from "firebase/auth";
 import { deleteDoc, doc } from "firebase/firestore";
 import Toast from "react-native-toast-message";
@@ -48,6 +48,30 @@ export async function deleteAccount() {
       throw new Error("Please re-authenticate and try again.");
     }
 
+    throw error;
+  }
+}
+/**
+ * Send a password reset email to the given address.
+ * @param email the user's email
+ */
+export async function resetPassword(email: string) {
+  try {
+    await sendPasswordResetEmail(auth, email);
+    Toast.show({
+      type: "success",
+      text1: "Password Reset Email Sent",
+      text2: `Check ${email} to reset your password.`,
+    });
+  } catch (error: any) {
+    console.error("Error sending reset email:", error);
+    let message = "Failed to send reset email.";
+    if (error.code === "auth/invalid-email") {
+      message = "That email address is not valid.";
+    } else if (error.code === "auth/user-not-found") {
+      message = "No account found with that email.";
+    }
+    Toast.show({ type: "error", text1: message });
     throw error;
   }
 }

@@ -23,6 +23,44 @@ import Header from "@/components/header";
 import { auth } from "@/config/firebaseConfig";
 import { deleteAccount, logoutUser } from "@/utils/auth";
 import { useRouter } from "expo-router";
+// Somewhere at top of file
+const PASSWORD_ERROR_MESSAGES: Record<
+  string,
+  { title: string; message: string }
+> = {
+  "auth/wrong-password": {
+    title: "Incorrect Password",
+    message: "The current password you entered is incorrect.",
+  },
+  "auth/weak-password": {
+    title: "Weak Password",
+    message: "Your new password is too weak. It must be at least 6 characters.",
+  },
+  "auth/requires-recent-login": {
+    title: "Re-authenticate Required",
+    message: "Please log in again before changing your password.",
+  },
+  "auth/invalid-credential": {
+    title: "Invalid Credential",
+    message: "The password provided is invalid.",
+  },
+};
+
+const EMAIL_ERROR_MESSAGES: Record<string, { title: string; message: string }> =
+  {
+    "auth/invalid-email": {
+      title: "Invalid Email",
+      message: "That email address doesn’t look right.",
+    },
+    "auth/email-already-in-use": {
+      title: "Email In Use",
+      message: "That email is already linked to another account.",
+    },
+    "auth/requires-recent-login": {
+      title: "Re-authenticate Required",
+      message: "Please log in again before changing your email.",
+    },
+  };
 
 import { useUserPreferences } from "@/context/userPreferences";
 export default function AccountSettingsSection() {
@@ -38,49 +76,43 @@ export default function AccountSettingsSection() {
 
   const [showEmailSection, setShowEmailSection] = useState(false);
   const [showPasswordSection, setShowPasswordSection] = useState(false);
-  useEffect(() => {
-    setTimeout(() => {
-      Toast.show({
-        type: "info",
-        text1: "Test Toast",
-        text2: "Does this show on this screen?",
-      });
-    }, 1000);
-  }, []);
 
   const handleChangePassword = async () => {
     if (newPassword !== confirmPassword) {
-      Alert.alert("Mismatch", "New passwords do not match.");
-      return;
+      return Toast.show({
+        type: "error",
+        text1: "Passwords Don’t Match",
+        text2: "Please make sure both fields are identical.",
+      });
     }
 
     if (!user?.email) return;
+
+    setLoading(true);
     try {
-      setLoading(true);
       const credential = EmailAuthProvider.credential(
         user.email,
         currentPassword
       );
       await reauthenticateWithCredential(user, credential);
       await updatePassword(user, newPassword);
+
       Toast.show({
         type: "success",
-        text1: "Success",
-        text2: "Password updated successfully.",
-        position: "bottom",
+        text1: "Password Updated",
+        text2: "Your password has been changed successfully.",
       });
 
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (error: any) {
-      console.log("🔥 Toast should trigger now:", error.message);
+    } catch (err: any) {
+      const { code, message } = err;
+      const errInfo = PASSWORD_ERROR_MESSAGES[code];
       Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: error.message || "Something went wrong",
-        position: "bottom",
-        visibilityTime: 4000,
+        type: errInfo ? "error" : "error",
+        text1: errInfo?.title || "Error Changing Password",
+        text2: errInfo?.message || message || "Something went wrong.",
       });
     } finally {
       setLoading(false);
@@ -90,23 +122,27 @@ export default function AccountSettingsSection() {
   const handleChangeEmail = async () => {
     if (!user?.email) return;
 
+    setLoading(true);
     try {
-      setLoading(true);
       const credential = EmailAuthProvider.credential(
         user.email,
         currentPassword
       );
       await reauthenticateWithCredential(user, credential);
       await updateEmail(user, newEmail);
-      Alert.alert("Success", "Email updated.");
-    } catch (error: any) {
-      console.log("🔥 Toast should trigger now:", error.message);
+
+      Toast.show({
+        type: "success",
+        text1: "Email Updated",
+        text2: "Your email address has been changed.",
+      });
+    } catch (err: any) {
+      const { code, message } = err;
+      const errInfo = EMAIL_ERROR_MESSAGES[code];
       Toast.show({
         type: "error",
-        text1: "Error",
-        text2: error.message || "Something went wrong",
-        position: "bottom",
-        visibilityTime: 4000,
+        text1: errInfo?.title || "Error Changing Email",
+        text2: errInfo?.message || message || "Something went wrong.",
       });
     } finally {
       setLoading(false);
@@ -122,6 +158,7 @@ export default function AccountSettingsSection() {
         onPress: async () => {
           try {
             await deleteAccount();
+            router.replace("/(auth)/login");
           } catch (err: any) {
             Alert.alert("Error", err.message || "Failed to delete account.");
           }
@@ -133,7 +170,7 @@ export default function AccountSettingsSection() {
   const handleLogout = async () => {
     try {
       await logoutUser();
-      router.replace("/(auth)/login");    
+      router.replace("/(auth)/login");
     } catch (err: any) {
       Alert.alert("Error", err.message || "Failed to log out.");
     }

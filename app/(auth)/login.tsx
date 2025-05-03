@@ -21,7 +21,7 @@ import {
 } from "react-native";
 import { Button } from "react-native-paper";
 import { useRouter } from "expo-router";
-import { loginUser } from "../../utils/auth"; 
+import { loginUser,resetPassword } from "../../utils/auth"; 
 import { fetchUserPreferences } from "@/utils/firestore";
 import { useUserPreferences } from "@/context/userPreferences"; // Custom hook for user preferences
 import { ensureUserDocumentExists } from "../../utils/firestore"; // Function to ensure user document exists
@@ -36,7 +36,19 @@ export default function LoginScreen() {
 
   const { updatePreferences } =
     useUserPreferences();
-
+    const handleReset = async () => {
+      try {
+        await resetPassword(email);
+        router.push("/(auth)/login");
+      } catch {
+        Toast.show({
+          type: "error",
+          text1: "Failed to reset password. Please try again.",
+          visibilityTime: 2000,
+        });
+      }
+    };
+  
   const handleLogin = async () => {
     setErrorMessage("");
     setIsLoading(true); // Start spinner
@@ -165,11 +177,11 @@ export default function LoginScreen() {
                 </View>
               </View>
 
-              <TouchableOpacity>
+              <TouchableOpacity onPress={handleReset}>
                 <Text style={styles.forgot_button}>Forgot Password?</Text>
               </TouchableOpacity>
               <Button
-                mode="contained-tonal"
+                mode="contained-tonal"  
                 buttonColor="#86508f"
                 textColor="#fefefe"
                 onPress={handleLogin}

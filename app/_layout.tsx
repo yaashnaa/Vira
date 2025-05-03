@@ -12,6 +12,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../config/firebaseConfig';
 import 'react-native-reanimated';
 
+import Toast from 'react-native-toast-message';
 export default function RootLayout() {
   const [ready, setReady] = useState(false);
 
@@ -33,6 +34,7 @@ export default function RootLayout() {
             <CheckInProvider>
               <MealLogProvider>
                 <Slot />
+                <Toast />
               </MealLogProvider>
             </CheckInProvider>
           </UserPreferencesProvider>
