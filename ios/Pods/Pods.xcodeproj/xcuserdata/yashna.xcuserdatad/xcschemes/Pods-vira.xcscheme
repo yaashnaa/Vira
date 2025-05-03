@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "9400A1FCD6E5AEEDC860026335A7B5E7"
-               BuildableName = "libPods-vira.a"
+               BuildableName = "Pods_vira.framework"
                BlueprintName = "Pods-vira"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>

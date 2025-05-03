@@ -1,4 +1,4 @@
-module ExpoVideo {
+framework module ExpoVideo {
   umbrella header "ExpoVideo-umbrella.h"
 
   export *

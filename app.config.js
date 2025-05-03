@@ -13,12 +13,12 @@ export default {
     ios: {
       bundleIdentifier: "com.yaashna.vira",
       supportsTablet: true,
-      buildNumber: "22" 
+      buildNumber: "23" 
 
     },    
     android: {
       package: "com.yaashna.vira",
-      versionCode: 22,
+      versionCode: 23,
       adaptiveIcon: {
         foregroundImage: "./assets/images/vira.png",
         backgroundColor: "#ffffff",
