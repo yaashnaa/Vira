@@ -19,29 +19,67 @@ import { db, auth } from "@/config/firebaseConfig";
 import Feather from "@expo/vector-icons/Feather";
 import Toast from "react-native-toast-message";
 import { Filter } from "bad-words";
-
+import { blockUser } from "@/utils/blockUser";
+import { collection, getDocs } from "firebase/firestore";
 export default function CommentSection({
   category,
   postId,
+
   onCommentPosted,
 }: {
   category: string;
   postId: string;
+  blockedUserIds?: string[];
   onCommentPosted?: () => void;
 }) {
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState("");
   const flatListRef = useRef<FlatList>(null);
   const currentUid = auth.currentUser?.uid;
+  const [blockUsersId, setBlockUsersId] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchBlocked = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+      const snapshot = await getDocs(
+        collection(db, "users", user.uid, "blockedUsers")
+      );
+      const ids = snapshot.docs.map((doc) => doc.id);
+      setBlockUsersId(ids);
+    };
+
+    fetchBlocked();
+  }, []);
+
+  const handleBlock = async (userIdToBlock: string) => {
+    Alert.alert("Block User", "Are you sure?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Block",
+        style: "destructive",
+        onPress: async () => {
+          await blockUser(userIdToBlock);
+          setBlockUsersId((prev) => [...prev, userIdToBlock]); // update blocked list
+          setComments((prev) => prev.filter((c) => c.userId !== userIdToBlock)); // remove their comments
+          Toast.show({ type: "success", text1: "User blocked" });
+        },
+      },
+    ]);
+  };
+  
   const [isPosting, setIsPosting] = useState(false);
   const filter = new Filter();
 
   useEffect(() => {
     const unsubscribe = listenToComments(category, postId, (newComments) => {
-      setComments(newComments);
+      const visible = newComments.filter(
+        (c) => !blockUsersId.includes(c.userId)
+      );
+      setComments(visible);
     });
     return () => unsubscribe();
-  }, [category, postId]);
+  }, [category, postId, blockUsersId]); // ← Add blockUsersId here
 
   const handlePostComment = async () => {
     if (!newComment.trim()) {
@@ -158,6 +196,12 @@ export default function CommentSection({
               <View style={styles.headerRow}>
                 <Text style={styles.name}>{item.name || "Anonymous"}</Text>
                 <View style={{ flexDirection: "row", gap: 8 }}>
+                  {item.userId !== currentUid && (
+                    <TouchableOpacity onPress={() => handleBlock(item.userId)}>
+                      <Feather name="slash" size={18} color="#888" />
+                    </TouchableOpacity>
+                  )}
+
                   {item.userId !== currentUid && (
                     <TouchableOpacity onPress={() => handleReportComment(item)}>
                       <Feather name="flag" size={16} color="#d9534f" />

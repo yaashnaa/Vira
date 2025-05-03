@@ -169,7 +169,7 @@ export default function Explore() {
                   <FlatList
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    data={exercises.slice(0, 2)}
+                    data={exercises.slice(0, 5)}
                     style={{ backgroundColor: "#F8F9FA" }}
                     keyExtractor={(_, index) => index.toString()}
                     contentContainerStyle={styles.resultsContainer}
@@ -325,6 +325,8 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#F8F9FA",
     flexGrow: 1,
+    // width: width,
+    // height: height,
   },
   introText: {
     fontSize: 18,
@@ -334,6 +336,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: "Main-font",
     marginTop: 20,
+    width:"100%"
   },
   button: {
     marginVertical: 12,
@@ -401,6 +404,7 @@ const styles = StyleSheet.create({
     color: "#9478B5",
     marginTop: 10,
     textAlign: "center",
+    marginBottom: 10,
   },
   sectionTitle: {
     fontSize: 22,
@@ -415,7 +419,7 @@ const styles = StyleSheet.create({
     padding: 24,
     marginHorizontal: 20,
     borderRadius: 24,
-    height: height * 0.7,
+    height:"70%",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -440,29 +444,29 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   actionButtonsContainer: {
-    marginTop: 20,
-    gap: 12,
-    alignItems: "center",
-    justifyContent: "center",
     flexDirection: "row",
+    // flexWrap: "wrap", 
+    justifyContent: "center",
+    // paddingHorizontal: 20,
+    marginTop: 24,
+    gap: 16,
+    // height: "100%",
   },
 
   actionButton: {
-    flexDirection: "column",
-    width: width * 0.4,
-    alignItems: "center",
+    width: "45%", // percentage instead of fixed width
+    aspectRatio: 1, 
+    marginBottom: 16,
     backgroundColor: "#E9DFFF",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
     borderRadius: 20,
-    elevation: 3,
     justifyContent: "center",
-    height: height * 0.23,
+    alignItems: "center",
+    padding: 12,
+    elevation: 3,
   },
-
   actionIcon: {
-    width: 60,
-    height: 60,
+    width: "45%",
+    height: "45%",
     // marginRight: 16,
   },
 

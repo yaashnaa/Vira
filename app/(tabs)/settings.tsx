@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   container: {
     paddingVertical: 16,
     paddingLeft: 8,
-    height: height,
+    // height: height,
     backgroundColor: "#ffffff",
   },
   subheader: {

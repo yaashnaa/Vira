@@ -43,19 +43,45 @@ export default function TermsOfUseScreen() {
       <Text style={styles.heading}>Terms of Use</Text>
 
       <Text style={styles.text}>
-        By using Vira, you agree to behave respectfully, and not post any
-        harmful or offensive content. You must be 13+ to use this app.
+        By using Vira, you agree to behave respectfully and not post harmful,
+        offensive, or inappropriate content.
+        {"\n"}{"\n"}
+        <Text style={{ fontWeight: "bold" }}>
+  
+          We have zero tolerance for objectionable content or abusive behavior.
+          Violations may result in removal of your posts or suspension of your
+          account.
+        </Text>
       </Text>
 
-      <Text style={styles.linkText} onPress={() => Linking.openURL("https://yaashnaa.github.io/vira-website/privacy.html")}>
+      <Text
+        style={styles.linkText}
+        onPress={() =>
+          Linking.openURL(
+            "https://yaashnaa.github.io/vira-website/privacy.html"
+          )
+        }
+      >
         Read our Privacy Policy
       </Text>
-      <Text style={styles.linkText} onPress={() => Linking.openURL("https://yaashnaa.github.io/vira-website/terms.html")}>
+      <Text
+        style={styles.linkText}
+        onPress={() =>
+          Linking.openURL("https://yaashnaa.github.io/vira-website/terms.html")
+        }
+      >
         Read our End User License Agreement (EULA)
       </Text>
 
       <View style={styles.checkboxRow}>
-        <View style={{ borderWidth: 0.6, borderColor: "#444", borderRadius: 4, marginRight: 10 }}>
+        <View
+          style={{
+            borderWidth: 0.6,
+            borderColor: "#444",
+            borderRadius: 4,
+            marginRight: 10,
+          }}
+        >
           <Checkbox
             status={checked ? "checked" : "unchecked"}
             onPress={() => setChecked(!checked)}
@@ -86,9 +112,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     minHeight: height,
     justifyContent: "center",
+    flexGrow: 1,
+    width: "70%",
+    alignSelf: "center",
+
+
   },
   heading: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "bold",
     marginBottom: 16,
     color: "#622f00",
@@ -96,10 +127,10 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 16,
-    marginBottom: 12,
+    marginBottom: 20,
     color: "#333",
   },
-  linkText: {
+  linkText: { 
     color: "#1d5ea4",
     marginBottom: 10,
     fontSize: 16,

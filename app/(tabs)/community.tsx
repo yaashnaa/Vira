@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect , useMemo} from "react";
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
   Dimensions,
 } from "react-native";
 import { Filter } from "bad-words";
-
+import { blockUser } from "@/utils/blockUser";
 import { Dialog } from "react-native-paper";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Feather from "@expo/vector-icons/Feather";
@@ -46,6 +46,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Modal as RNModal } from "react-native";
 import { useRouter } from "expo-router";
 export default function CommunityScreen() {
+  const [blockedUserIds, setBlockedUserIds] = useState<string[]>([]);
   const [postText, setPostText] = useState("");
   const router = useRouter();
   const [infoVisible, setInfoVisible] = useState(false);
@@ -104,7 +105,19 @@ export default function CommunityScreen() {
 
     enforceAgreement();
   }, []);
+  useEffect(() => {
+    const fetchBlocked = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+      const snapshot = await getDocs(
+        collection(db, "users", user.uid, "blockedUsers")
+      );
+      const ids = snapshot.docs.map((doc) => doc.id);
+      setBlockedUserIds(ids);
+    };
 
+    fetchBlocked();
+  }, []);
   const TAG_OPTIONS = [
     "All",
     "General",
@@ -179,6 +192,21 @@ export default function CommunityScreen() {
       prevPosts.map((p) => (p.id === postId ? { ...p, tag: newTag } : p))
     );
   };
+  const handleBlock = async (userIdToBlock: string) => {
+    Alert.alert("Block User", "Are you sure?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Block",
+        style: "destructive",
+        onPress: async () => {
+          await blockUser(userIdToBlock);
+          setBlockedUserIds((prev) => [...prev, userIdToBlock]);
+
+          Toast.show({ type: "success", text1: "User blocked" });
+        },
+      },
+    ]);
+  };
 
   const handlePostSubmit = async () => {
     if (!selectedTag || !postText.trim()) {
@@ -232,6 +260,10 @@ export default function CommunityScreen() {
     setEditingPostId(null);
     setEditedText("");
   };
+  const visiblePosts = useMemo(() => {
+    return posts.filter((post) => !blockedUserIds.includes(post.userId));
+  }, [posts, blockedUserIds]);
+  
 
   const handleDelete = async (post: any) => {
     Alert.alert("Delete Post", "Are you sure?", [
@@ -309,7 +341,7 @@ export default function CommunityScreen() {
 
           {/* Posts */}
           <FlatList
-            data={posts}
+            data={visiblePosts}
             keyExtractor={(item) => item.id}
             contentContainerStyle={{ paddingBottom: 100 }}
             ListEmptyComponent={
@@ -396,6 +428,13 @@ export default function CommunityScreen() {
                             <Text style={styles.author}>
                               Posted by {item.name}
                             </Text>
+                            {item.userId !== auth.currentUser?.uid && (
+                              <TouchableOpacity
+                                onPress={() => handleBlock(item.userId)}
+                              >
+                                <Feather name="slash" size={18} color="#888" />
+                              </TouchableOpacity>
+                            )}
 
                             <View style={styles.actions}>
                               {item.userId !== auth.currentUser?.uid && (
@@ -487,6 +526,7 @@ export default function CommunityScreen() {
                       <CommentSection
                         category={item.tag ?? "General"}
                         postId={item.id}
+                        blockedUserIds={blockedUserIds}
                       />
                     </View>
                   )}
@@ -657,49 +697,50 @@ export default function CommunityScreen() {
           </Portal>
           <Portal>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-       
-                <Modal
-                  visible={reportModalVisible}
-                  onDismiss={() => setReportModalVisible(false)}
-                  contentContainerStyle={styles.modalBox}
+              <Modal
+                visible={reportModalVisible}
+                onDismiss={() => setReportModalVisible(false)}
+                contentContainerStyle={styles.modalBox}
+              >
+                <Text style={styles.modalTitle}>Report Post</Text>
+                <TextInput
+                  placeholder="Why are you reporting this post?"
+                  value={reportReason}
+                  onChangeText={setReportReason}
+                  multiline
+                  style={styles.input}
+                  placeholderTextColor="#888"
+                />
+                <Button
+                  mode="contained"
+                  onPress={submitReport}
+                  textColor="#fff"
+                  style={{ backgroundColor: "#b7524f" }}
                 >
-                  <Text style={styles.modalTitle}>Report Post</Text>
-                  <TextInput
-                    placeholder="Why are you reporting this post?"
-                    value={reportReason}
-                    onChangeText={setReportReason}
-                    multiline
-                    style={styles.input}
-                    placeholderTextColor="#888"
-                  />
-                  <Button
-                    mode="contained"
-                    onPress={submitReport}
-                    textColor="#fff"
-                    style={{  backgroundColor: "#b7524f" }}
-                  >
-                    Submit Report
-                  </Button>
-                  <Button
-                    mode="text"
-                    onPress={() => setReportModalVisible(false)}
-                    style={{ marginTop: 10 }}
-                  >
-                    Cancel
-                  </Button>
-                </Modal>
-       
+                  Submit Report
+                </Button>
+                <Button
+                  mode="text"
+                  onPress={() => setReportModalVisible(false)}
+                  style={{ marginTop: 10 }}
+                >
+                  Cancel
+                </Button>
+              </Modal>
             </TouchableWithoutFeedback>
           </Portal>
 
           {/* FAB to open post modal */}
-          {!isPostModalVisible && !showRulesModal && !showWelcomeModal && !reportModalVisible && (
-            <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
-              <TouchableOpacity style={styles.fab} onPress={openPost}>
-                <Text style={styles.fabText}>+</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+          {!isPostModalVisible &&
+            !showRulesModal &&
+            !showWelcomeModal &&
+            !reportModalVisible && (
+              <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
+                <TouchableOpacity style={styles.fab} onPress={openPost}>
+                  <Text style={styles.fabText}>+</Text>
+                </TouchableOpacity>
+              </View>
+            )}
         </SafeAreaView>
       </TouchableWithoutFeedback>
     </>

@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Divider } from "react-native-paper";
 import Header from "@/components/header";
 
-export default function TermsOfService() {
+export default function TermsAndPoliciesScreen() {
   return (
     <>
       <Header title="Terms of Service" backPath="/settings" />
