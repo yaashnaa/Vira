@@ -10,6 +10,8 @@ import {
 import { Button, Checkbox } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { doc, setDoc } from "firebase/firestore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import { db, auth } from "@/config/firebaseConfig";
 
 const { height } = Dimensions.get("window");
@@ -20,24 +22,33 @@ export default function TermsOfUseScreen() {
   const [loading, setLoading] = useState(false);
 
   const handleAgree = async () => {
-    const user = auth.currentUser;
-    if (!user) return;
-
     setLoading(true);
+  
     try {
-      await setDoc(
-        doc(db, "users", user.uid),
-        { agreedToTerms: true },
-        { merge: true }
-      );
-      router.replace("/dashboard");
+      // Always store agreement locally
+      await AsyncStorage.setItem("agreedToTerms", "true");
+  
+      const user = auth.currentUser;
+  
+      if (user) {
+        // If user is signed in, also update Firestore
+        await setDoc(
+          doc(db, "users", user.uid),
+          { agreedToTerms: true },
+          { merge: true }
+        );
+        router.replace("/dashboard");
+      } else {
+        // Otherwise go to login screen, sync later after login
+        router.replace("/login");
+      }
     } catch (error) {
       console.error("Failed to save agreement:", error);
     } finally {
       setLoading(false);
     }
   };
-
+  
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.heading}>Terms of Use</Text>
@@ -45,9 +56,9 @@ export default function TermsOfUseScreen() {
       <Text style={styles.text}>
         By using Vira, you agree to behave respectfully and not post harmful,
         offensive, or inappropriate content.
-        {"\n"}{"\n"}
+        {"\n"}
+        {"\n"}
         <Text style={{ fontWeight: "bold" }}>
-  
           We have zero tolerance for objectionable content or abusive behavior.
           Violations may result in removal of your posts or suspension of your
           account.
@@ -115,8 +126,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     width: "100%",
     alignSelf: "center",
-
-
   },
   heading: {
     fontSize: 28,
@@ -130,7 +139,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: "#333",
   },
-  linkText: { 
+  linkText: {
     color: "#1d5ea4",
     marginBottom: 10,
     fontSize: 16,

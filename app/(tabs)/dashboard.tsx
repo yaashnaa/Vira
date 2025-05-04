@@ -16,14 +16,14 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { auth } from "@/config/firebaseConfig";
 import Toast from "react-native-toast-message";
 import { db } from "@/config/firebaseConfig";
-import { doc, getDoc, } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import {
   getEnabledWidgets,
   addWidget,
   removeWidget as removeWidgetFromStorage,
 } from "@/utils/widgetStorage";
 import { isOnboardingComplete } from "@/utils/asyncStorage";
-import {resetAllAsyncStorage} from "@/utils/asyncStorage";
+import { resetAllAsyncStorage } from "@/utils/asyncStorage";
 import {
   isQuizCompletedInFirestore,
   isScreeningQuizCompleted,
@@ -53,20 +53,6 @@ const dashboardSections = [
 ];
 
 export default function Dashboard() {
-  useEffect(() => {
-    const enforceAgreement = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-  
-      const userDoc = await getDoc(doc(db, "users", user.uid));
-      if (!userDoc.exists() || !userDoc.data().agreedToTerms) {
-        router.replace("/termsOfUse");
-      }
-    };
-  
-    enforceAgreement();
-  }, []);
-  
   const router = useRouter();
   const { userPreferences, loading } = useUserPreferences();
   const { hasCheckedInToday } = useCheckInContext();
@@ -99,7 +85,32 @@ export default function Dashboard() {
     await resetAllAsyncStorage();
   };
 
+  useEffect(() => {
+    const checkAgreementAfterAuth = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+      const agreed = await AsyncStorage.getItem("agreedToTerms");
 
+      const userDocRef = doc(db, "users", user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+      const alreadyAgreed =
+        userDocSnap.exists() && userDocSnap.data()?.agreedToTerms;
+
+
+      if (agreed === "true" && !alreadyAgreed) {
+        await setDoc(userDocRef, { agreedToTerms: true }, { merge: true });
+        await AsyncStorage.removeItem("agreedToTerms");
+      }
+
+      if (!alreadyAgreed && agreed !== "true") {
+        router.replace("/termsOfUse");
+      }
+    };
+
+    if (authReady) {
+      checkAgreementAfterAuth();
+    }
+  }, [authReady]);
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setAuthReady(true);
@@ -173,9 +184,9 @@ export default function Dashboard() {
             color={lightTheme.primary}
             style={styles.spinner}
           />
-            <View style={styles.logoutButton}>
+          <View style={styles.logoutButton}>
             <LogoutButton />
-            </View>
+          </View>
         </View>
       </View>
     );
@@ -204,7 +215,6 @@ export default function Dashboard() {
                     <View style={styles.section}>
                       <CombinedCheckInCard />
                       {/* <Button onPress={()=> dumpAsyncStorage()} title="Dump AsyncStorage" /> */}
-                      
                     </View>
                   );
                 case "logMood":
