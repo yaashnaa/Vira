@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     minHeight: height,
     justifyContent: "center",
     flexGrow: 1,
-    width: "70%",
+    width: "100%",
     alignSelf: "center",
 
 
