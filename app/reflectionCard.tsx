@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 5,
     width: "48%",
-    height: height * 0.25,
+    height: "75%",
   },
   title: {
     fontSize: 20,

@@ -325,8 +325,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#F8F9FA",
     flexGrow: 1,
-    // width: width,
-    // height: height,
+
   },
   introText: {
     fontSize: 18,

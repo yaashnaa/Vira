@@ -10,6 +10,7 @@ import ThoughtReframeWidget from '@/components/widgets/ThoughtReframeWidget';
 import CopingBoxWidget from '@/components/widgets/CopingBoxWidget';
 import CBTToolsWidget from '@/components/widgets/CBTToolsWidget';
 import RecommendedWidgetsBanner from '@/components/recommendedWidegts';
+import QuickHelpWidget from '../widgets/quickHelpWidget';
 import {  Dimensions } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -67,6 +68,9 @@ export default function PinnedWidgetsSection({
             {enabledWidgets.includes("cbtTools") && (
               <CBTToolsWidget onRemove={() => onRemove(uid, "cbtTools")} />
             )}
+             {enabledWidgets.includes("quickHelp") && (
+              <QuickHelpWidget onRemove={() => onRemove(uid, "quicHelp")} />
+            )}
           </View>
         </>
       )}
@@ -87,6 +91,8 @@ const styles = StyleSheet.create({
   gridContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
+    width:"80%",
+    alignSelf: "center",
     justifyContent: "space-evenly",
     gap: 12,
   },

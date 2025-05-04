@@ -79,17 +79,18 @@ export default function MoodSuggestionsCard({
   return (
     <Card onPress={() => router.push("/checkInScreen")} style={styles.card}>
       <Card.Content style={styles.cardContent}>
-        <View style={{}}>
+        <View style={{width: "100%", alignItems: "center" }}>
           <LottieView
             source={require("../../assets/animations/checkin.json")}
             autoPlay
             loop
             style={styles.image}
           />
-          <Text style={styles.heading}>
-            Check in to get personalized suggestions✨
-          </Text>
-      
+          <View style={{ width: "100%", alignItems: "center" }}>
+            <Text style={styles.heading}>
+              Check in to get personalized suggestions✨
+            </Text>
+          </View>
         </View>
 
         <Divider style={styles.divider} />
@@ -148,8 +149,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginBottom: 10,
     textAlign: "center",
-    width: "100%",
-
+    width: "80%",
+    flexWrap: "wrap",
   },
   divider: {
     width: "80%",

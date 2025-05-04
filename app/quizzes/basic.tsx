@@ -304,7 +304,7 @@ export default function BasicQuiz() {
                   mode="contained"
                   onPress={handleNext}
                   textColor="#390a84"
-                  style={{ marginRight: 10, left: 250 }}
+                  style={{ marginRight: 10, justifyContent: "flex-end" }}
                   theme={{ colors: { primary: "#C3B1E1" } }}
                 >
                   Next
@@ -446,7 +446,7 @@ export default function BasicQuiz() {
       flexGrow: 1,
       padding: 15,
       backgroundColor: "#F8F9FA",
-      height: height,
+      // height: height,
     },
     errorText: {
       color: "red",
@@ -513,7 +513,8 @@ export default function BasicQuiz() {
     },
     navigationButtons: {
       flexDirection: "row",
-      justifyContent: "space-between",
+      width:"100%",
+      justifyContent: "flex-end",
     },
 
     selectedConsentButton: {

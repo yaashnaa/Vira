@@ -35,12 +35,15 @@ export default function TrendChart({
 
       setData(values);
       setLabels(xLabels);
+      console.log("📊 Labels:", xLabels);
+console.log("📊 Data:", values);
+
     };
 
     fetchData();
   }, [metric]);
 
-  if (!data.length) {
+  if (data.length < 2) {
     return (
       <Card style={styles.fallbackCard}>
         <Card.Content>

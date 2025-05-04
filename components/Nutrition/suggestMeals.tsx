@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 20,
     backgroundColor: "#fff",
-    height: height,
+    height: "100%",
   },
   title: {
     fontSize: 24,

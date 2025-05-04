@@ -8,19 +8,9 @@ export const presentation = "card";
 export const animation = "slide_from_right"; 
 export default function logExercise() {
   return (
-    <SafeAreaView
-      style={{
-        backgroundColor: "#ffffff",
-        justifyContent: "center",
-        height: height,
-        alignItems: "center",
-        alignSelf: "center",
-        marginTop: 20,
-        marginBottom:50
-      }}
-    >
+
       <LogExercise />
-    </SafeAreaView>
+
   );
 }
 const { height } = Dimensions.get("window");

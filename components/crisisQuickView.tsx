@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Linking,
-  YellowBox,
 } from "react-native";
 import { Card, Divider } from "react-native-paper";
 import { auth, db } from "@/config/firebaseConfig";
@@ -54,10 +53,10 @@ export default function CrisisQuickView() {
   };
 
   return (
-    <ScrollView>
+    <ScrollView contentContainerStyle={{alignItems: "center", justifyContent:"center", width: "100%"}}>
       <Text style={styles.header}>Emergency Resources 🚨</Text>
       {preFilledContacts.map((contact, idx) => (
-        <Card key={idx} style={styles.card}>
+        <Card key={idx} style={styles.card} mode="outlined">
           <Card.Content>
             <Text style={styles.title}>{contact.label}</Text>
             <Text style={styles.text}>{contact.description}</Text>
@@ -70,17 +69,18 @@ export default function CrisisQuickView() {
         </Card>
       ))}
 
-      <Divider style={styles.divider} />
+
 
       {userContacts.length > 0 && (
         <>
           <Text style={styles.header}>Your Emergency Contacts</Text>
           {userContacts.map((contact, idx) => (
-            <Card key={idx} style={styles.card}>
+            <Card key={idx} style={styles.card} mode="outlined">
               <Card.Content>
                 <Text style={styles.title}>{contact.label}</Text>
                 <Text style={styles.text}>{contact.description}</Text>
                 <TouchableOpacity
+                style={{marginBottom: 14}}
                   onPress={() => Linking.openURL(`tel:${contact.phone}`)}
                 >
                   <Text style={styles.phone}>📞 {contact.phone}</Text>
@@ -106,7 +106,10 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
         marginBottom: 12,
         borderRadius: 12,
-        padding: 12,
+        // padding: 12,
+
+        width: "100%",
+
     },
     title: {
         fontSize: 16,
@@ -122,7 +125,8 @@ const styles = StyleSheet.create({
     phone: {
         marginTop: 4,
         fontFamily: "Main-font",
-        color: "#865dff",
+        color: "#86508f",
+        marginBottom: 14,
     },
     divider: {
         height: 1,
@@ -132,7 +136,7 @@ const styles = StyleSheet.create({
     phoneLink: {
         marginTop: 4,
         fontFamily: "Main-font",
-        color: "#865dff",
+        color: "#86508f",
         textDecorationLine: "none",
      
     },

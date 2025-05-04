@@ -835,7 +835,7 @@ const styles = StyleSheet.create({
     padding: 20,
     width: "100%",
     marginTop: 50,
-    height: height * 0.5,
+    height: "50%",
   },
   filterRow: { paddingHorizontal: 10, marginVertical: 10 },
   emptyContainer: { alignItems: "center", marginTop: 50 },

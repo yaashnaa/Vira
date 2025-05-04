@@ -96,7 +96,6 @@ export default function Dashboard() {
       const alreadyAgreed =
         userDocSnap.exists() && userDocSnap.data()?.agreedToTerms;
 
-
       if (agreed === "true" && !alreadyAgreed) {
         await setDoc(userDocRef, { agreedToTerms: true }, { merge: true });
         await AsyncStorage.removeItem("agreedToTerms");
@@ -214,6 +213,7 @@ export default function Dashboard() {
                   return (
                     <View style={styles.section}>
                       <CombinedCheckInCard />
+
                       {/* <Button onPress={()=> dumpAsyncStorage()} title="Dump AsyncStorage" /> */}
                     </View>
                   );

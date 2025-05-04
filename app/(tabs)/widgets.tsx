@@ -18,7 +18,7 @@ import { doc, getDoc } from "firebase/firestore";
 import {
   addWidget,
   removeWidget as removeWidgetFromStorage,
-  getEnabledWidgets,
+  getEnabledWidgets, 
 } from "@/utils/widgetStorage";
 import CrisisQuickView from "@/components/crisisQuickView";
 
@@ -77,7 +77,7 @@ const tools = [
       {
         id: "crisisHelp", // 🆘 NEW TOOL
         label: "Get Immediate Help",
-        route: "modalCrisisHelp", // handled specially
+        route: "modalCrisisHelp", 
         icon: require("../../assets/images/widgetImages/sos.png"), // create a small life ring or SOS image
         description: "Access crisis resources and emergency contacts anytime.",
       },
@@ -231,7 +231,8 @@ export default function ToolsScreen() {
             <Button
               mode="outlined"
               onPress={() => setCrisisModalVisible(false)}
-              style={{ marginTop: 20 }}
+              style={{ marginTop: 20, backgroundColor: "#86508f" }}
+              textColor="#ffffff" 
             >
               Close
             </Button>

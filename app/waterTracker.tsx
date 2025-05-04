@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     borderWidth: 1,
     width: 40,
-    height: height *0.3,
+    height: "30%",
     justifyContent: "flex-end",
     overflow: "hidden",
     borderColor: "#e2d6cc",

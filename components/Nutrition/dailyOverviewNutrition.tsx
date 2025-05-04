@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: "#fff",
     elevation: 3,
-    width: width * 0.9,
+    width: "90%",
   },
   label: {
     marginBottom: 6,

@@ -40,39 +40,42 @@ export default function RecipeSearchScreen() {
   };
 
   const renderCard = (recipe: TastyRecipe) => {
-    const recipeTags = recipe.tags?.map((t) => t.name.replace(/_/g, " ")) || [];
-
+    const recipeTags =
+      recipe.tags?.map((t) => t.name.replace(/_/g, " ")) || [];
+  
     return (
       <Card key={recipe.id} mode="outlined" style={styles.card}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View>
-            <View style={styles.tagContainer}>
-              {recipeTags.slice(0, 2).map((tag, index) => (
-                <View key={index} style={styles.tagBadge}>
-                  <Text style={styles.tagText}>{tag}</Text>
-                </View>
-              ))}
+        {/* top badge row + thumbnail ---------------------------------- */}
+        <View style={styles.tagContainer}>
+          {recipeTags.slice(0, 2).map((tag, i) => (
+            <View key={i} style={styles.tagBadge}>
+              <Text style={styles.tagText}>{tag}</Text>
             </View>
-
-            <Card.Cover
-              source={{ uri: recipe.thumbnail_url }}
-              style={styles.cover}
-            />
-            <Card.Content>
-              <Text style={styles.recipeTitle}>{recipe.name}</Text>
-              <Text style={styles.recipeDesc}>{recipe.description || ""}</Text>
-
-              {recipe.video_url && (
-                <TouchableOpacity onPress={() => setPlayingVideoId(recipe.id)}>
-                  <Text style={styles.link}>▶️ Watch Video</Text>
-                </TouchableOpacity>
-              )}
-            </Card.Content>
-          </View>
+          ))}
+        </View>
+  
+        <Card.Cover source={{ uri: recipe.thumbnail_url }} style={styles.cover} />
+  
+        {/* 👇 **scrollable content** ---------------------------------- */}
+        <ScrollView        /* ← makes JUST the text/links scroll */
+          style={styles.cardScroll}
+          contentContainerStyle={styles.cardScrollContent}
+          showsVerticalScrollIndicator={false}
+          nestedScrollEnabled            // Android nested scrolling
+        >
+          <Text style={styles.recipeTitle}>{recipe.name}</Text>
+          <Text style={styles.recipeDesc}>{recipe.description || ""}</Text>
+  
+          {recipe.video_url && (
+            <TouchableOpacity onPress={() => setPlayingVideoId(recipe.id)}>
+              <Text style={styles.link}>▶️ Watch Video</Text>
+            </TouchableOpacity>
+          )}
         </ScrollView>
       </Card>
     );
   };
+  
 
   return (
     <>
@@ -154,7 +157,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     backgroundColor: "#fff",
     flex: 1,
-    height: height,
+    height: "100%",
+  },
+  cardScroll: {
+    // flex: 1,              // take up the remaining height (450‑180)
+    paddingHorizontal: 12,
+  },
+  cardScrollContent: {
+    paddingBottom: 12,
   },
   emptyState: {
     alignItems: "center",

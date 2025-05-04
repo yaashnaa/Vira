@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     backgroundColor: "#fff",
-    minHeight: height,
+    minHeight: "100%",
     justifyContent: "center",
     flexGrow: 1,
     width: "100%",

@@ -53,7 +53,7 @@ export default function BodyScanExercise({ onBack }: BodyScanExerciseProps) {
 
   return (
     <>
-      <Header title="Body Scan" />
+      <Header title="Body Scan" backPath="/mindfulness"/>
       <View style={styles.container}>
         {/* Expandable Section */}
         <TouchableOpacity

@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 16,
     backgroundColor: "#fff8f0",
-    minHeight: height,
+    minHeight: "100%",
   },
   card: {
     backgroundColor: "#fefefe",

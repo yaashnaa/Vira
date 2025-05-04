@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#ffffff",
     flexGrow: 1,
-    height: height,
+    height: "100%",
 
 
   },
@@ -261,8 +261,8 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   lottie:{
-    width: width *0.7 || 400,
-    height: height *0.21|| 400,
+    width: "70%",
+    height: "20%",
     marginTop: 25,
     alignSelf: "center",
     

@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 16,
     backgroundColor: "#ffffff",
-    height: height,
+    height: "100%",
   },
   heading: {
     fontSize: 21,

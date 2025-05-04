@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
     // marginTop: 24,
     backgroundColor: "#fff",
-    height: height,
+    height: "100%",
     marginBottom: 75,
   },
   sectionHeading: {

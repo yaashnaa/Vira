@@ -66,7 +66,7 @@ export default function MindfulnessHomeScreen() {
         source={require("../assets/animations/mindfulness.json")}
         autoPlay
         loop
-        style={{ width: width, height: 200, alignSelf: "center" }}
+        style={{ width: "100%", height: 200, alignSelf: "center" }}
       />
         <View style={styles.section}>
           <Text style={styles.sectionTitle}> Explore Techniques</Text>

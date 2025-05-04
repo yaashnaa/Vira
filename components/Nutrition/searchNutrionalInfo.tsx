@@ -67,6 +67,7 @@ function NutritionSearchModal() {
     try {
       const data = await getNutritionData(query);
       setResults(data.foods);
+      console.log("Nutrition data fetched:", data.foods);
     } catch (error) {
       console.error("Nutrition fetch failed:", error);
     } finally {
@@ -176,7 +177,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 16,
     marginBottom: 14,
-    width: width * 0.9,
+    width: "90%",
     alignSelf: "center",
     elevation: 2,
     overflow: "hidden",

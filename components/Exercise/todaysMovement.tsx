@@ -114,8 +114,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     backgroundColor: "#f8f9fa",
     borderRadius: 12,
-    // height: height * 0.7,
-    // width: width * 0.91,
+
     width: "100%",
     alignSelf: "center",
   },

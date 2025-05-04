@@ -307,7 +307,8 @@ const height = Dimensions.get("window").height;
 const styles = StyleSheet.create({
   container: {
     padding: 20,
-    backgroundColor: "#F8F9FA",
+    backgroundColor: "#ffffff",
+    flex: 1,
   },
   filterLabel: {
     fontSize: 16,
@@ -369,7 +370,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     width: "80%",
     maxWidth: 400,
-    height: height * 0.3,
+    height: "30%",
   },
   sectionTitle: {
     fontSize: 22,
