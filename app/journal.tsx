@@ -8,7 +8,8 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
-  Platform, Dimensions
+  Platform,
+  Dimensions,
 } from "react-native";
 import { db, auth } from "@/config/firebaseConfig";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
@@ -31,10 +32,10 @@ import Header from "@/components/header";
 import DailyPrompt from "@/components/Journal/dailyPrompt";
 import { useCheckInContext } from "@/context/checkInContext";
 
-
 export default function Journal() {
   const { userPreferences } = useUserPreferences();
-  const { moodLabel, energyLabel, sleepLabel, hasCheckedInToday } = useCheckInContext();
+  const { moodLabel, energyLabel, sleepLabel, hasCheckedInToday } =
+    useCheckInContext();
 
   const today = dayjs().format("YYYY-MM-DD");
   const router = useRouter();
@@ -105,94 +106,95 @@ export default function Journal() {
 
   return (
     <>
-      
-      <Header title="Journal" />
+      <View style={{ flex: 1 }}>
+        <Header title="Journal" />
+        <Provider>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            style={{ flex: 1 }}
+          >
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <ScrollView
+                style={{ flex: 1 }}
+                contentContainerStyle={styles.container}
+                ref={scrollRef}
+                showsVerticalScrollIndicator={true}
+              >
+                <Text style={styles.heading}>
+                  Hi {userPreferences?.name || "there"} ✨
+                </Text>
+                <LottieView
+                  source={require("../assets/animations/write.json")}
+                  autoPlay
+                  loop
+                  style={styles.lottie}
+                />
+                <Text style={styles.sectionTitle}>
+                  What kind of journaling today?
+                </Text>
 
-      <Provider>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-          style={{ flex: 1 }}
-        >
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <ScrollView
-              contentContainerStyle={styles.container}
-              ref={scrollRef}
-            >
-              <Text style={styles.heading}>
-                Hi {userPreferences?.name || "there"} ✨
-              </Text>
-              <LottieView
-                source={require("../assets/animations/write.json")}
-                autoPlay
-                loop
-                
-                style={styles.lottie}
-              />
-              <Text style={styles.sectionTitle}>
-                What kind of journaling today?
-              </Text>
-   
                 <SegmentedButtons
                   value={entryType}
                   onValueChange={setEntryType}
                   buttons={entryOptions}
-                  style={{ flexWrap: "wrap", width:"100%" }}
+                  style={{ flexWrap: "wrap", width: "100%" }}
                 />
 
-              <Text style={styles.modeDescription}>
-                {entryType === "free" &&
-                  "Write freely about anything on your mind."}
-                {entryType === "prompt" &&
-                  "Answer structured CBT prompts to guide reflection."}
-                {entryType === "mood" &&
-                  "Get suggestions based on how you're feeling today."}
-              </Text>
-              {entryType === "free" && <DailyPrompt />}
-              {/* Conditional: If mood mode selected but no check-in */}
-              {entryType === "mood" && !hasCheckedInToday ? (
-                <View style={styles.checkInNotice}>
-                  <Text style={styles.noticeText}>
-                    You haven't checked in today. Please do a mood check-in
-                    first!
-                  </Text>
+                <Text style={styles.modeDescription}>
+                  {entryType === "free" &&
+                    "Write freely about anything on your mind."}
+                  {entryType === "prompt" &&
+                    "Answer structured CBT prompts to guide reflection."}
+                  {entryType === "mood" &&
+                    "Get suggestions based on how you're feeling today."}
+                </Text>
+                {entryType === "free" && <DailyPrompt />}
+                {/* Conditional: If mood mode selected but no check-in */}
+                {entryType === "mood" && !hasCheckedInToday ? (
+                  <View style={styles.checkInNotice}>
+                    <Text style={styles.noticeText}>
+                      You haven't checked in today. Please do a mood check-in
+                      first!
+                    </Text>
+                    <Button
+                      onPress={() => router.push("/checkInScreen")}
+                      mode="outlined"
+                      style={{ marginTop: 8 }}
+                    >
+                      Go to Check-In
+                    </Button>
+                  </View>
+                ) : (
+                  <>
+                    {renderEntryExtras()}
+                    <JournalEntrySection
+                      onFocus={scrollToInput}
+                      entryType={entryType as "free" | "prompt" | "mood"}
+                      moodLabel={moodLabel ?? ""}
+                      onSave={() => {
+                        fetchEntries();
+                      }}
+                    />
+                  </>
+                )}
+
+                <View style={styles.buttons}>
                   <Button
-                    onPress={() => router.push("/checkInScreen")}
-                    mode="outlined"
-                    style={{ marginTop: 8 }}
+                    mode="contained-tonal"
+                    textColor="#580b88"
+                    compact={true}
+                    icon={"link-variant"}
+                    onPress={() => router.replace("/previousJournalEntries")}
+                    style={styles.actionButton}
                   >
-                    Go to Check-In
+                    View previous entries
                   </Button>
                 </View>
-              ) : (
-                <>
-                  {renderEntryExtras()}
-                  <JournalEntrySection
-                    onFocus={scrollToInput}
-                    entryType={entryType as "free" | "prompt" | "mood"}
-                    moodLabel={moodLabel ?? ""}
-                    onSave={() => {
-                      fetchEntries();
-                    }}
-                  />
-                </>
-              )}
-
-              <View style={styles.buttons}>
-                <Button
-                  mode="contained-tonal"
-                  textColor="#580b88"
-                  compact={true}
-                  icon={"link-variant"}
-                  onPress={() => router.replace("/previousJournalEntries")}
-                  style={styles.actionButton}
-                >
-                  View previous entries
-                </Button>
-              </View>
-            </ScrollView>
-          </TouchableWithoutFeedback>
-        </KeyboardAvoidingView>
-      </Provider>
+              </ScrollView>
+            </TouchableWithoutFeedback>
+          </KeyboardAvoidingView>
+        </Provider>
+      </View>
     </>
   );
 }
@@ -202,10 +204,9 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     backgroundColor: "#ffffff",
-    flexGrow: 1,
-    height: "100%",
-
-
+    paddingBottom: 240,      // 👈  room for the last item
+    flexGrow: 1,     
+    // height: "100%",
   },
   segmentedContainer: {
     flexDirection: "row",
@@ -260,12 +261,11 @@ const styles = StyleSheet.create({
     color: "#94618e",
     marginVertical: 10,
   },
-  lottie:{
+  lottie: {
     width: "70%",
     height: "20%",
     marginTop: 25,
     alignSelf: "center",
-    
   },
   checkInNotice: {
     marginTop: 12,

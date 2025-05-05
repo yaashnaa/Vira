@@ -66,7 +66,7 @@ export default function Explore() {
         setType("strength");
         setDifficulty("intermediate");
         setReasonText(
-          "You indicated you're feeling okay today. Here's a steady movement to help lift your mood and build consistency. 🌿"
+          "You indicated you're good today! Here's a steady movement to help lift your mood and build consistency. 🌿"
         );
       } else if (moodLabel === "Feeling Great") {
         setType("strength");

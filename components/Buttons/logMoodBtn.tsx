@@ -88,7 +88,7 @@ export default function MoodSuggestionsCard({
           />
           <View style={{ width: "100%", alignItems: "center" }}>
             <Text style={styles.heading}>
-              Check in to get personalized suggestions✨
+              How are you feeling today?✨
             </Text>
           </View>
         </View>

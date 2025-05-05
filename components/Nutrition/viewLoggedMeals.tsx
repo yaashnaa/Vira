@@ -142,15 +142,15 @@ const ViewLoggedMeals: React.FC = () => {
                   <Text style={styles.mealDetail}>
                     {userPreferences.calorieViewing && (
                       <>
-                        {item.nutrition?.calories || 0} cal{" "}
+                        {Math.round(item.nutrition?.calories || 0)} cal{" "}
                         {userPreferences.macroViewing && " | "}
                       </>
                     )}
                     {userPreferences.macroViewing && (
                       <>
-                        {item.nutrition?.protein || 0}g protein |{" "}
-                        {item.nutrition?.carbs || 0}g carbs |{" "}
-                        {item.nutrition?.fat || 0}g fat
+                        {Math.round(item.nutrition?.protein || 0)} g protein |{" "}
+                        {Math.round(item.nutrition?.carbs || 0)} g carbs |{" "}
+                        {Math.round(item.nutrition?.fat || 0)} g fat
                       </>
                     )}
                   </Text>
@@ -208,9 +208,10 @@ const ViewLoggedMeals: React.FC = () => {
                 <Text style={styles.mealName}>{meal.name}</Text>
                 <Text style={styles.mealDetail}>
                   {meal.nutrition?.calories || 0} cal |{" "}
-                  {meal.nutrition?.protein || 0}g protein |{" "}
-                  {meal.nutrition?.carbs || 0}g carbs |{" "}
-                  {meal.nutrition?.fat || 0}g fat
+                  {Math.round(meal.nutrition?.calories || 0)} cal |{" "}
+                  {Math.round(meal.nutrition?.protein || 0)} g protein |{" "}
+                  {Math.round(meal.nutrition?.carbs || 0)} g carbs |{" "}
+                  {Math.round(meal.nutrition?.fat || 0)} g fat
                 </Text>
                 <Text style={styles.dateText}>Logged on {meal.date}</Text>
               </View>

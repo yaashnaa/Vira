@@ -8,7 +8,7 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
-  ScrollView, 
+  ScrollView,  Linking,
 } from "react-native";
 import { Icon } from "react-native-paper";
 
@@ -62,6 +62,14 @@ export default function CBTJournalingInfo() {
           <Text style={styles.note}>
             *Not a substitute for professional care. If you’re struggling,
             please reach out to a mental health professional.*
+          </Text>
+          <Text
+            style={styles.source}
+            onPress={() =>
+              Linking.openURL("https://beckinstitute.org/get-informed/what-is-cognitive-therapy/")
+            }
+          >
+            Source: Beck Institute for Cognitive Behavior Therapy
           </Text>
         </ScrollView>
       )}
@@ -117,5 +125,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontStyle: "italic",
     color: "#666",
+  },
+  source: {
+    marginTop: 10,
+    fontSize: 12,
+    color: "#4e2a7e",
+    textDecorationLine: "underline",
   },
 });
