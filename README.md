@@ -1,50 +1,64 @@
-# Welcome to your Expo app 👋
+# 🌿 Vira — A Gentle Wellness Companion  
+**Launching June 5 on TestFlight**
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Vira is a research-backed wellness app designed to support users navigating depression, anxiety, or eating disorder recovery. Unlike traditional wellness apps focused on streaks, goals, or calorie counts, Vira prioritizes emotional safety, user autonomy, and sustainable self-care.
 
-## Get started
+Built with behavioral psychology and ethical UX principles, Vira adapts to the user — not the other way around.
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## 🧠 Core Features
 
-2. Start the app
+- **CBT Thought Logging** — Guided journaling based on cognitive behavioral therapy  
+- **Mood Check-ins** — Gentle, flexible mood tracking without pressure  
+- **Customizable Routines** — Build habits that work with your energy levels  
+- **Emotionally Aware Design** — No streaks, no guilt-based nudges  
+- **Adaptive Support** — Features can be turned on or off depending on your journey  
 
-   ```bash
-    npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## ⚙️ Tech Stack
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- **React Native** + **Expo** for cross-platform development  
+- **Firebase** for authentication and secure client-side data storage  
+- **Styled Components** for theming and UI consistency  
+- **Jest** + **jest-expo** for testing  
+- **Figma** for UI/UX prototyping  
+- **Behavioral Psychology**, **CBT**, and **Self-Determination Theory** as design foundations  
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## 📸 Screenshots
+![ipad-sim-shot](https://github.com/user-attachments/assets/b4104cda-8dc0-4550-9827-a0006dcba697)
 
-When you're ready, run:
+> _Add screenshots or screen recordings here (e.g. onboarding, mood tracker, journal interface, etc.)_
+
+---
+
+## 🧪 Status
+
+Vira is currently in **internal testing** via TestFlight.  
+🎉 **Public beta launches June 5.**
+
+---
+
+## 📚 Research & Philosophy
+
+Vira was built not just with code, but with care. Every feature is grounded in academic research around mental health, trauma-informed care, and ethical technology. Key influences include:
+
+- **CBT (Beck Institute)**  
+- **Nutritional Psychiatry** (Harvard Health, SMILES Trial)  
+- **Self-Determination Theory** (Deci & Ryan)  
+- **Ethical UX Design** (Center for Humane Technology, Prototypr)
+
+> Full source list available in-app or on request.
+
+---
+
+## 🚀 Getting Started (Developers)
 
 ```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+git clone https://github.com/yaashnaa/vira.git
+cd vira
+npm install
+npx expo start
