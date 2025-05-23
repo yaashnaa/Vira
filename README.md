@@ -28,16 +28,6 @@ Built with behavioral psychology and ethical UX principles, Vira adapts to the u
 
 ---
 
-## 📸 Screenshots
-![ipad-sim-shot](https://github.com/user-attachments/assets/b4104cda-8dc0-4550-9827-a0006dcba697)
-![Adobe Express - file (2)](https://github.com/user-attachments/assets/0b85954c-7a08-41e3-8d5f-11546d575b2b)
-![Adobe Express - file (3)](https://github.com/user-attachments/assets/eb2f0030-09db-4ce1-8165-7fd5b20f16ed)
-![1](https://github.com/user-attachments/assets/dc3fb268-1bde-4ae8-a677-e6c0b54255d4)
-
-> _Add screenshots or screen recordings here (e.g. onboarding, mood tracker, journal interface, etc.)_
-
----
-
 ## 🧪 Status
 
 Vira is currently in **internal testing** via TestFlight.  
